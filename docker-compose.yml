@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  courses:
+    image: postgres
+    restart: unless-stopped
+    container_name: courses
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: courses
+    networks:
+      - default_network
+    ports:
+      - 5430:5432
+
+networks:
+  default_network:
+    driver: bridge
