@@ -12,7 +12,12 @@ export class UserService {
   public user = new PrismaClient().user;
 
   public async findAllUser(): Promise<User[]> {
-    const allUser: User[] = await this.user.findMany();
+    const allUser: User[] = await this.user.findMany({
+      include: {
+        coursesAsTeacher: true,
+        coursesAsStudent: true,
+      },
+    });
     return allUser;
   }
 
