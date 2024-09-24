@@ -3,6 +3,8 @@ tags:
     description: users API
   - name: courses
     description: courses API
+  - name: auth
+    description: auth api
 
 paths:
   # [GET] users
@@ -205,6 +207,32 @@ paths:
         500:
           description: 'Server Error'
 
+  # [GET] auth/challenge
+  /auth/challenge:
+    get:
+      tags:
+        - auth
+      summery: get challenge to sign
+      responses:
+        200:
+          description: 'Ok'
+  # [POST] auth/validate
+  /auth/validate:
+    post:
+      tags:
+        - auth
+      summery: validate the signture
+      parameters:
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/auth'
+      responses:
+        200:
+          description: 'Ok'
+
 # definitions
 definitions:
   courses:
@@ -223,6 +251,31 @@ definitions:
       teacherId:
         type: number
         description: Course teacherId
+  auth:
+    type: object
+    required:
+      - accountId
+      - publicKey
+      - signature
+      - challenge
+      - message
+    properties:
+      accountId:
+        type: string
+        description: Course title
+      publicKey:
+        type: string
+        description: Course content
+      challenge:
+        type: string
+        description: Course content
+      message:
+        type: string
+        description: Course content
+      signature:
+        type: string
+        description: Course teacherId
+
   users:
     type: object
     required:
