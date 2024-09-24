@@ -10,6 +10,8 @@ import { User } from '@interfaces/users.interface';
 import { randomBytes } from 'crypto';
 import * as naj from 'near-api-js';
 import * as js_sha256 from 'js-sha256';
+import * as borsh from 'borsh';
+import { post } from 'axios';
 
 @Service()
 export class AuthService {
@@ -20,15 +22,17 @@ export class AuthService {
     const message = 'Login with near';
     return { challenge, message };
   }
-  private async authenticate({ accountId, publicKey, signature }) {
+  public async authenticate({ accountId, publicKey, signature, challenge, message }) {
     const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
-    const valid_signature = this.verifySignature({ publicKey, signature });
+    const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
     return valid_signature && full_key_of_user;
   }
 
-  private verifySignature({ publicKey, signature }) {
+  private verifySignature({ publicKey, signature, accountId, challenge, message }) {
     // Reconstruct the payload that was **actually signed**
-    const payload = new Payload({ message: MESSAGE, nonce: CHALLENGE, recipient: APP, callbackUrl: cURL });
+    const payload = { message: message, nonce: challenge, recipient: accountId };
+    console.log(payload);
+    const payloadSchema = { struct: { message: 'string', nonce: 'string', recipient: 'string' } };
     const borsh_payload = borsh.serialize(payloadSchema, payload);
     const to_sign = Uint8Array.from(js_sha256.sha256.array(borsh_payload));
 
@@ -61,14 +65,25 @@ export class AuthService {
 
   // Aux method
   private async fetch_all_user_keys({ accountId }) {
-    const keys = await fetch('https://rpc.testnet.near.org', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: `{"jsonrpc":"2.0", "method":"query", "params":["access_key/${accountId}", ""], "id":1}`,
-    })
-      .then(data => data.json())
-      .then(result => result);
-    return keys;
+    try {
+      const response = await post(
+        'https://rpc.testnet.near.org',
+        {
+          jsonrpc: '2.0',
+          method: 'query',
+          params: [`access_key/${accountId}`, ''],
+          id: 1,
+        },
+        {
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        },
+      );
+
+      return response.data; // Return the data from the response
+    } catch (error) {
+      console.error('Error fetching user keys:', error);
+      throw error; // Rethrow the error for handling upstream
+    }
   }
 
   // public async signup(userData: CreateUserDto): Promise<User> {
