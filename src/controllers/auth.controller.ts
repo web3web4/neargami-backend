@@ -24,6 +24,16 @@ export class AuthController {
       next(error);
     }
   };
+
+  public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // const userData: User = req.body;
+      const signUpUserData: User = await this.auth.createUser(req.body);
+      res.status(201).json({ data: signUpUserData, message: 'signup' });
+    } catch (error) {
+      next(error);
+    }
+  };
   // public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   try {
   //     const userData: User = req.body;

@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 import * as naj from 'near-api-js';
 import * as js_sha256 from 'js-sha256';
 import * as borsh from 'borsh';
-import { post } from 'axios';
+import axios from 'axios';
 
 @Service()
 export class AuthService {
@@ -22,10 +22,21 @@ export class AuthService {
     const message = 'Login with near';
     return { challenge, message };
   }
+  public async createUser({ accountId, publicKey, signature, challenge, message }) {
+    // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+    // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+    const user = await this.users.upsert({
+      where: { address: accountId },
+      create: { address: accountId, message, signature },
+      update: { message, signature },
+    });
+    return user;
+  }
   public async authenticate({ accountId, publicKey, signature, challenge, message }) {
-    const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
-    const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
-    return valid_signature && full_key_of_user;
+    // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+    // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+    const user = await this.users.findFirst({ where: { address: accountId } });
+    return this.createToken(user.id);
   }
 
   private verifySignature({ publicKey, signature, accountId, challenge, message }) {
@@ -66,7 +77,7 @@ export class AuthService {
   // Aux method
   private async fetch_all_user_keys({ accountId }) {
     try {
-      const response = await post(
+      const response = await axios.post(
         'https://rpc.testnet.near.org',
         {
           jsonrpc: '2.0',
@@ -116,13 +127,13 @@ export class AuthService {
   //   return findUser;
   // }
 
-  // public createToken(user: User): TokenData {
-  //   const dataStoredInToken: DataStoredInToken = { id: user.id };
-  //   const secretKey: string = SECRET_KEY;
-  //   const expiresIn: number = 60 * 60;
+  public createToken(id: number): TokenData {
+    const dataStoredInToken: DataStoredInToken = { id };
+    const secretKey: string = SECRET_KEY;
+    const expiresIn: number = 60 * 60;
 
-  //   return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
-  // }
+    return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+  }
 
   // public createCookie(tokenData: TokenData): string {
   //   return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;

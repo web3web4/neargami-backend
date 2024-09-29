@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
-import { CreateUserDto } from '@dtos/users.dto';
+import { CreateProfileDto, CreateUserDto } from '@dtos/users.dto';
 import { User } from '@interfaces/users.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { NearConfig } from 'near-api-js/lib/near';
@@ -26,6 +26,17 @@ export class UserService {
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;
+  }
+
+  public async createProfile(id: number, createProfileDto: CreateProfileDto) {
+    const { userId, ...data } = createProfileDto;
+    await this.findUserById(id);
+    return await this.user.update({
+      where: {
+        id: id,
+      },
+      data,
+    });
   }
 
   // private async initNear() {

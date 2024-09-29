@@ -232,6 +232,21 @@ paths:
       responses:
         200:
           description: 'Ok'
+  /auth/signup:
+    post:
+      tags:
+        - auth
+      summery: validate the signture
+      parameters:
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/auth'
+      responses:
+        200:
+          description: 'Ok'
 
 # definitions
 definitions:
