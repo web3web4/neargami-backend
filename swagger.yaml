@@ -1,13 +1,17 @@
 tags:
-- name: users
-  description: users API
+  - name: users
+    description: users API
+  - name: courses
+    description: courses API
+  - name: auth
+    description: auth api
 
 paths:
-# [GET] users
+  # [GET] users
   /users:
     get:
       tags:
-      - users
+        - users
       summary: Find All Users
       responses:
         200:
@@ -15,18 +19,18 @@ paths:
         500:
           description: 'Server Error'
 
-# [POST] users
+    # [POST] users
     post:
       tags:
-      - users
+        - users
       summary: Add User
       parameters:
-      - name: body
-        in: body
-        description: user Data
-        required: true
-        schema:
-          $ref: '#/definitions/users'
+        - name: body
+          in: body
+          description: user Data
+          required: true
+          schema:
+            $ref: '#/definitions/users'
       responses:
         201:
           description: 'Created'
@@ -37,18 +41,18 @@ paths:
         500:
           description: 'Server Error'
 
-# [GET] users/id
+  # [GET] users/id
   /users/{id}:
     get:
       tags:
-      - users
+        - users
       summary: Find User By Id
       parameters:
-      - name: id
-        in: path
-        description: User Id
-        required: true
-        type: integer
+        - name: id
+          in: path
+          description: User Id
+          required: true
+          type: integer
       responses:
         200:
           description: 'OK'
@@ -57,60 +61,242 @@ paths:
         500:
           description: 'Server Error'
 
-# [PUT] users/id
-#     put:
-#       tags:
-#       - users
-#       summary: Update User By Id
-#       parameters:
-#       - name: id
-#         in: path
-#         description: user Id
-#         required: true
-#         type: integer
-#       - name: body
-#         in: body
-#         description: user Data
-#         required: true
-#         schema:
-#           $ref: '#/definitions/users'
-#       responses:
-#         200:
-#           description: 'OK'
-#         400:
-#           description: 'Bad Request'
-#         409:
-#           description: 'Conflict'
-#         500:
-#           description: 'Server Error'
+  # [PUT] users/id
+  #     put:
+  #       tags:
+  #       - users
+  #       summary: Update User By Id
+  #       parameters:
+  #       - name: id
+  #         in: path
+  #         description: user Id
+  #         required: true
+  #         type: integer
+  #       - name: body
+  #         in: body
+  #         description: user Data
+  #         required: true
+  #         schema:
+  #           $ref: '#/definitions/users'
+  #       responses:
+  #         200:
+  #           description: 'OK'
+  #         400:
+  #           description: 'Bad Request'
+  #         409:
+  #           description: 'Conflict'
+  #         500:
+  #           description: 'Server Error'
 
-# # [DELETE] users/id
-#     delete:
-#       tags:
-#       - users
-#       summary: Delete User By Id
-#       parameters:
-#       - name: id
-#         in: path
-#         description: user Id
-#         required: true
-#         type: integer
-#       responses:
-#         200:
-#           description: 'OK'
-#         409:
-#           description: 'Conflict'
-#         500:
-#           description: 'Server Error'
+  # # [DELETE] users/id
+  #     delete:
+  #       tags:
+  #       - users
+  #       summary: Delete User By Id
+  #       parameters:
+  #       - name: id
+  #         in: path
+  #         description: user Id
+  #         required: true
+  #         type: integer
+  #       responses:
+  #         200:
+  #           description: 'OK'
+  #         409:
+  #           description: 'Conflict'
+  #         500:
+  #           description: 'Server Error'
+
+  # [GET] courses
+  /courses:
+    get:
+      tags:
+        - courses
+      summary: Find All Courses
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+    # [POST] courses
+    post:
+      tags:
+        - courses
+      summary: Add Course
+      parameters:
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/courses'
+      responses:
+        201:
+          description: 'Created'
+        400:
+          description: 'Bad Request'
+        409:
+          description: 'Conflict'
+        500:
+          description: 'Server Error'
+
+  # [GET] courses/id
+  /courses/{id}:
+    get:
+      tags:
+        - courses
+      summary: Find Course By Id
+      parameters:
+        - name: id
+          in: path
+          description: Course Id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 'OK'
+        409:
+          description: 'Conflict'
+        500:
+          description: 'Server Error'
+
+    # [PUT] courses/id
+    put:
+      tags:
+        - courses
+      summary: Update Course By Id
+      parameters:
+        - name: id
+          in: path
+          description: course Id
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/courses'
+      responses:
+        200:
+          description: 'OK'
+        400:
+          description: 'Bad Request'
+        409:
+          description: 'Conflict'
+        500:
+          description: 'Server Error'
+
+    # # [DELETE] courses/id
+    delete:
+      tags:
+        - courses
+      summary: Delete Course By Id
+      parameters:
+        - name: id
+          in: path
+          description: course Id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 'OK'
+        409:
+          description: 'Conflict'
+        500:
+          description: 'Server Error'
+
+  # [GET] auth/challenge
+  /auth/challenge:
+    get:
+      tags:
+        - auth
+      summery: get challenge to sign
+      responses:
+        200:
+          description: 'Ok'
+  # [POST] auth/validate
+  /auth/validate:
+    post:
+      tags:
+        - auth
+      summery: validate the signture
+      parameters:
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/auth'
+      responses:
+        200:
+          description: 'Ok'
+  /auth/signup:
+    post:
+      tags:
+        - auth
+      summery: validate the signture
+      parameters:
+        - name: body
+          in: body
+          description: course Data
+          required: true
+          schema:
+            $ref: '#/definitions/auth'
+      responses:
+        200:
+          description: 'Ok'
 
 # definitions
 definitions:
+  courses:
+    type: object
+    required:
+      - title
+      - content
+      - teacherId
+    properties:
+      title:
+        type: string
+        description: Course title
+      content:
+        type: string
+        description: Course content
+      teacherId:
+        type: number
+        description: Course teacherId
+  auth:
+    type: object
+    required:
+      - accountId
+      - publicKey
+      - signature
+      - challenge
+      - message
+    properties:
+      accountId:
+        type: string
+        description: Course title
+      publicKey:
+        type: string
+        description: Course content
+      challenge:
+        type: string
+        description: Course content
+      message:
+        type: string
+        description: Course content
+      signature:
+        type: string
+        description: Course teacherId
+
   users:
     type: object
     required:
-        - address
-        - message
-        - signature
+      - address
+      - message
+      - signature
     properties:
       address:
         type: string
@@ -123,5 +309,5 @@ definitions:
         description: signed message
 
 schemes:
- - https
- - http
+  - https
+  - http

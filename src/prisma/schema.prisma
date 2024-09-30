@@ -8,18 +8,27 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  address     String   @unique
-  message     String
-  signature   String
-  createdAt DateTime @default(now())
-  courses   Course[]
+  id          Int         @id               @default(autoincrement())
+  address     String      @db.VarChar(50)   @unique
+  message     String      @db.VarChar(50)
+  signature   String      @db.VarChar(50)
+  name        String?     @db.VarChar(50)
+  phone       String?     @db.VarChar(50)
+  linkedin    String?     @db.VarChar(50)
+  score       Int         @default(0)
+  about       String?
+  createdAt   DateTime    @default(now())
+  coursesAsTeacher Course[] @relation("CourseTeacher")
+  coursesAsStudent Course[] @relation("CourseUsers")
+
+  @@map("users")
 }
 
 model Course {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String
+  teacherId    Int      
+  teacher      User     @relation("CourseTeacher",fields: [teacherId], references: [id])
+  users        User[]   @relation("CourseUsers")
 }

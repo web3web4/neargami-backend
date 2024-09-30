@@ -5,16 +5,35 @@ import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
 
 export class AuthController {
-  // public auth = Container.get(AuthService);
-  // public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const userData: User = req.body;
-  //     const signUpUserData: User = await this.auth.signup(userData);
-  //     res.status(201).json({ data: signUpUserData, message: 'signup' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
+  public auth = Container.get(AuthService);
+  public validate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // const userData: User = req.body;
+      const signUpUserData = await this.auth.authenticate(req.body);
+      res.status(201).json({ data: signUpUserData, message: 'signup' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { challenge, message } = this.auth.createChallenge();
+      res.status(200).json({ challenge, message });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // const userData: User = req.body;
+      const signUpUserData: User = await this.auth.createUser(req.body);
+      res.status(201).json({ data: signUpUserData, message: 'signup' });
+    } catch (error) {
+      next(error);
+    }
+  };
   // public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   try {
   //     const userData: User = req.body;

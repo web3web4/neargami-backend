@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { User } from '@interfaces/users.interface';
 import { UserService } from '@services/users.service';
+import { CreateProfileDto } from '@/dtos/users.dto';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 export class UserController {
   public user = Container.get(UserService);
@@ -33,6 +35,17 @@ export class UserController {
       const createUserData: User = await this.user.createUser(userData);
 
       res.status(201).json({ data: createUserData, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createProfile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const createProfileDto: CreateProfileDto = req.body;
+      const createdProfile = await this.user.createProfile(req.user.id, createProfileDto);
+
+      res.status(200).json({ data: createdProfile, message: 'updated' });
     } catch (error) {
       next(error);
     }
