@@ -1,87 +1,123 @@
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
-import { Service } from 'typedi';
-import { CreateProfileDto, CreateUserDto } from '@dtos/users.dto';
-import { User } from '@interfaces/users.interface';
-import { HttpException } from '@/exceptions/HttpException';
-import { NearConfig } from 'near-api-js/lib/near';
-import * as nearAPI from 'near-api-js';
+import { PrismaClient, User } from "@prisma/client";
+import { Service } from "typedi";
+import { CreateUserDto } from "@dtos/users.dto";
+import { UpdateUserDto } from "@dtos/users.dto";
+import { IUser } from "@/interfaces/user.interface";
+import { HttpException } from "@/exceptions/HttpException";
 
 @Service()
 export class UserService {
-  public user = new PrismaClient().user;
+  public prismaUser = new PrismaClient().user;
 
-  public async findAllUser(): Promise<User[]> {
-    const allUser: User[] = await this.user.findMany({
-      include: {
-        coursesAsTeacher: true,
-        coursesAsStudent: true,
+  public async findAllUser(): Promise<IUser[]> {
+    const allUsers: IUser[] = await this.prismaUser.findMany({
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        message: true,
+        signature: true,
+        phone: true,
+        slug: true,
+        linkedin: true,
+        score: true,
+        about: true,
+        createdAt: true,
       },
     });
-    return allUser;
+    return allUsers;
+  }
+  public async findOneById(uid: string): Promise<User> {
+    
+    return this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
+  }
+  // public async findUserById(userId: string): Promise<IUser> {
+  //   const findUser: IUser = await this.prismaUser.findUnique({ where: { id: userId } });
+  //   if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+  //   return findUser;
+  // }
+
+  public async createUser(createUserDto: CreateUserDto): Promise<User> {
+    createUserDto.createdAt = new Date();
+    return this.prismaUser.create({
+      data: createUserDto,
+    });
   }
 
-  public async findUserById(userId: number): Promise<User> {
-    const findUser: User = await this.user.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "User doesn't exist");
-
-    return findUser;
+  async findByAddress(address1: string): Promise<IUser | null> {
+    return this.prismaUser.findUnique({ where: { address: `${address1}` }, include: { userCourses: true } });
   }
 
-  public async createProfile(id: number, createProfileDto: CreateProfileDto) {
-    const { userId, ...data } = createProfileDto;
-    await this.findUserById(id);
-    return await this.user.update({
-      where: {
-        id: id,
-      },
+  async update(uid: string, data: UpdateUserDto): Promise<IUser> {
+    return this.prismaUser.update({
+      where: { id: `${uid}` },
       data,
     });
   }
+  async deleteUserById(uid: string): Promise<IUser> {
+    const findUser: IUser = await this.prismaUser.findUnique({ where: { id: `${uid}` } });
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
 
-  // private async initNear() {
-  //   const nearConfig: NearConfig = {
-  //     networkId: 'testnet',
-  //     keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-  //     nodeUrl: 'https://rpc.testnet.near.org',
-  //   };
-  //   const near = await nearAPI.connect(nearConfig);
-  //   return near;
-  // }
-
-  private async verify() {
-    return true;
+    const deleteUserData = await this.prismaUser.delete({ where: { id: `${uid}` } });
+    return deleteUserData;
   }
-
-  public async createUser(userData: CreateUserDto): Promise<User> {
-    const { address, message, signature } = userData;
-    const isVerified = await this.verify();
-    if (!isVerified) {
-      throw new HttpException(400, 'Invalid signature');
-    }
-    const user: User = await this.user.upsert({
-      where: { address },
-      create: { address, message, signature },
-      update: { message, signature },
-    });
-
-    return user;
-  }
-
-  // public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
-  //   const findUser: User = await this.user.findUnique({ where: { id: userId } });
-  //   if (!findUser) throw new HttpException(409, "User doesn't exist");
-
-  //   const hashedPassword = await hash(userData.password, 10);
-  //   const updateUserData = await this.user.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
-  //   return updateUserData;
-  // }
-
-  // public async deleteUser(userId: number): Promise<User> {
-  //   const findUser: User = await this.user.findUnique({ where: { id: userId } });
-  //   if (!findUser) throw new HttpException(409, "User doesn't exist");
-
-  //   const deleteUserData = await this.user.delete({ where: { id: userId } });
-  //   return deleteUserData;
-  // }
 }
+
+// const linkedin = userData.linkedin;
+// const score = userData.score;
+// const name = userData.name;
+// const phone = userData.phone;
+// const about = userData.about;
+// const slug = userData.slug;
+// const address = userData.address;
+// const signature = userData.signature;
+// const message = userData.message;
+// console.log(userData);
+// console.log(name);
+// console.log(phone);
+// const user: User = await this.prismaUser.upsert({
+//   where: { address },
+//   create: {
+//     name,
+//     address,
+//     signature,
+//     message,
+//     about,
+//     phone: phone ?? undefined, // Handle optional phone
+//     slug,
+//     linkedin,score,
+
+//   },
+//   update: {
+//     message,
+//     signature
+//   }
+// });
+
+// public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
+//   const findUser: User = await this.user.findUnique({ where: { id: userId } });
+//   if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+//   const hashedPassword = await hash(userData.password, 10);
+//   const updateUserData = await this.user.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
+//   return updateUserData;
+// }
+
+// public async deleteUser(userId: number): Promise<User> {
+//   const findUser: User = await this.user.findUnique({ where: { id: userId } });
+//   if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+//   const deleteUserData = await this.user.delete({ where: { id: userId } });
+//   return deleteUserData;
+// }
+
+// private async initNear() {
+//   const nearConfig: NearConfig = {
+//     networkId: 'testnet',
+//     keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
+//     nodeUrl: 'https://rpc.testnet.near.org',
+//   };
+//   const near = await nearAPI.connect(nearConfig);
+//   return near;
+// }

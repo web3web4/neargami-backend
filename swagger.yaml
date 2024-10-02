@@ -5,7 +5,8 @@ tags:
     description: courses API
   - name: auth
     description: auth api
-
+  - name: userCoursesMapping
+    description: User-Courses mapping API
 paths:
   # [GET] users
   /users:
@@ -19,7 +20,7 @@ paths:
         500:
           description: 'Server Error'
 
-    # [POST] users
+  # [POST] users
     post:
       tags:
         - users
@@ -52,7 +53,7 @@ paths:
           in: path
           description: User Id
           required: true
-          type: integer
+          type: string
       responses:
         200:
           description: 'OK'
@@ -60,121 +61,19 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-  # [PUT] users/id
-  #     put:
-  #       tags:
-  #       - users
-  #       summary: Update User By Id
-  #       parameters:
-  #       - name: id
-  #         in: path
-  #         description: user Id
-  #         required: true
-  #         type: integer
-  #       - name: body
-  #         in: body
-  #         description: user Data
-  #         required: true
-  #         schema:
-  #           $ref: '#/definitions/users'
-  #       responses:
-  #         200:
-  #           description: 'OK'
-  #         400:
-  #           description: 'Bad Request'
-  #         409:
-  #           description: 'Conflict'
-  #         500:
-  #           description: 'Server Error'
-
-  # # [DELETE] users/id
-  #     delete:
-  #       tags:
-  #       - users
-  #       summary: Delete User By Id
-  #       parameters:
-  #       - name: id
-  #         in: path
-  #         description: user Id
-  #         required: true
-  #         type: integer
-  #       responses:
-  #         200:
-  #           description: 'OK'
-  #         409:
-  #           description: 'Conflict'
-  #         500:
-  #           description: 'Server Error'
-
-  # [GET] courses
-  /courses:
-    get:
-      tags:
-        - courses
-      summary: Find All Courses
-      responses:
-        200:
-          description: 'OK'
-        500:
-          description: 'Server Error'
-
-    # [POST] courses
-    post:
-      tags:
-        - courses
-      summary: Add Course
-      parameters:
-        - name: body
-          in: body
-          description: course Data
-          required: true
-          schema:
-            $ref: '#/definitions/courses'
-      responses:
-        201:
-          description: 'Created'
-        400:
-          description: 'Bad Request'
-        409:
-          description: 'Conflict'
-        500:
-          description: 'Server Error'
-
-  # [GET] courses/id
-  /courses/{id}:
-    get:
-      tags:
-        - courses
-      summary: Find Course By Id
-      parameters:
-        - name: id
-          in: path
-          description: Course Id
-          required: true
-          type: integer
-      responses:
-        200:
-          description: 'OK'
-        409:
-          description: 'Conflict'
-        500:
-          description: 'Server Error'
-
-    # [PUT] courses/id
     put:
       tags:
-        - courses
-      summary: Update Course By Id
+        - users
+      summary: Update user By Id
       parameters:
         - name: id
           in: path
-          description: course Id
+          description: user Id
           required: true
-          type: integer
+          type: string
         - name: body
           in: body
-          description: course Data
+          description: user Data
           required: true
           schema:
             $ref: '#/definitions/courses'
@@ -187,18 +86,16 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-    # # [DELETE] courses/id
     delete:
       tags:
-        - courses
-      summary: Delete Course By Id
+        - users
+      summary: Delete user By Id
       parameters:
         - name: id
           in: path
-          description: course Id
+          description: user Id
           required: true
-          type: integer
+          type: string
       responses:
         200:
           description: 'OK'
@@ -207,62 +104,542 @@ paths:
         500:
           description: 'Server Error'
 
-  # [GET] auth/challenge
-  /auth/challenge:
-    get:
-      tags:
-        - auth
-      summery: get challenge to sign
-      responses:
-        200:
-          description: 'Ok'
-  # [POST] auth/validate
-  /auth/validate:
-    post:
-      tags:
-        - auth
-      summery: validate the signture
-      parameters:
-        - name: body
-          in: body
-          description: course Data
-          required: true
-          schema:
-            $ref: '#/definitions/auth'
-      responses:
-        200:
-          description: 'Ok'
-  /auth/signup:
-    post:
-      tags:
-        - auth
-      summery: validate the signture
-      parameters:
-        - name: body
-          in: body
-          description: course Data
-          required: true
-          schema:
-            $ref: '#/definitions/auth'
-      responses:
-        200:
-          description: 'Ok'
+/courses:
+  get:
+    tags:
+      - courses
+    summary: Find All Courses
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+  post:
+    tags:
+      - courses
+    summary: Add Course
+    parameters:
+      - name: body
+        in: body
+        description: course Data
+        required: true
+        schema:
+          $ref: '#/definitions/courses'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+ # [GET] courses/id
+/courses/{id}:
+  get:
+    tags:
+     - courses
+    summary: Find Course By Id
+    parameters:
+      - name: id
+        in: path
+        description: Course Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - courses
+    summary: Update Course By Id
+    parameters:
+      - name: id
+        in: path
+        description: course Id
+        required: true
+        type: integer
+      - name: body
+        in: body
+        description: course Data
+        required: true
+        schema:
+          $ref: '#/definitions/courses'
+    responses:
+      200:
+        description: 'OK'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - courses
+    summary: Delete Course By Id
+    parameters:
+      - name: id
+        in: path
+        description: course Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
 
+ # [GET] user-courses-mappings
+/user-courses-mappings:
+  get:
+    tags:
+      - userCoursesMapping
+    summary: Find All User-Course Mappings
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+ # [POST] user-courses-mappings
+  post:
+    tags:
+      - userCoursesMapping
+    summary: Add User-Course Mapping
+    parameters:
+      - name: body
+        in: body
+        description: User-Course Mapping Data
+        required: true
+        schema:
+          $ref: '#/definitions/userCoursesMapping'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  # [GET] user-courses-mappings/{id}
+/user-courses-mappings/{id}:
+  get:
+    tags:
+      - userCoursesMapping
+    summary: Find User-Course Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Course Mapping Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - userCoursesMapping
+    summary: update User-Course Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Course Mapping Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - userCoursesMapping
+    summary: delete User-Course Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Course Mapping Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  # [GET] lectures
+/lectures:
+  get:
+    tags:
+      - lecture
+    summary: Find All Lectures
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+
+# [POST] lectures
+  post:
+    tags:
+      - lecture
+    summary: Add Lecture
+    parameters:
+      - name: body
+        in: body
+        description: Lecture Data
+        required: true
+        schema:
+          $ref: '#/definitions/lecture'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+
+  # [GET] lectures/{id}
+/lectures/{id}:
+  get:
+    tags:
+      - lecture
+    summary: Find Lecture By Id
+    parameters:
+      - name: id
+        in: path
+        description: Lecture Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - lecture
+    summary: update Lecture By Id
+    parameters:
+      - name: id
+        in: path
+        description: Lecture Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - lecture
+    summary: delete Lecture By Id
+    parameters:
+      - name: id
+        in: path
+        description: Lecture Id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'        
+  # [GET] user-lecture-mappings
+/user-lecture-mappings:
+  get:
+    tags:
+      - userLectureMapping
+    summary: Find All User-Lecture Mappings
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+
+# [POST] user-lecture-mappings
+  post:
+    tags:
+      - userLectureMapping
+    summary: Add User-Lecture Mapping
+    parameters:
+      - name: body
+        in: body
+        description: User-Lecture Mapping Data
+        required: true
+        schema:
+          $ref: '#/definitions/userLectureMapping'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+
+  # [GET] user-lecture-mappings/{id}
+/user-lecture-mappings/{id}:
+  get:
+    tags:
+      - userLectureMapping
+    summary: Find User-Lecture Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Lecture Mapping Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - userLectureMapping
+    summary: update User-Lecture Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Lecture Mapping Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - userLectureMapping
+    summary: delete User-Lecture Mapping By Id
+    parameters:
+      - name: id
+        in: path
+        description: User-Lecture Mapping Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'        
+# [GET] questions
+/questions:
+  get:
+    tags:
+      - question
+    summary: Find All Questions
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+
+# [POST] questions
+  post:
+    tags:
+      - question
+    summary: Add Question
+    parameters:
+      - name: body
+        in: body
+        description: Question Data
+        required: true
+        schema:
+          $ref: '#/definitions/question'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+
+  # [GET] questions/{id}
+/questions/{id}:
+  get:
+    tags:
+      - question
+    summary: Find Question By Id
+    parameters:
+      - name: id
+        in: path
+        description: Question Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - question
+    summary: update Question By Id
+    parameters:
+      - name: id
+        in: path
+        description: Question Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - question
+    summary: delete Question By Id
+    parameters:
+      - name: id
+        in: path
+        description: Question Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+# [GET] answers
+/answers:
+  get:
+    tags:
+      - answer
+    summary: Find All Answers
+    responses:
+      200:
+        description: 'OK'
+      500:
+        description: 'Server Error'
+
+# [POST] answers
+  post:
+    tags:
+      - answer
+    summary: Add Answer
+    parameters:
+      - name: body
+        in: body
+        description: Answer Data
+        required: true
+        schema:
+          $ref: '#/definitions/answer'
+    responses:
+      201:
+        description: 'Created'
+      400:
+        description: 'Bad Request'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+
+  # [GET] answers/{id}
+/answers/{id}:
+  get:
+    tags:
+      - answer
+    summary: Find Answer By Id
+    parameters:
+      - name: id
+        in: path
+        description: Answer Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  put:
+    tags:
+      - answer
+    summary: update Answer By Id
+    parameters:
+      - name: id
+        in: path
+        description: Answer Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
+  delete:
+    tags:
+      - answer
+    summary: delete Answer By Id
+    parameters:
+      - name: id
+        in: path
+        description: Answer Id
+        required: true
+        type: string
+    responses:
+      200:
+        description: 'OK'
+      409:
+        description: 'Conflict'
+      500:
+        description: 'Server Error'
 # definitions
 definitions:
   courses:
     type: object
     required:
       - title
-      - content
       - teacherId
     properties:
       title:
         type: string
         description: Course title
-      content:
-        type: string
-        description: Course content
       teacherId:
         type: number
         description: Course teacherId
@@ -290,13 +667,14 @@ definitions:
       signature:
         type: string
         description: Course teacherId
-
   users:
     type: object
     required:
       - address
       - message
       - signature
+      - phone
+      - name
     properties:
       address:
         type: string
@@ -307,7 +685,58 @@ definitions:
       signature:
         type: string
         description: signed message
-
+      phone:
+        type: string
+      name:
+        type: string
+  userCoursesMapping:
+    type: object
+    required:
+      - userId
+      - courseId
+    properties:
+      userId:
+        type: string
+        description: The ID of the user
+      courseId:
+        type: string
+        description: The ID of the course
+  userLectureMapping:
+    type: object
+    required:
+       - userId
+       - lectureId
+    properties:
+      userId:
+        type: string
+      lectureId:  
+        type: string
+  question:
+    type: object
+    required:
+      - description
+      - lecture_id
+      - score
+    properties:
+      description:
+        type: string
+      lecture_id:
+        type: integer
+      score:
+        type: integer
+  answer:
+    type: object
+    required:
+      - description
+      - question_id
+      - is_correct
+    properties:
+      description:
+        type: string
+      question_id:
+        type: integer
+      is_correct:
+        type: boolean  
 schemes:
   - https
   - http

@@ -1,36 +1,36 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
+  public name: string;
+
   public address: string;
 
-  @IsString()
-  @IsNotEmpty()
-  public message: string;
+  public message?: string;
 
-  @IsString()
-  @IsNotEmpty()
   public signature: string;
-}
 
-export class CreateProfileDto {
-  @IsNumber()
-  public userId: number;
-  @IsString()
-  public name: string;
-  @IsString()
   public phone: string;
-  @IsString()
-  public linkedin: string;
-  @IsString()
-  public about: string;
+
+  public linkedin?: string;
+
+  public about?: string;
+
+  public slug?: string;
+
+  public score: number;
+  public createdAt: Date;
 }
 
 export class UpdateUserDto {
-  @IsString()
-  @IsNotEmpty()
   @MinLength(9)
   @MaxLength(32)
-  public password: string;
+  address?: string;
+  signature?: string;
+  message?: string;
+  name?: string;
+  phone?: string;
+  linkedin?: string;
+  score?: number;
+  about?: string;
+  slug?: string;
 }
