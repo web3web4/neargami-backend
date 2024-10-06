@@ -1,9 +1,9 @@
-import { PrismaClient, User } from "@prisma/client";
-import { Service } from "typedi";
-import { CreateUserDto } from "@dtos/users.dto";
-import { UpdateUserDto } from "@dtos/users.dto";
-import { IUser } from "@/interfaces/user.interface";
-import { HttpException } from "@/exceptions/HttpException";
+import { PrismaClient, User } from '@prisma/client';
+import { Service } from 'typedi';
+import { CreateUserDto } from '@dtos/users.dto';
+import { UpdateUserDto } from '@dtos/users.dto';
+import { IUser } from '@/interfaces/user.interface';
+import { HttpException } from '@/exceptions/HttpException';
 
 @Service()
 export class UserService {
@@ -28,7 +28,6 @@ export class UserService {
     return allUsers;
   }
   public async findOneById(uid: string): Promise<User> {
-    
     return this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
   }
   // public async findUserById(userId: string): Promise<IUser> {

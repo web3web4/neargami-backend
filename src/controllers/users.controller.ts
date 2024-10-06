@@ -50,7 +50,7 @@ export class UserController {
       const userData: IUser = req.body;
       console.log(userData);
       const createUserData: IUser = await this.user.createUser(userData);
-
+      
       res.status(201).json({ data: createUserData, message: 'created' });
     } catch (error) {
       next(error);

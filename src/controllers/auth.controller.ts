@@ -1,28 +1,24 @@
-import { NextFunction, Request, Response } from "express";
-import { Container, Inject, Service } from "typedi";
-import { RequestWithUser } from "@interfaces/auth.interface";
-import { IUser } from "@/interfaces/user.interface";
-import { AuthService } from "@services/auth.service";
+import { NextFunction, Request, Response } from 'express';
+import { Container, Inject, Service } from 'typedi';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import { IUser } from '@/interfaces/user.interface';
+import { AuthService } from '@services/auth.service';
+import { User } from '@prisma/client';
+import Jwt from 'jsonwebtoken';
 @Service()
 export class AuthController {
   constructor(@Inject(() => AuthService) private auth: AuthService) {
-    console.log("Authcontrollr initialized");
+    console.log('Authcontrollr initialized');
   }
-  // public auth: AuthService;
-  // constructor() {
-  //   this.auth = Container.get(AuthService); // Manual injection
-  // }
-  
   public validate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // const userData: User = req.body;
       const signUpUserData = await this.auth.authenticate(req.body);
-      res.status(201).json({ data: signUpUserData, message: "signup" });
+      res.status(201).json({ data: signUpUserData, message: 'signup' });
     } catch (error) {
       next(error);
     }
   };
-
   public createChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { challenge, message } = this.auth.createChallenge();
@@ -31,16 +27,17 @@ export class AuthController {
       next(error);
     }
   };
-  // public auth = Container.get(AuthService);
-  // public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const userData: User = req.body;
-  //     const signUpUserData: User = await this.auth.signup(userData);
-  //     res.status(201).json({ data: signUpUserData, message: 'signup' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
+  public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // const userData: User = req.body;
+      const signUpUserData: IUser = await this.auth.createUser(req.body);
+      const authenticate = await this.auth.authenticate(req.body);
+      res.status(201).json({ data: { signUpUserData, authenticate }, message: 'signup' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   try {
   //     const userData: User = req.body;

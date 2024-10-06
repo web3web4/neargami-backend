@@ -1,7 +1,9 @@
-import { CourseController } from "@/controllers/course.controller";
-import { Routes } from "@/interfaces/routes.interface";
-import { Router } from "express";
-import { Service, Container } from "typedi";
+import { CourseController } from '@/controllers/course.controller';
+import { Routes } from '@/interfaces/routes.interface';
+import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { CheckCourseTeacher } from '@/middlewares/course-teacher.middleware';
+import { Router } from 'express';
+import { Service, Container } from 'typedi';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class CourseRoute implements Routes {
@@ -13,10 +15,10 @@ export class CourseRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get("/courses", this.courseController.findAllCourses);
-    this.router.post("/courses", this.courseController.createCourse);
-    this.router.get("/courses/:id", this.courseController.findCourseById);
-    this.router.put("/courses/:id", this.courseController.updateCourse);
-    this.router.delete("/courses/:id", this.courseController.deleteCourse);
+    this.router.get('/courses', AuthMiddleware, this.courseController.findAllCourses);
+    this.router.post('/courses', AuthMiddleware, this.courseController.createCourse);
+    this.router.get('/courses/:id', AuthMiddleware, this.courseController.findCourseById);
+    this.router.put('/courses/:id', AuthMiddleware, CheckCourseTeacher, this.courseController.updateCourse);
+    this.router.delete('/courses/:id', AuthMiddleware, this.courseController.deleteCourse);
   }
 }

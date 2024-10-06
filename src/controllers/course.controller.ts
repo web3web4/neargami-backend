@@ -1,13 +1,15 @@
-import { Request, Response, NextFunction } from "express";
-import { Inject, Service } from "typedi";
-import { CourseService } from "../services/course.service";
-import { ICourse } from "@/interfaces/course.interface";
-import { Status, UpdateCourseDto } from "../dtos/course.dto";
+import { Request, Response, NextFunction } from 'express';
+import { Inject, Service } from 'typedi';
+import { CourseService } from '../services/course.service';
+import { ICourse } from '@/interfaces/course.interface';
+import { Status, UpdateCourseDto } from '../dtos/course.dto';
+import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   constructor(@Inject(() => CourseService) private courseService: CourseService) {
-    console.log("CourseController initialized");
+    console.log('CourseController initialized');
   }
 
   public findAllCourses = async (req: Request, res: Response): Promise<void> => {
@@ -19,7 +21,7 @@ export class CourseController {
         id: course.id.toString(), // Assuming 'id' is a BigInt field
       }));
 
-      res.status(200).json({ data: processedCourses, message: "findAll" });
+      res.status(200).json({ data: processedCourses, message: 'findAll' });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -34,7 +36,7 @@ export class CourseController {
       // Use custom JSON stringify function to handle BigInt
       res
         .status(200)
-        .send(JSON.stringify({ data: createCourse, message: "created" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+        .send(JSON.stringify({ data: createCourse, message: 'created' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
       //res.status(201).json({ data: createCourse, message: "created" });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -49,7 +51,7 @@ export class CourseController {
       res
         .status(200)
         .send(
-          JSON.stringify({ data: findOneCourseData, message: "findOne" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
+          JSON.stringify({ data: findOneCourseData, message: 'findOne' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)),
         );
     } catch (error) {
       next(error);
@@ -57,12 +59,13 @@ export class CourseController {
   };
   public updateCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const id = BigInt(req.params.id);
+
     const data: UpdateCourseDto = req.body;
     try {
       const course = await this.courseService.update(id, data);
       res
         .status(200)
-        .send(JSON.stringify({ data: course, message: "created" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+        .send(JSON.stringify({ data: course, message: 'created' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -75,7 +78,7 @@ export class CourseController {
       res
         .status(200)
         .send(
-          JSON.stringify({ data: findOneCourseData, message: "delete One" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
+          JSON.stringify({ data: findOneCourseData, message: 'delete One' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)),
         );
     } catch (error) {
       next(error);

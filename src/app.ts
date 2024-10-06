@@ -13,10 +13,19 @@ import { Routes } from '@interfaces/routes.interface';
 import { ErrorMiddleware } from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
 import { Container } from 'typedi';
+import winston from 'winston';
 //import errorHandler from '../src/middlewares/error.middleware'; // Adjust the path to your middleware
 ///import { useContainer } from "typedi";
 // Set typedi container globally for dependency injection
 //useContainer(Container);
+import http from 'http';
+
+// Create the HTTP server
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello, World!\n');
+});
 
 export class App {
   public app: express.Application;
@@ -27,10 +36,11 @@ export class App {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
-
+   
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
+    this.initializeErrorHandling();
     this.initializeErrorHandling();
   }
 
@@ -56,7 +66,6 @@ export class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
-    
   }
 
   private initializeRoutes(routes: Routes[]) {
@@ -82,7 +91,25 @@ export class App {
     this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
   }
 
-  private initializeErrorHandling() {
+  // Configure Winston to log to a file and the console
+  logger = winston.createLogger({
+    level: 'error', // Only log errors (adjust if needed)
+    format: winston.format.combine(
+      winston.format.timestamp(), // Include timestamps
+      winston.format.json(), // Log in JSON format for better structure
+    ),
+    transports: [
+      new winston.transports.File({ filename: 'error.log' }), // Log to error.log file
+      new winston.transports.Console({ format: winston.format.simple() }), // Also log to console
+    ],
+  });
+ 
+  private initializeErrorHandling(): void {
     this.app.use(ErrorMiddleware);
+    // Global handler for uncaught exceptions
+    process.on('uncaughtException', (err: Error): void => {
+      logger.error(`Uncaught Exception: ${err.message}`, { stack: err.stack });
+      process.exit(1); // Optionally exit the process
+    });
   }
 }

@@ -1,5 +1,5 @@
-import { Request } from "express";
-import { IUser } from "@/interfaces/user.interface";
+import { Request } from 'express';
+import { IUser } from '@/interfaces/user.interface';
 
 export interface DataStoredInToken {
   id: string;
