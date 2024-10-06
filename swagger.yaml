@@ -7,7 +7,7 @@ tags:
     description: auth api
 
 paths:
-  # [GET] users
+  # [GET] users  
   /users:
     get:
       tags:
@@ -41,7 +41,7 @@ paths:
         500:
           description: 'Server Error'
 
-  # [GET] users/id
+  # [GET] users/id ff  
   /users/{id}:
     get:
       tags:
