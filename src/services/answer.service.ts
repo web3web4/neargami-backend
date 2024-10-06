@@ -1,8 +1,8 @@
-import { CreateAnswerDto, UpdateAnswerDto } from "../dtos/answer.dto";
-import { IAnswer } from "../interfaces/answer.interface";
-import { PrismaClient, Answer } from "@prisma/client";
+import { CreateAnswerDto, UpdateAnswerDto } from '../dtos/answer.dto';
+import { IAnswer } from '../interfaces/answer.interface';
+import { PrismaClient, Answer } from '@prisma/client';
 
-import { Service } from "typedi";
+import { Service } from 'typedi';
 
 @Service()
 export class AnswerService {

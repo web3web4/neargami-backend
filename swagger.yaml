@@ -104,45 +104,45 @@ paths:
         500:
           description: 'Server Error'
   # [GET] auth/challenge
-  /auth/challenge:
-    get:
-      tags:
-        - auth
-      summery: get challenge to sign
-      responses:
-        200:
-          description: 'Ok'
+/auth/challenge:
+  get:
+    tags:
+      - auth
+    summery: get challenge to sign
+    responses:
+      200:
+        description: 'Ok'
   # [POST] auth/validate
-  /auth/validate:
-    post:
-      tags:
-        - auth
-      summery: validate the signture
-      parameters:
-        - name: body
-          in: body
-          description: course Data
-          required: true
-          schema:
-            $ref: '#/definitions/auth'
-      responses:
-        200:
-          description: 'Ok'
-  /auth/signup:
-    post: 
-      tags:
-        - auth
-      summery: validate the signture
-      parameters:
-        - name: body
-          in: body
-          description: course Data
-          required: true
-          schema:
-            $ref: '#/definitions/auth'
-      responses:
-        200:
-          description: 'Ok'
+/auth/validate:
+  post:
+    tags:
+      - auth
+    summery: validate the signture
+    parameters:
+      - name: body
+        in: body
+        description: course Data
+        required: true
+        schema:
+          $ref: '#/definitions/auth'
+    responses:
+      200:
+        description: 'Ok'
+/auth/signup:
+  post: 
+    tags:
+      - auth
+    summery: validate the signture
+    parameters:
+      - name: body
+        in: body
+        description: course Data
+        required: true
+        schema:
+          $ref: '#/definitions/auth'
+    responses:
+      200:
+        description: 'Ok'
 /courses:
   get:
     tags:
