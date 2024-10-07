@@ -1,20 +1,34 @@
 import { Request, Response, NextFunction } from 'express';
 import { Inject, Service } from 'typedi';
 import { CourseService } from '../services/course.service';
-import { ICourse } from '@/interfaces/course.interface';
+import { ICourse, ICoursefull, ICoursewithoutUserId } from '@/interfaces/course.interface';
 import { Status, UpdateCourseDto } from '../dtos/course.dto';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { DataStoredInToken, RequestWithUser } from '@/interfaces/auth.interface';
+import { SECRET_KEY } from '@/config';
+import { verify } from 'jsonwebtoken';
+import { Course } from '@prisma/client';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   constructor(@Inject(() => CourseService) private courseService: CourseService) {
     console.log('CourseController initialized');
   }
+  public getAuthorization = (req: Request) => {
+    const coockie = req.cookies['Authorization'];
+    if (coockie) return coockie;
+
+    const header = req.headers['authorization'];
+    if (header) return header.split('Bearer ')[1];
+
+    return null;
+  };
 
   public findAllCourses = async (req: Request, res: Response): Promise<void> => {
     try {
-      const findAllCoursesData: ICourse[] = await this.courseService.findAll();
+      const Authorization = this.getAuthorization(req);
+      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
+      const findAllCoursesData: ICoursefull[] = await this.courseService.findAll(id);
       // Convert any BigInt fields to strings
       const processedCourses = findAllCoursesData.map(course => ({
         ...course,
@@ -28,11 +42,12 @@ export class CourseController {
   };
 
   public createCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const data: ICourse = req.body;
-    const publishStatus: Status = req.body.publish_status;
-
+    const data1: ICoursewithoutUserId = req.body;
     try {
-      const createCourse: ICourse = await this.courseService.createNewCourse(data);
+      const Authorization = this.getAuthorization(req);
+      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
+      const data: ICourse = { icoursewithoutUserId: data1, teacher_user_id: id };
+      const createCourse: Course = await this.courseService.createNewCourse(data);
       // Use custom JSON stringify function to handle BigInt
       res
         .status(200)
@@ -46,7 +61,7 @@ export class CourseController {
   public findCourseById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const coursId = BigInt(req.params.id);
-      const findOneCourseData: ICourse = await this.courseService.findOne(coursId);
+      const findOneCourseData: ICoursefull = await this.courseService.findOne(coursId);
 
       res
         .status(200)
@@ -65,7 +80,7 @@ export class CourseController {
       const course = await this.courseService.update(id, data);
       res
         .status(200)
-        .send(JSON.stringify({ data: course, message: 'created' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
+        .send(JSON.stringify({ data: course, message: 'updated' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -73,7 +88,7 @@ export class CourseController {
   public deleteCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const coursId = BigInt(req.params.id);
-      const findOneCourseData: ICourse = await this.courseService.delete(coursId);
+      const findOneCourseData: ICoursefull = await this.courseService.delete(coursId);
 
       res
         .status(200)

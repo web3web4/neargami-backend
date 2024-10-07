@@ -103,6 +103,7 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
+ 
   # [GET] auth/challenge
 /auth/challenge:
   get:
@@ -668,6 +669,7 @@ paths:
         description: 'Conflict'
       500:
         description: 'Server Error'
+    
 # definitions
 definitions:
   courses:
