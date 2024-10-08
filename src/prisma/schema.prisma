@@ -9,9 +9,9 @@ datasource db {
 
 model User {
   id          Int         @id               @default(autoincrement())
-  address     String      @db.VarChar(50)   @unique
-  message     String      @db.VarChar(50)
-  signature   String      @db.VarChar(50)
+  address     String      @db.VarChar(255)   @unique
+  message     String      @db.VarChar(255)
+  signature   String      @db.VarChar(255)
   name        String?     @db.VarChar(50)
   phone       String?     @db.VarChar(50)
   linkedin    String?     @db.VarChar(50)
