@@ -1,8 +1,8 @@
 import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
-  public name: string;
-
+  public firstname?: string;
+  public lastname?: string;
   public address: string;
 
   public message?: string;
@@ -19,6 +19,10 @@ export class CreateUserDto {
 
   public score: number;
   public createdAt: Date;
+  country?: string;
+  discord?: string;
+  facebook?: string;
+  twitter?: string;
 }
 
 export class UpdateUserDto {
@@ -27,10 +31,15 @@ export class UpdateUserDto {
   address?: string;
   signature?: string;
   message?: string;
-  name?: string;
+  firstname?: string;
+  lastname?: string;
   phone?: string;
   linkedin?: string;
   score?: number;
   about?: string;
   slug?: string;
+  country?: string;
+  discord?: string;
+  facebook?: string;
+  twitter?: string;
 }

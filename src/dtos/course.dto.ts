@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { ICoursewithoutUserId } from '@/interfaces/course.interface';
 import { IsUUID } from 'class-validator';
 
 
@@ -10,14 +11,21 @@ export enum Status {
   DEPRECATED = 'DEPRECATED',
 }
 export class CreateCourseDto {
-  title: string;
+  
+
+  icoursewithoutUserId: ICoursewithoutUserId;
   @IsUUID()
   teacher_user_id: string;
-  publish_status?: Status;
+
 }
 
 export class UpdateCourseDto {
   title?: string;
   teacher_user_id?: string;
   publish_status?: Status;
+  name?: string;
+  description?: string;
+  difficulty     ?:string;
+  video          ?:string;
+   logo          ?:string;
 }

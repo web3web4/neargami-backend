@@ -1,3 +1,8 @@
+openapi: '3.0.0'
+info:
+  title: 'REST API'
+  version: '1.0.0'
+  description: 'Example docs'
 tags:
   - name: users
     description: users API
@@ -7,6 +12,15 @@ tags:
     description: auth api
   - name: userCoursesMapping
     description: User-Courses mapping API
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT   # optional: specifies the format, usually JWT
+
+security:                  # Apply globally to all routes
+  - bearerAuth: [] 
 paths:
   # [GET] users
   /users:
@@ -149,6 +163,8 @@ paths:
     tags:
       - courses
     summary: Find All Courses
+    security:
+      - bearerAuth: []  # Requires Bearer token
     responses:
       200:
         description: 'OK'
@@ -332,7 +348,6 @@ paths:
         description: 'OK'
       500:
         description: 'Server Error'
-
 # [POST] lectures
   post:
     tags:
@@ -354,7 +369,6 @@ paths:
         description: 'Conflict'
       500:
         description: 'Server Error'
-
   # [GET] lectures/{id}
 /lectures/{id}:
   get:
@@ -419,7 +433,6 @@ paths:
         description: 'OK'
       500:
         description: 'Server Error'
-
 # [POST] user-lecture-mappings
   post:
     tags:
@@ -441,7 +454,6 @@ paths:
         description: 'Conflict'
       500:
         description: 'Server Error'
-
   # [GET] user-lecture-mappings/{id}
 /user-lecture-mappings/{id}:
   get:
@@ -506,7 +518,6 @@ paths:
         description: 'OK'
       500:
         description: 'Server Error'
-
 # [POST] questions
   post:
     tags:
@@ -528,7 +539,6 @@ paths:
         description: 'Conflict'
       500:
         description: 'Server Error'
-
   # [GET] questions/{id}
 /questions/{id}:
   get:
@@ -593,7 +603,6 @@ paths:
         description: 'OK'
       500:
         description: 'Server Error'
-
 # [POST] answers
   post:
     tags:
@@ -669,7 +678,7 @@ paths:
         description: 'Conflict'
       500:
         description: 'Server Error'
-    
+   
 # definitions
 definitions:
   courses:

@@ -1,5 +1,6 @@
 export interface IUser {
-  name: string;
+  firstname?: string;
+  lastname?: string;
   address: string;
   message?: string;
   signature: string;
@@ -9,4 +10,8 @@ export interface IUser {
   score: number;
   about: string;
   createdAt: Date;
+  country?: string;
+  discord?: string;
+  facebook?: string;
+  twitter?: string;
 }

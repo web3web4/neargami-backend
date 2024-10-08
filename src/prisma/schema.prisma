@@ -14,12 +14,17 @@ datasource db {
             }
 model User {
   id        String  @id @default(uuid()) @db.Uuid
-  address   String?  @unique @db.VarChar(50)
+  firstname      String?  @db.VarChar(50)
+  lastname      String?  @db.VarChar(50)
+  address   String  @unique @db.VarChar(50)
   signature String  @db.VarChar(50)
   message   String?  @db.VarChar(50)
-  name      String  @db.VarChar(50)
+  country   String?  @db.VarChar(50)
   phone     String  @db.VarChar(50)
   linkedin  String?  @db.VarChar(60)
+  discord  String?  @db.VarChar(60)
+  facebook  String?  @db.VarChar(60)
+  twitter  String?  @db.VarChar(60)
   score     Int     @default(0)
   about     String? @db.Text
   slug      String?  @db.VarChar(50)
@@ -39,6 +44,11 @@ model Course {
   title          String   @db.VarChar(150)
   teacher_user_id String  @db.Uuid
   publish_status  Status? 
+  name            String?
+  description     String?  @db.Text
+  difficulty      String?
+  video           String?
+   logo           String?
   lecture       Lecture[]
   userCourses    UserCoursesMapping[]
 }
