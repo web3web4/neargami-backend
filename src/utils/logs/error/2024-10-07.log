@@ -87,3 +87,544 @@ TypeError: Cannot read properties of undefined (reading 'securitySchemes')
     at Module.m._compile (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\ts-node\src\index.ts:1618:23)
     at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
     at Object.require.extensions.<computed> [as .ts] (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\ts-node\src\index.ts:1621:12)
+2024-10-07 18:52:49 error: [GET] /courses >> StatusCode:: 404, Message:: Authentication token missing
+2024-10-07 19:00:09 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:00:29 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:00:55 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:01:00 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:02:34 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:07:45 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:09:57 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:13:47 error: uncaughtException: Cannot read properties of undefined (reading 'securitySchemes')
+TypeError: Cannot read properties of undefined (reading 'securitySchemes')
+    at organize (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\swagger-jsdoc\src\specification.js:157:32)
+    at build (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\swagger-jsdoc\src\specification.js:320:7)
+    at module.exports (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\swagger-jsdoc\src\lib.js:32:10)
+    at App.initializeSwagger (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\app.ts:90:31)
+    at new App (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\app.ts:42:10)
+    at Object.<anonymous> (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\server.ts:13:13)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module.m._compile (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\ts-node\src\index.ts:1618:23)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\node_modules\ts-node\src\index.ts:1621:12)
+2024-10-07 19:38:48 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:43:55 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 19:46:42 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 20:01:14 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-07 20:03:33 error: [POST] /auth/signup >> StatusCode:: 500, Message:: 
+Invalid `this.users.upsert()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\auth.service.ts:21:35
+
+  18 public async createUser({ accountId, publicKey, signature, challenge, message }) {
+  19   // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
+  20   // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+→ 21   const user = await this.users.upsert({
+         where: {
+       ?   address?: String,
+       ?   id?: String
+         },
+         create: {
+       ?   address?: String | null,
+       ?   message?: String | null,
+       +   signature: String,
+       +   name: String,
+       +   phone: String,
+       ?   id?: String,
+       ?   linkedin?: String | null,
+       ?   score?: Int,
+       ?   about?: String | null,
+       ?   slug?: String | null,
+       ?   createdAt?: DateTime | null,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         },
+         update: {
+           message: undefined,
+           signature: undefined
+         }
+       })
+
+Argument where of type UserWhereUniqueInput needs at least one argument. Available args are listed in green.
+Argument signature for create.signature is missing.
+Argument name for create.name is missing.
+Argument phone for create.phone is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
