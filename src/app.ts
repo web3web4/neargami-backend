@@ -36,7 +36,7 @@ export class App {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
-   
+
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -59,7 +59,7 @@ export class App {
 
   private initializeMiddlewares() {
     this.app.use(morgan(LOG_FORMAT, { stream }));
-    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    this.app.use(cors({ origin: '*', credentials: CREDENTIALS, allowedHeaders: ['Authorization', 'Content-Type'] }));
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
@@ -83,6 +83,20 @@ export class App {
           version: '1.0.0',
           description: 'Example docs',
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
+          },
+        },
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
       },
       apis: ['swagger.yaml'],
     };
@@ -103,7 +117,7 @@ export class App {
       new winston.transports.Console({ format: winston.format.simple() }), // Also log to console
     ],
   });
- 
+
   private initializeErrorHandling(): void {
     this.app.use(ErrorMiddleware);
     // Global handler for uncaught exceptions

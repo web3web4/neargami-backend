@@ -20,7 +20,7 @@ export class AuthService {
     // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
     const user = await this.users.upsert({
       where: { address: accountId },
-      create: { address: accountId, message, signature, name: publicKey, phone: challenge },
+      create: { address: accountId, message, signature, firstname: publicKey, phone: challenge },
       update: { message, signature },
     });
     return user;
