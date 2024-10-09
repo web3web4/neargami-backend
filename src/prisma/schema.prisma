@@ -31,7 +31,10 @@ model User {
   slug      String?  @db.VarChar(50)
   createdAt   DateTime? @db.Timestamp()
   userCourses UserCoursesMapping[]
+
+   @@map("users")
 }
+
 enum  Status{
   DRAFT
 PENDING_REVIEW
@@ -41,6 +44,7 @@ DEPRECATED
  
 
 }
+
 model Course {
   id             BigInt   @id @default(autoincrement())
   title          String   @db.VarChar(150)
