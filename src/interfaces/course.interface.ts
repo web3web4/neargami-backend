@@ -11,6 +11,11 @@ export interface ICoursewithoutUserId {
   id: bigint;
   title: string;
   publish_status?: Status;
+  name?: string;
+  description?: string;
+  difficulty     ?:string;
+  video          ?:string;
+   logo          ?:string;
   lectures?: ILecture[];
   userCourses?: IUserCoursesMapping[];
 }

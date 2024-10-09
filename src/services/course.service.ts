@@ -11,7 +11,18 @@ export class CourseService {
     const teacher_user_id = createcourseDto.teacher_user_id;
     const title = createcourseDto.icoursewithoutUserId.title;
     const publish_status = createcourseDto.icoursewithoutUserId.publish_status;
-    return this.prisma.course.create({ data: { teacher_user_id: teacher_user_id, title: title, publish_status: publish_status } });
+    return this.prisma.course.create({
+      data: {
+        teacher_user_id: teacher_user_id,
+        title: title,
+        publish_status: publish_status,
+        name: createcourseDto.icoursewithoutUserId.name,
+        description: createcourseDto.icoursewithoutUserId.description,
+        difficulty: createcourseDto.icoursewithoutUserId.difficulty,
+        video: createcourseDto.icoursewithoutUserId.video,
+        logo: createcourseDto.icoursewithoutUserId.logo,
+      },
+    });
   }
 
   public async findAll(id: string): Promise<Course[]> {
