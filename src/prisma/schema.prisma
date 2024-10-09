@@ -1,34 +1,117 @@
-generator client {
-  provider = "prisma-client-js"
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  
+}
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
+            }
 model User {
-  id          Int         @id               @default(autoincrement())
-  address     String      @db.VarChar(255)   @unique
-  message     String      @db.VarChar(255)
-  signature   String      @db.VarChar(255)
-  name        String?     @db.VarChar(50)
-  phone       String?     @db.VarChar(50)
-  linkedin    String?     @db.VarChar(50)
-  score       Int         @default(0)
-  about       String?
-  createdAt   DateTime    @default(now())
-  coursesAsTeacher Course[] @relation("CourseTeacher")
-  coursesAsStudent Course[] @relation("CourseUsers")
-
-  @@map("users")
+ 
+  id        String  @id @default(uuid()) @db.Uuid
+  firstname      String?  @db.VarChar(50)
+  lastname      String?  @db.VarChar(50)
+  address   String  @unique @db.VarChar(255)
+  signature String  @db.VarChar(255)
+  message   String?  @db.VarChar(255)
+  country   String?  @db.VarChar(50)
+  phone     String  @db.VarChar(50)
+  linkedin  String?  @db.VarChar(60)
+  discord  String?  @db.VarChar(60)
+  facebook  String?  @db.VarChar(60)
+  twitter  String?  @db.VarChar(60)
+  score     Int     @default(0)
+  about     String? @db.Text
+  slug      String?  @db.VarChar(50)
+  createdAt   DateTime? @db.Timestamp()
+  userCourses UserCoursesMapping[]
 }
+enum  Status{
+  DRAFT
+PENDING_REVIEW
+REJECTED
+APPROVED
+DEPRECATED
+ 
 
+}
 model Course {
-  id           Int      @id @default(autoincrement())
-  title        String
-  content      String
-  teacherId    Int      
-  teacher      User     @relation("CourseTeacher",fields: [teacherId], references: [id])
-  users        User[]   @relation("CourseUsers")
+  id             BigInt   @id @default(autoincrement())
+  title          String   @db.VarChar(150)
+  teacher_user_id String  @db.Uuid
+  publish_status  Status? 
+  name            String?
+  description     String?  @db.Text
+  difficulty      String?
+  video           String?
+   logo           String?
+  lecture       Lecture[]
+  userCourses    UserCoursesMapping[]
 }
+
+model UserCoursesMapping {
+  id          BigInt   @id @default(autoincrement())
+  start_time  DateTime
+  end_time    DateTime
+  user_id     String @db.Uuid
+  course_id   BigInt
+
+  user      User  @relation(fields: [user_id], references: [id])
+  course     Course @relation(fields: [course_id], references: [id])
+
+  userLecture UserLectureMapping[]
+}
+
+model UserLectureMapping {
+  id                   BigInt   @id @default(autoincrement())
+  lecture_id           BigInt
+  user_courses_mapping_id BigInt
+  start_at             DateTime 
+  end_at               DateTime
+  score                Int      @default(-1)
+
+  userCoursesMapping UserCoursesMapping @relation(fields: [user_courses_mapping_id], references: [id])
+  lecture           Lecture @relation(fields: [lecture_id], references: [id])
+}
+
+
+
+model Lecture {
+  id          BigInt   @id @default(autoincrement())
+  title       String   @db.VarChar(150)
+  description String  @db.Text
+  video_path  String?   @db.VarChar(50)
+  course_id   BigInt
+  pre_note    String?  @db.Text
+  next_note   String?  @db.Text
+  picture     String?  @db.VarChar(60)
+  course     Course @relation(fields: [course_id], references: [id])
+  question   Question[]
+  userLecture UserLectureMapping[]
+}
+
+model Question {
+  id          BigInt   @id @default(autoincrement())
+  description String   @db.Text
+  lecture_id  BigInt
+  sequence    Int?
+  score       Int?
+  lecture    Lecture @relation(fields: [lecture_id], references: [id])
+  answer     Answer[]
+}
+
+model Answer {
+  id          BigInt   @id @default(autoincrement())
+  description String  @db.VarChar(150)
+  is_correct  Boolean 
+  question_id BigInt
+
+  question   Question @relation(fields: [question_id], references: [id])
+}
+

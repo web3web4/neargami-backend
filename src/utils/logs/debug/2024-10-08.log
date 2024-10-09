@@ -1,0 +1,442 @@
+2024-10-08 11:30:40 info: json
+2024-10-08 11:31:30 info: =================================
+2024-10-08 11:31:30 info: ======= ENV: development =======
+2024-10-08 11:31:30 info: 🚀 App listening on the port 3000
+2024-10-08 11:31:30 info: =================================
+2024-10-08 11:31:46 info: json
+2024-10-08 11:32:24 info: json
+2024-10-08 11:32:39 info: json
+2024-10-08 19:12:04 info: =================================
+2024-10-08 19:12:04 info: ======= ENV: development =======
+2024-10-08 19:12:04 info: 🚀 App listening on the port 3000
+2024-10-08 19:12:04 info: =================================
+2024-10-08 19:20:44 info: =================================
+2024-10-08 19:20:44 info: ======= ENV: development =======
+2024-10-08 19:20:44 info: 🚀 App listening on the port 3000
+2024-10-08 19:20:44 info: =================================
+2024-10-08 19:27:26 info: =================================
+2024-10-08 19:27:26 info: ======= ENV: development =======
+2024-10-08 19:27:26 info: 🚀 App listening on the port 3000
+2024-10-08 19:27:26 info: =================================
+2024-10-08 19:29:33 info: =================================
+2024-10-08 19:29:33 info: ======= ENV: development =======
+2024-10-08 19:29:33 info: 🚀 App listening on the port 3000
+2024-10-08 19:29:33 info: =================================
+2024-10-08 19:31:06 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany({
+         select: {
+       ?   id?: true,
+       ?   name?: true,
+       ?   address?: true,
+       ?   message?: true,
+       ?   signature?: true,
+       ?   phone?: true,
+       ?   slug?: true,
+       ?   linkedin?: true,
+       ?   score?: true,
+       ?   about?: true,
+       ?   createdAt?: true,
+           country: true,
+           ~~~~~~~
+           discord: true,
+           ~~~~~~~
+           facebook: true,
+           ~~~~~~~~
+           twitter: true,
+           ~~~~~~~
+       ?   userCourses?: true,
+       ?   _count?: true
+         }
+       })
+
+
+Unknown field `country` for select statement on model User. Available options are listed in green. Did you mean `_count`?
+Unknown field `discord` for select statement on model User. Available options are listed in green. Did you mean `score`?
+Unknown field `facebook` for select statement on model User. Available options are listed in green. Did you mean `about`?
+Unknown field `twitter` for select statement on model User. Available options are listed in green.
+
+2024-10-08 19:31:06 info: json
+2024-10-08 19:33:35 info: =================================
+2024-10-08 19:33:35 info: ======= ENV: development =======
+2024-10-08 19:33:35 info: 🚀 App listening on the port 3000
+2024-10-08 19:33:35 info: =================================
+2024-10-08 19:34:30 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:34:30 info: json
+2024-10-08 19:40:56 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:40:56 info: json
+2024-10-08 19:40:59 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:41:00 info: json
+2024-10-08 19:46:52 info: =================================
+2024-10-08 19:46:52 info: ======= ENV: development =======
+2024-10-08 19:46:52 info: 🚀 App listening on the port 3000
+2024-10-08 19:46:52 info: =================================
+2024-10-08 19:48:32 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:48:32 info: json
+2024-10-08 19:50:24 error: [POST] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.create()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:28:28
+
+  25 
+  26 public async createUser(createUserDto: CreateUserDto): Promise<User> {
+  27   createUserDto.createdAt = new Date();
+→ 28   return this.prismaUser.create({
+         data: {
+           address: 'alyhamerr5454er@gmail.com',
+           signature: 'fefefef',
+           message: 'maybe null',
+           linkedin: 'null',
+           phone: '525325322253425',
+           about: 'null',
+           slug: 'null',
+           createdAt: new Date('2024-10-08T16:50:24.585Z'),
+       +   name: String,
+       ?   id?: String,
+       ?   score?: Int,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         }
+       })
+
+Argument name for data.name is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-08 19:50:24 info: json
+2024-10-08 19:53:56 info: =================================
+2024-10-08 19:53:56 info: ======= ENV: development =======
+2024-10-08 19:53:56 info: 🚀 App listening on the port 3000
+2024-10-08 19:53:56 info: =================================
+2024-10-08 19:54:06 error: [POST] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.create()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:28:28
+
+  25 
+  26 public async createUser(createUserDto: CreateUserDto): Promise<User> {
+  27   createUserDto.createdAt = new Date();
+→ 28   return this.prismaUser.create({
+         data: {
+           address: 'alyhamerr5454er@gmail.com',
+           signature: 'fefefef',
+           message: 'maybe null',
+           linkedin: 'null',
+           phone: '525325322253425',
+           about: 'null',
+           slug: 'null',
+           createdAt: new Date('2024-10-08T16:54:05.999Z'),
+       +   name: String,
+       ?   id?: String,
+       ?   score?: Int,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         }
+       })
+
+Argument name for data.name is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-08 19:54:07 info: json
+2024-10-08 19:54:24 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:54:24 info: json
+2024-10-08 19:54:52 info: json
+2024-10-08 19:54:53 info: json
+2024-10-08 19:54:53 info: json
+2024-10-08 19:54:53 info: json
+2024-10-08 19:54:53 info: json
+2024-10-08 19:54:53 info: json
+2024-10-08 19:55:11 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:55:12 info: json
+2024-10-08 19:57:01 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 19:57:01 info: json
+2024-10-08 20:02:46 info: =================================
+2024-10-08 20:02:47 info: ======= ENV: development =======
+2024-10-08 20:02:47 info: 🚀 App listening on the port 3000
+2024-10-08 20:02:47 info: =================================
+2024-10-08 20:02:53 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:02:53 info: json
+2024-10-08 20:08:34 info: =================================
+2024-10-08 20:08:34 info: ======= ENV: development =======
+2024-10-08 20:08:34 info: 🚀 App listening on the port 3000
+2024-10-08 20:08:34 info: =================================
+2024-10-08 20:08:38 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:53
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:08:38 info: json
+2024-10-08 20:09:16 error: [POST] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.create()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:28:28
+
+  25 
+  26 public async createUser(createUserDto: CreateUserDto): Promise<User> {
+  27   createUserDto.createdAt = new Date();
+→ 28   return this.prismaUser.create({
+         data: {
+           address: 'alyhamerr5454er@gmail.com',
+           signature: 'fefefef',
+           message: 'maybe null',
+           linkedin: 'null',
+           phone: '525325322253425',
+           about: 'null',
+           slug: 'null',
+           createdAt: new Date('2024-10-08T17:09:16.835Z'),
+       +   name: String,
+       ?   id?: String,
+       ?   score?: Int,
+       ?   userCourses?: {
+       ?     create?: UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput | UserCoursesMappingUncheckedCreateWithoutUserInput,
+       ?     connectOrCreate?: UserCoursesMappingCreateOrConnectWithoutUserInput | UserCoursesMappingCreateOrConnectWithoutUserInput,
+       ?     createMany?: UserCoursesMappingCreateManyUserInputEnvelope,
+       ?     connect?: UserCoursesMappingWhereUniqueInput | UserCoursesMappingWhereUniqueInput
+       ?   }
+         }
+       })
+
+Argument name for data.name is missing.
+
+Note: Lines with + are required, lines with ? are optional.
+
+2024-10-08 20:09:17 info: json
+2024-10-08 20:10:35 info: =================================
+2024-10-08 20:10:35 info: ======= ENV: development =======
+2024-10-08 20:10:35 info: 🚀 App listening on the port 3000
+2024-10-08 20:10:35 info: =================================
+2024-10-08 20:11:06 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:52
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<User[]> {
+→ 13   const allUsers: User[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:11:07 info: json
+2024-10-08 20:17:54 info: =================================
+2024-10-08 20:17:54 info: ======= ENV: development =======
+2024-10-08 20:17:54 info: 🚀 App listening on the port 3000
+2024-10-08 20:17:54 info: =================================
+2024-10-08 20:18:26 info: =================================
+2024-10-08 20:18:26 info: ======= ENV: development =======
+2024-10-08 20:18:26 info: 🚀 App listening on the port 3000
+2024-10-08 20:18:26 info: =================================
+2024-10-08 20:18:44 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:52
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<User[]> {
+→ 13   const allUsers: User[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:18:44 info: json
+2024-10-08 20:21:39 info: =================================
+2024-10-08 20:21:39 info: ======= ENV: development =======
+2024-10-08 20:21:39 info: 🚀 App listening on the port 3000
+2024-10-08 20:21:39 info: =================================
+2024-10-08 20:21:46 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:52
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<User[]> {
+→ 13   const allUsers: User[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:21:46 info: json
+2024-10-08 20:23:18 info: =================================
+2024-10-08 20:23:18 info: ======= ENV: development =======
+2024-10-08 20:23:18 info: 🚀 App listening on the port 3000
+2024-10-08 20:23:18 info: =================================
+2024-10-08 20:25:05 info: =================================
+2024-10-08 20:25:05 info: ======= ENV: development =======
+2024-10-08 20:25:05 info: 🚀 App listening on the port 3000
+2024-10-08 20:25:05 info: =================================
+2024-10-08 20:25:18 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prismaUser.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:52
+
+  10 public prismaUser = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<User[]> {
+→ 13   const allUsers: User[] = await this.prismaUser.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:25:19 info: json
+2024-10-08 20:27:59 info: =================================
+2024-10-08 20:27:59 info: ======= ENV: development =======
+2024-10-08 20:27:59 info: 🚀 App listening on the port 3000
+2024-10-08 20:27:59 info: =================================
+2024-10-08 20:28:03 error: [GET] /users >> StatusCode:: 500, Message:: Cannot read properties of undefined (reading 'findMany')
+2024-10-08 20:28:03 info: json
+2024-10-08 20:29:08 info: =================================
+2024-10-08 20:29:08 info: ======= ENV: development =======
+2024-10-08 20:29:08 info: 🚀 App listening on the port 3000
+2024-10-08 20:29:08 info: =================================
+2024-10-08 20:29:13 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prisma_User.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:14:53
+
+  11 prismaUser: any;
+  12 
+  13 public async findAllUser(): Promise<User[]> {
+→ 14   const allUsers: User[] = await this.prisma_User.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:29:13 info: json
+2024-10-08 20:31:02 info: =================================
+2024-10-08 20:31:02 info: ======= ENV: development =======
+2024-10-08 20:31:02 info: 🚀 App listening on the port 3000
+2024-10-08 20:31:02 info: =================================
+2024-10-08 20:31:06 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prisma_User.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:14:54
+
+  11 prismaUser: any;
+  12 
+  13 public async findAllUser(): Promise<IUser[]> {
+→ 14   const allUsers: IUser[] = await this.prisma_User.findMany(
+The column `User.name` does not exist in the current database.
+2024-10-08 20:31:06 info: json
+2024-10-08 20:37:08 info: json
+2024-10-08 20:41:51 info: =================================
+2024-10-08 20:41:51 info: ======= ENV: development =======
+2024-10-08 20:41:52 info: 🚀 App listening on the port 3000
+2024-10-08 20:41:52 info: =================================
+2024-10-08 20:44:06 info: =================================
+2024-10-08 20:44:06 info: ======= ENV: development =======
+2024-10-08 20:44:06 info: 🚀 App listening on the port 3000
+2024-10-08 20:44:06 info: =================================
+2024-10-08 20:44:27 error: [GET] /users >> StatusCode:: 500, Message:: 
+Invalid `this.prisma_User.findMany()` invocation in
+C:\Users\MOSTFA\Desktop\gitLap\gamfi_near_backend\src\services\users.service.ts:13:54
+
+  10 public prisma_User = new PrismaClient().user;
+  11 
+  12 public async findAllUser(): Promise<IUser[]> {
+→ 13   const allUsers: IUser[] = await this.prisma_User.findMany({
+         select: {
+       ?   id?: true,
+           firstname: true,
+           ~~~~~~~~~
+           lastname: true,
+           ~~~~~~~~
+       ?   address?: true,
+       ?   message?: true,
+       ?   signature?: true,
+       ?   phone?: true,
+       ?   slug?: true,
+       ?   linkedin?: true,
+           facebook: true,
+           ~~~~~~~~
+           twitter: true,
+           ~~~~~~~
+           discord: true,
+           ~~~~~~~
+       ?   score?: true,
+       ?   about?: true,
+       ?   createdAt?: true,
+       ?   name?: true,
+       ?   userCourses?: true,
+       ?   _count?: true
+         }
+       })
+
+
+Unknown field `firstname` for select statement on model User. Available options are listed in green. Did you mean `name`?
+Unknown field `lastname` for select statement on model User. Available options are listed in green. Did you mean `name`?
+Unknown field `facebook` for select statement on model User. Available options are listed in green. Did you mean `about`?
+Unknown field `twitter` for select statement on model User. Available options are listed in green.
+Unknown field `discord` for select statement on model User. Available options are listed in green. Did you mean `score`?
+
+2024-10-08 20:44:27 info: json
+2024-10-08 21:11:18 info: =================================
+2024-10-08 21:11:18 info: ======= ENV: development =======
+2024-10-08 21:11:18 info: 🚀 App listening on the port 3000
+2024-10-08 21:11:18 info: =================================
+2024-10-08 21:11:25 info: json
+2024-10-08 21:29:46 info: json
+2024-10-08 23:23:07 info: =================================
+2024-10-08 23:23:07 info: ======= ENV: development =======
+2024-10-08 23:23:08 info: 🚀 App listening on the port 3000
+2024-10-08 23:23:08 info: =================================

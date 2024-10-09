@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 30
+    },
+    "auditLog": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\error\\.56cc71a51d47063987808d770166b8e6af750ea2-audit.json",
+    "files": [
+        {
+            "date": 1728222689553,
+            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\error\\2024-10-06.log",
+            "hash": "844c2d75b314c87d71a0ac9e57834ffe108f7048425732bfb6e7cc34b0fe283c"
+        },
+        {
+            "date": 1728287937548,
+            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\error\\2024-10-07.log",
+            "hash": "3340bc2357b1b29bfca7b817b53e6ba8c6c7d479667d7701ec83c54613c86013"
+        },
+        {
+            "date": 1728376273641,
+            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\error\\2024-10-08.log",
+            "hash": "a7bf30f0a76ee2edd854a879ad5f4f9ce25a62c87a0612b7fb707c34fb0afd90"
+        }
+    ],
+    "hashType": "sha256"
+}

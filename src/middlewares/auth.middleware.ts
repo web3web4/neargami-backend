@@ -5,11 +5,11 @@ import { SECRET_KEY } from '@config';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
 import { HttpException } from '@/exceptions/HttpException';
 
-const getAuthorization = req => {
+const getAuthorization = (req: RequestWithUser) => {
   const coockie = req.cookies['Authorization'];
   if (coockie) return coockie;
 
-  const header = req.header('Authorization');
+  const header = req.headers['authorization'];
   if (header) return header.split('Bearer ')[1];
 
   return null;
@@ -18,11 +18,12 @@ const getAuthorization = req => {
 export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const Authorization = getAuthorization(req);
-
+   
     if (Authorization) {
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
+  
       const users = new PrismaClient().user;
-      const findUser = await users.findUnique({ where: { id: Number(id) } });
+      const findUser = await users.findUnique({ where: { id } });
 
       if (findUser) {
         req.user = findUser;

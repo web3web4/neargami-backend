@@ -1,53 +1,96 @@
 import { NextFunction, Request, Response } from 'express';
-import { Container } from 'typedi';
-import { User } from '@interfaces/users.interface';
+import { Container, Service } from 'typedi';
+import { IUser } from '@/interfaces/user.interface';
 import { UserService } from '@services/users.service';
-import { CreateProfileDto } from '@/dtos/users.dto';
-import { RequestWithUser } from '@/interfaces/auth.interface';
-
+import { validator } from 'validator';
+import { UpdateUserDto } from '@/dtos/users.dto';
+@Service()
 export class UserController {
   public user = Container.get(UserService);
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllUsersData: User[] = await this.user.findAllUser();
+      const findAllUsersData: IUser[] = await this.user.findAllUser();
 
       res.status(200).json({ data: findAllUsersData, message: 'findAll' });
     } catch (error) {
       next(error);
     }
   };
-
-  public getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findOneUserById = async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
     try {
-      const userId = Number(req.params.id);
-      const findOneUserData: User = await this.user.findUserById(userId);
+      const userone = await this.user.findOneById(id);
 
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
+      if (userone) {
+        res
+          .status(200)
+          .send(JSON.stringify({ data: userone, message: 'find one user' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
     } catch (error) {
-      next(error);
+      res.status(400).json({ error: error.message });
     }
   };
 
+  // public getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   try {
+  //     const userId = req.params.id;
+  //     const findOneUserData: IUser = await this.user.findUserById(userId);
+
+  //     res.status(200).json({ data: findOneUserData, message: "findOne" });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
+
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.body;
-      const createUserData: User = await this.user.createUser(userData);
-
+      const userData: IUser = req.body;
+      console.log(userData);
+      const createUserData: IUser = await this.user.createUser(userData);
+      
       res.status(201).json({ data: createUserData, message: 'created' });
     } catch (error) {
       next(error);
     }
   };
 
-  public createProfile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  public findOneByAddress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const createProfileDto: CreateProfileDto = req.body;
-      const createdProfile = await this.user.createProfile(req.user.id, createProfileDto);
-
-      res.status(200).json({ data: createdProfile, message: 'updated' });
+      const address: string = req.params.address;
+      console.log(address);
+      const user = await this.user.findByAddress(address);
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
     } catch (error) {
+      res.status(400).json({ error: error.message });
       next(error);
+    }
+  };
+
+  public updateUser = async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    const data: UpdateUserDto = req.body;
+    try {
+      const user = await this.user.update(id, data);
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  public deleteUser = async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    try {
+      const user = await this.user.deleteUserById(id);
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   };
 
