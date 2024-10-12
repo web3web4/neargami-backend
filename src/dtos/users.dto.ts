@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateUserDto {
   public firstname?: string;
@@ -26,20 +26,42 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto {
-  @MinLength(9)
-  @MaxLength(32)
-  address?: string;
-  signature?: string;
-  message?: string;
-  firstname?: string;
-  lastname?: string;
-  phone?: string;
-  linkedin?: string;
-  score?: number;
-  about?: string;
-  slug?: string;
-  country?: string;
-  discord?: string;
-  facebook?: string;
-  twitter?: string;
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
+  public firstname?: string;
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
+  public lastname?: string;
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
+  public phone?: string;
+  @IsString()
+  @MaxLength(60)
+  @IsOptional()
+  public linkedin?: string;
+  @IsNumber()
+  @IsOptional()
+  public score?: number;
+  @IsString()
+  @IsOptional()
+  public about?: string;
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
+  public country?: string;
+  @IsString()
+  @MaxLength(60)
+  @IsOptional()
+  public discord?: string;
+  @IsString()
+  @MaxLength(60)
+  @IsOptional()
+  public facebook?: string;
+  @IsString()
+  @MaxLength(60)
+  @IsOptional()
+  public twitter?: string;
 }
