@@ -4,6 +4,7 @@ import { IUser } from '@/interfaces/user.interface';
 import { UserService } from '@services/users.service';
 import { validator } from 'validator';
 import { UpdateUserDto } from '@/dtos/users.dto';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 @Service()
 export class UserController {
   public user = Container.get(UserService);
@@ -50,7 +51,7 @@ export class UserController {
       const userData: IUser = req.body;
       console.log(userData);
       const createUserData: IUser = await this.user.createUser(userData);
-      
+
       res.status(201).json({ data: createUserData, message: 'created' });
     } catch (error) {
       next(error);
@@ -73,9 +74,13 @@ export class UserController {
     }
   };
 
-  public updateUser = async (req: Request, res: Response): Promise<void> => {
+  public updateUser = async (req: RequestWithUser, res: Response): Promise<void> => {
     const id: string = req.params.id;
     const data: UpdateUserDto = req.body;
+    const user = req.user;
+    if (user.id !== id) {
+      res.status(401).json({ message: 'Unauthorized' });
+    }
     try {
       const user = await this.user.update(id, data);
       res.status(200).json(user);

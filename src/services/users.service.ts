@@ -7,10 +7,10 @@ import { HttpException } from '@/exceptions/HttpException';
 
 @Service()
 export class UserService {
-  public prisma_User = new PrismaClient().user;
+  public prismaUser = new PrismaClient().user;
 
   public async findAllUser(): Promise<IUser[]> {
-    const allUsers: IUser[] = await this.prisma_User.findMany({
+    const allUsers: IUser[] = await this.prismaUser.findMany({
       select: {
         id: true,
         firstname: true,
@@ -32,7 +32,7 @@ export class UserService {
     return allUsers;
   }
   public async findOneById(uid: string): Promise<User> {
-    return this.prisma_User.findUnique({ where: { id: uid }, include: { userCourses: true } });
+    return this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
   }
   // public async findUserById(userId: string): Promise<IUser> {
   //   const findUser: IUser = await this.prismaUser.findUnique({ where: { id: userId } });
@@ -43,26 +43,26 @@ export class UserService {
 
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
     createUserDto.createdAt = new Date();
-    return this.prisma_User.create({
+    return this.prismaUser.create({
       data: createUserDto,
     });
   }
 
   async findByAddress(address1: string): Promise<IUser | null> {
-    return this.prisma_User.findUnique({ where: { address: `${address1}` }, include: { userCourses: true } });
+    return this.prismaUser.findUnique({ where: { address: `${address1}` }, include: { userCourses: true } });
   }
 
   async update(uid: string, data: UpdateUserDto): Promise<IUser> {
-    return this.prisma_User.update({
-      where: { id: `${uid}` },
+    return await this.prismaUser.update({
+      where: { id: uid },
       data,
     });
   }
   async deleteUserById(uid: string): Promise<IUser> {
-    const findUser: IUser = await this.prisma_User.findUnique({ where: { id: `${uid}` } });
+    const findUser: IUser = await this.prismaUser.findUnique({ where: { id: `${uid}` } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
-    const deleteUserData = await this.prisma_User.delete({ where: { id: `${uid}` } });
+    const deleteUserData = await this.prismaUser.delete({ where: { id: `${uid}` } });
     return deleteUserData;
   }
 }
