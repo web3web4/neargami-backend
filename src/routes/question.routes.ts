@@ -1,7 +1,8 @@
-import { Router } from "express";
-import { QuestionController } from "../controllers/question.controller";
-import { Service, Container } from "typedi";
-import { Routes } from "@/interfaces/routes.interface";
+import { Router } from 'express';
+import { QuestionController } from '../controllers/question.controller';
+import { Service, Container } from 'typedi';
+import { Routes } from '@/interfaces/routes.interface';
+import { AuthMiddleware } from '@/middlewares/auth.middleware';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class QuestionRoute implements Routes {
@@ -13,10 +14,10 @@ export class QuestionRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post("/questions", this.questionController.create);
-    this.router.get("/questions", this.questionController.findAll);
-    this.router.get("/questions/:id", this.questionController.findOne);
-    this.router.put("/questions/:id", this.questionController.update);
-    this.router.delete("/questions/:id", this.questionController.delete);
+    this.router.post('/questions', AuthMiddleware, this.questionController.create);
+    this.router.get('/questions', AuthMiddleware, this.questionController.findAll);
+    this.router.get('/questions/:id', AuthMiddleware, this.questionController.findOne);
+    this.router.put('/questions/:id', AuthMiddleware, this.questionController.update);
+    this.router.delete('/questions/:id', AuthMiddleware, this.questionController.delete);
   }
 }

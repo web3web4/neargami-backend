@@ -1,7 +1,7 @@
-import { Lecture, PrismaClient } from "@prisma/client";
-import { CreateLectureDto, UpdateLectureDto } from "../dtos/lecture.dto";
-import { ILecture } from "../interfaces/lecture.interface";
-import { Service } from "typedi";
+import { Lecture, PrismaClient } from '@prisma/client';
+import { CreateLectureDto, UpdateLectureDto } from '../dtos/lecture.dto';
+import { ILecture } from '../interfaces/lecture.interface';
+import { Service } from 'typedi';
 
 @Service()
 export class LectureService {
@@ -11,7 +11,7 @@ export class LectureService {
   }
 
   async findAll(): Promise<ILecture[]> {
-    return this.prisma.lecture.findMany({ include: { course: true, question: true, userLecture: true } });
+    return this.prisma.lecture.findMany({ where: { deletedAt: null }, include: { course: true, question: true, userLecture: true } });
   }
 
   async findOne(id1: bigint): Promise<ILecture | null> {
@@ -26,6 +26,11 @@ export class LectureService {
   }
 
   async delete(id1: bigint): Promise<ILecture> {
-    return this.prisma.lecture.delete({ where: { id: id1 } });
+    return this.prisma.lecture.update({
+      where: { id: id1 },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 }

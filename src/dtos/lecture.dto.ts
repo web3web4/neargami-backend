@@ -1,5 +1,6 @@
 export class CreateLectureDto {
   title: string;
+  name: string;
   description: string;
   video_path?: string;
   course_id: number;
@@ -10,6 +11,7 @@ export class CreateLectureDto {
 
 export class UpdateLectureDto {
   title?: string;
+  name?: string;
   description?: string;
   video_path?: string;
   course_id?: number;

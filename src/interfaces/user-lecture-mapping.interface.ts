@@ -1,5 +1,5 @@
-import { ILecture } from "./lecture.interface";
-import { IUserCoursesMapping } from "./user-courses-mapping.interface";
+import { ILecture } from './lecture.interface';
+import { IUserCoursesMapping } from './user-courses-mapping.interface';
 
 export interface IUserLectureMapping {
   id: bigint;

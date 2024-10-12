@@ -18,6 +18,7 @@ export class CreateUserDto {
   public slug?: string;
 
   public score: number;
+
   public createdAt: Date;
   country?: string;
   discord?: string;
@@ -27,7 +28,6 @@ export class CreateUserDto {
 
 export class UpdateUserDto {
   @MinLength(9)
-  @MaxLength(32)
   address?: string;
   signature?: string;
   message?: string;
