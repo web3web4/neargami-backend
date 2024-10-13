@@ -18,10 +18,10 @@ const getAuthorization = (req: RequestWithUser) => {
 export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const Authorization = getAuthorization(req);
-   
+
     if (Authorization) {
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
-  
+
       const users = new PrismaClient().user;
       const findUser = await users.findUnique({ where: { id } });
 

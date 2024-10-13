@@ -1,58 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
-import { Inject, Service } from 'typedi';
+import Container, { Inject, Service } from 'typedi';
 import { CourseService } from '../services/course.service';
-import { ICourse, ICoursefull, ICoursewithoutUserId } from '@/interfaces/course.interface';
-import { Status, UpdateCourseDto } from '../dtos/course.dto';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
-import { DataStoredInToken, RequestWithUser } from '@/interfaces/auth.interface';
-import { SECRET_KEY } from '@/config';
-import { verify } from 'jsonwebtoken';
+import { ICoursefull } from '@/interfaces/course.interface';
+import { CreateCourseDto, UpdateCourseDto } from '../dtos/course.dto';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Course } from '@prisma/client';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
-  constructor(@Inject(() => CourseService) private courseService: CourseService) {
-    console.log('CourseController initialized');
-  }
-  public getAuthorization = (req: Request) => {
-    const coockie = req.cookies['Authorization'];
-    if (coockie) return coockie;
+  public courseService = Container.get(CourseService);
 
-    const header = req.headers['authorization'];
-    if (header) return header.split('Bearer ')[1];
-
-    return null;
-  };
-
-  public findAllCourses = async (req: Request, res: Response): Promise<void> => {
+  public findAllCourses = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const Authorization = this.getAuthorization(req);
-      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
-      const findAllCoursesData: ICoursefull[] = await this.courseService.findAll(id);
-      // Convert any BigInt fields to strings
-      const processedCourses = findAllCoursesData.map(course => ({
-        ...course,
-        id: course.id.toString(), // Assuming 'id' is a BigInt field
-      }));
+      const courses: Course[] = await this.courseService.findAll();
 
-      res.status(200).json({ data: processedCourses, message: 'findAll' });
+      res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
+    }
+  };
+  public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
     }
   };
 
-  public createCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const data1: ICoursewithoutUserId = req.body;
+  public createCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const data: CreateCourseDto = req.body;
     try {
-      const Authorization = this.getAuthorization(req);
-      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
-      const data: ICourse = { icoursewithoutUserId: data1, teacher_user_id: id };
-      const createCourse: Course = await this.courseService.createNewCourse(data);
-      // Use custom JSON stringify function to handle BigInt
-      res
-        .status(200)
-        .send(JSON.stringify({ data: createCourse, message: 'created' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
-      //res.status(201).json({ data: createCourse, message: "created" });
+      const { id } = req.user;
+      const createdCourse: Course = await this.courseService.createNewCourse(id, data);
+
+      res.status(201).send({ data: createdCourse, message: 'created' });
     } catch (error) {
       res.status(400).json({ error: error.message });
       next(error);
@@ -60,41 +44,32 @@ export class CourseController {
   };
   public findCourseById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const coursId = BigInt(req.params.id);
-      const findOneCourseData: ICoursefull = await this.courseService.findOne(coursId);
+      const { id } = req.params;
+      const findOneCourseData: Course = await this.courseService.findOne(+id);
 
-      res
-        .status(200)
-        .send(
-          JSON.stringify({ data: findOneCourseData, message: 'findOne' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)),
-        );
+      res.status(200).send({ data: findOneCourseData, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
-  public updateCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = BigInt(req.params.id);
-
+  public updateCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const userId = req.user.id;
     const data: UpdateCourseDto = req.body;
     try {
-      const course = await this.courseService.update(id, data);
-      res
-        .status(200)
-        .send(JSON.stringify({ data: course, message: 'updated' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
+      const course: Course = await this.courseService.update(+id, userId, data);
+      res.status(200).send({ data: course, message: 'updated' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
-  public deleteCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public deleteCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const coursId = BigInt(req.params.id);
-      const findOneCourseData: ICoursefull = await this.courseService.delete(coursId);
+      const { id } = req.params;
+      const userId = req.user.id;
+      const findOneCourseData: Course = await this.courseService.delete(+id, userId);
 
-      res
-        .status(200)
-        .send(
-          JSON.stringify({ data: findOneCourseData, message: 'delete One' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)),
-        );
+      res.status(200).send({ data: findOneCourseData, message: 'delete One' });
     } catch (error) {
       next(error);
     }

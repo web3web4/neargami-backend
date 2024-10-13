@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ICoursewithoutUserId } from '@/interfaces/course.interface';
-import { IsUUID } from 'class-validator';
-
+import { IsEnum, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 
 export enum Status {
   DRAFT = 'DRAFT',
@@ -11,21 +10,36 @@ export enum Status {
   DEPRECATED = 'DEPRECATED',
 }
 export class CreateCourseDto {
-  
-
-  icoursewithoutUserId: ICoursewithoutUserId;
-  @IsUUID()
-  teacher_user_id: string;
-
+  @IsString()
+  @MaxLength(50)
+  public name: string;
+  @IsString()
+  @MaxLength(150)
+  public title: string;
+  @IsString()
+  public logo: string;
+  @IsString()
+  public description: string;
+  @IsString()
+  @MaxLength(10)
+  public difficulty: string;
 }
 
 export class UpdateCourseDto {
-  title?: string;
-  teacher_user_id?: string;
-  publish_status?: Status;
-  name?: string;
-  description?: string;
-  difficulty     ?:string;
-  video          ?:string;
-   logo          ?:string;
+  @IsString()
+  @MaxLength(150)
+  public title?: string;
+  @IsEnum(Status)
+  public publish_status?: Status;
+  @IsString()
+  @MaxLength(50)
+  public name?: string;
+  @IsString()
+  public description?: string;
+  @IsString()
+  public difficulty?: string;
+  @IsString()
+  public video?: string;
+  @IsString()
+  public logo?: string;
 }
