@@ -17,11 +17,12 @@ model User {
   id        String  @id @default(uuid()) @db.Uuid
   firstname      String?  @db.VarChar(50)
   lastname      String?  @db.VarChar(50)
+  email         String? @db.VarChar(50)
   address   String  @unique @db.VarChar(255)
   signature String  @db.VarChar(255)
   message   String?  @db.VarChar(255)
   country   String?  @db.VarChar(50)
-  phone     String  @db.VarChar(50)
+  phone     String?  @db.VarChar(50)
   linkedin  String?  @db.VarChar(60)
   discord  String?  @db.VarChar(60)
   facebook  String?  @db.VarChar(60)
@@ -30,7 +31,7 @@ model User {
   about     String? @db.Text
   slug      String?  @db.VarChar(50)
   createdAt   DateTime? @db.Timestamp()
-
+  image String? 
   userCourses UserCoursesMapping[]
 
 }
@@ -46,7 +47,7 @@ DEPRECATED
 }
 
 model Course {
-  id             BigInt   @id @default(autoincrement())
+  id             Int   @id @default(autoincrement())
   title          String   @db.VarChar(150)
   teacher_user_id String  @db.Uuid
   publish_status  Status? 
@@ -54,17 +55,17 @@ model Course {
   description     String?  @db.Text
   difficulty      String?
   video           String?
-   logo           String?
+  logo           String?
   lecture       Lecture[]
   userCourses    UserCoursesMapping[]
 }
 
 model UserCoursesMapping {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   start_time  DateTime
   end_time    DateTime
   user_id     String @db.Uuid
-  course_id   BigInt
+  course_id   Int
 
   user      User  @relation(fields: [user_id], references: [id])
   course     Course @relation(fields: [course_id], references: [id])
@@ -73,9 +74,9 @@ model UserCoursesMapping {
 }
 
 model UserLectureMapping {
-  id                   BigInt   @id @default(autoincrement())
-  lecture_id           BigInt
-  user_courses_mapping_id BigInt
+  id                   Int   @id @default(autoincrement())
+  lecture_id           Int
+  user_courses_mapping_id Int
   start_at             DateTime 
   end_at               DateTime
   score                Int      @default(-1)
@@ -87,11 +88,11 @@ model UserLectureMapping {
 
 
 model Lecture {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   title       String   @db.VarChar(150)
   description String  @db.Text
   video_path  String?   @db.VarChar(50)
-  course_id   BigInt
+  course_id   Int
   pre_note    String?  @db.Text
   next_note   String?  @db.Text
   picture     String?  @db.VarChar(60)
@@ -101,9 +102,9 @@ model Lecture {
 }
 
 model Question {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   description String   @db.Text
-  lecture_id  BigInt
+  lecture_id  Int
   sequence    Int?
   score       Int?
   lecture    Lecture @relation(fields: [lecture_id], references: [id])
@@ -111,10 +112,10 @@ model Question {
 }
 
 model Answer {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   description String  @db.VarChar(150)
   is_correct  Boolean 
-  question_id BigInt
+  question_id Int
 
   question   Question @relation(fields: [question_id], references: [id])
 }

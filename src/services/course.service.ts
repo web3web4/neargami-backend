@@ -1,47 +1,59 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
-import { ICourse, ICoursefull, ICoursewithoutUserId } from '../interfaces/course.interface';
 import { Service } from 'typedi';
+import { HttpException } from '@/exceptions/HttpException';
 @Service()
 export class CourseService {
-  public prisma = new PrismaClient();
+  public course = new PrismaClient().course;
 
-  public async createNewCourse(createcourseDto: CreateCourseDto): Promise<Course> {
-    // const status: Status = createcourseDto.publish_status;
-    const teacher_user_id = createcourseDto.teacher_user_id;
-    const title = createcourseDto.icoursewithoutUserId.title;
-    const publish_status = createcourseDto.icoursewithoutUserId.publish_status;
-    return this.prisma.course.create({
+  public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
+    return this.course.create({
       data: {
         teacher_user_id: teacher_user_id,
-        title: title,
-        publish_status: publish_status,
-        name: createcourseDto.icoursewithoutUserId.name,
-        description: createcourseDto.icoursewithoutUserId.description,
-        difficulty: createcourseDto.icoursewithoutUserId.difficulty,
-        video: createcourseDto.icoursewithoutUserId.video,
-        logo: createcourseDto.icoursewithoutUserId.logo,
+        publish_status: Status.DRAFT,
+        ...createcourseDto,
       },
     });
   }
-
-  public async findAll(id: string): Promise<Course[]> {
-    const AllCourses: Course[] = await this.prisma.course.findMany({ where: { teacher_user_id: id } });
+  public async findAllTeacherCourses(id: string): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id } });
+    return AllCourses;
+  }
+  public async findAll(): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany();
     return AllCourses;
   }
 
-  async findOne(id: bigint): Promise<ICoursefull | null> {
-    return this.prisma.course.findUnique({ where: { id: id }, include: { lecture: true, userCourses: true } });
+  async findOne(id: number): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id }, include: { lecture: true, userCourses: true } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+    return course;
   }
 
-  async update(id1: bigint, data: UpdateCourseDto): Promise<ICoursefull> {
-    return this.prisma.course.update({
-      where: { id: id1 },
+  async update(id: number, userId: string, data: UpdateCourseDto): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    return this.course.update({
+      where: { id },
       data,
     });
   }
 
-  async delete(id1: bigint): Promise<ICoursefull> {
-    return this.prisma.course.delete({ where: { id: id1 } });
+  async delete(id: number, userId: string): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    return this.course.delete({ where: { id } });
   }
 }

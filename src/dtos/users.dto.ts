@@ -33,6 +33,10 @@ export class UpdateUserDto {
   @IsString()
   @MaxLength(50)
   @IsOptional()
+  public email?: string;
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
   public lastname?: string;
   @IsString()
   @MaxLength(50)
@@ -64,4 +68,7 @@ export class UpdateUserDto {
   @MaxLength(60)
   @IsOptional()
   public twitter?: string;
+  @IsString()
+  @IsOptional()
+  public image?: string;
 }

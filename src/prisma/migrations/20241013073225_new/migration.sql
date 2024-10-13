@@ -6,9 +6,10 @@ CREATE TABLE "User" (
     "id" UUID NOT NULL,
     "firstname" VARCHAR(50),
     "lastname" VARCHAR(50),
-    "address" VARCHAR(50) NOT NULL,
-    "signature" VARCHAR(50) NOT NULL,
-    "message" VARCHAR(50),
+    "email" VARCHAR(50),
+    "address" VARCHAR(255) NOT NULL,
+    "signature" VARCHAR(255) NOT NULL,
+    "message" VARCHAR(255),
     "country" VARCHAR(50),
     "phone" VARCHAR(50) NOT NULL,
     "linkedin" VARCHAR(60),
@@ -25,7 +26,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Course" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" VARCHAR(150) NOT NULL,
     "teacher_user_id" UUID NOT NULL,
     "publish_status" "Status",
@@ -40,20 +41,20 @@ CREATE TABLE "Course" (
 
 -- CreateTable
 CREATE TABLE "UserCoursesMapping" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "start_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "user_id" UUID NOT NULL,
-    "course_id" BIGINT NOT NULL,
+    "course_id" INTEGER NOT NULL,
 
     CONSTRAINT "UserCoursesMapping_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "UserLectureMapping" (
-    "id" BIGSERIAL NOT NULL,
-    "lecture_id" BIGINT NOT NULL,
-    "user_courses_mapping_id" BIGINT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "lecture_id" INTEGER NOT NULL,
+    "user_courses_mapping_id" INTEGER NOT NULL,
     "start_at" TIMESTAMP(3) NOT NULL,
     "end_at" TIMESTAMP(3) NOT NULL,
     "score" INTEGER NOT NULL DEFAULT -1,
@@ -63,11 +64,11 @@ CREATE TABLE "UserLectureMapping" (
 
 -- CreateTable
 CREATE TABLE "Lecture" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" VARCHAR(150) NOT NULL,
     "description" TEXT NOT NULL,
     "video_path" VARCHAR(50),
-    "course_id" BIGINT NOT NULL,
+    "course_id" INTEGER NOT NULL,
     "pre_note" TEXT,
     "next_note" TEXT,
     "picture" VARCHAR(60),
@@ -77,9 +78,9 @@ CREATE TABLE "Lecture" (
 
 -- CreateTable
 CREATE TABLE "Question" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "lecture_id" BIGINT NOT NULL,
+    "lecture_id" INTEGER NOT NULL,
     "sequence" INTEGER,
     "score" INTEGER,
 
@@ -88,10 +89,10 @@ CREATE TABLE "Question" (
 
 -- CreateTable
 CREATE TABLE "Answer" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "description" VARCHAR(150) NOT NULL,
     "is_correct" BOOLEAN NOT NULL,
-    "question_id" BIGINT NOT NULL,
+    "question_id" INTEGER NOT NULL,
 
     CONSTRAINT "Answer_pkey" PRIMARY KEY ("id")
 );
