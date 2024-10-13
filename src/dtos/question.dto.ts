@@ -3,6 +3,7 @@ export class CreateQuestionDto {
   lecture_id: bigint;
   sequence?: number;
   score?: number;
+  createdAt?: Date;
 }
 
 export class UpdateQuestionDto {

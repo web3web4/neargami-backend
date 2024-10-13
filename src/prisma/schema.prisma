@@ -18,6 +18,7 @@ model User {
   firstname      String?  @db.VarChar(50)
   lastname      String?  @db.VarChar(50)
   address   String  @unique @db.VarChar(255)
+   email   String?   @db.VarChar(255)
   signature String  @db.VarChar(255)
   message   String?  @db.VarChar(255)
   country   String?  @db.VarChar(50)
@@ -55,6 +56,8 @@ model Course {
   difficulty      String?
   video           String?
    logo           String?
+   deletedAt   DateTime?
+   createdAt   DateTime?
   lecture       Lecture[]
   userCourses    UserCoursesMapping[]
 }
@@ -89,6 +92,7 @@ model UserLectureMapping {
 model Lecture {
   id          BigInt   @id @default(autoincrement())
   title       String   @db.VarChar(150)
+  name        String? @db.VarChar(150)
   description String  @db.Text
   video_path  String?   @db.VarChar(50)
   course_id   BigInt
@@ -98,6 +102,8 @@ model Lecture {
   course     Course @relation(fields: [course_id], references: [id])
   question   Question[]
   userLecture UserLectureMapping[]
+   createdAt   DateTime?
+  deletedAt  DateTime?
 }
 
 model Question {
@@ -105,7 +111,9 @@ model Question {
   description String   @db.Text
   lecture_id  BigInt
   sequence    Int?
-  score       Int?
+  score       Int     @default(500)
+  deletedAt   DateTime?
+  createdAt   DateTime?
   lecture    Lecture @relation(fields: [lecture_id], references: [id])
   answer     Answer[]
 }

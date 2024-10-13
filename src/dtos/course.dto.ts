@@ -16,6 +16,8 @@ export class CreateCourseDto {
   icoursewithoutUserId: ICoursewithoutUserId;
   @IsUUID()
   teacher_user_id: string;
+  deletedAt?: Date;
+  createdAt?: Date;
 
 }
 
@@ -27,5 +29,6 @@ export class UpdateCourseDto {
   description?: string;
   difficulty     ?:string;
   video          ?:string;
-   logo          ?:string;
+  logo?: string;
+  
 }

@@ -1,6 +1,6 @@
-import { ICourse } from "./course.interface";
-import { IQuestion } from "../interfaces/question.interface";
-import { IUserLectureMapping } from "../interfaces/user-lecture-mapping.interface";
+import { ICourse } from './course.interface';
+import { IQuestion } from '../interfaces/question.interface';
+import { IUserLectureMapping } from '../interfaces/user-lecture-mapping.interface';
 
 export interface ILecture {
   id: bigint;
@@ -11,6 +11,8 @@ export interface ILecture {
   pre_note?: string;
   next_note?: string;
   picture?: string;
+  createdAt?: Date;
+  deletedAt?: Date;
   course: ICourse;
   question: IQuestion[];
   userLecture: IUserLectureMapping[];

@@ -6,6 +6,8 @@ export class CreateLectureDto {
   pre_note?: string;
   next_note?: string;
   picture?: string;
+  createdAt?: Date;
+
 }
 
 export class UpdateLectureDto {

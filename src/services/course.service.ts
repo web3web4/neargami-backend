@@ -8,6 +8,7 @@ export class CourseService {
 
   public async createNewCourse(createcourseDto: CreateCourseDto): Promise<Course> {
     // const status: Status = createcourseDto.publish_status;
+    createcourseDto.createdAt = new Date();
     const teacher_user_id = createcourseDto.teacher_user_id;
     const title = createcourseDto.icoursewithoutUserId.title;
     const publish_status = createcourseDto.icoursewithoutUserId.publish_status;
@@ -21,12 +22,17 @@ export class CourseService {
         difficulty: createcourseDto.icoursewithoutUserId.difficulty,
         video: createcourseDto.icoursewithoutUserId.video,
         logo: createcourseDto.icoursewithoutUserId.logo,
+        createdAt: createcourseDto.createdAt,
       },
     });
   }
 
   public async findAll(id: string): Promise<Course[]> {
-    const AllCourses: Course[] = await this.prisma.course.findMany({ where: { teacher_user_id: id } });
+    const AllCourses: Course[] = await this.prisma.course.findMany({ where: { teacher_user_id: id, deletedAt: null } });
+    return AllCourses;
+  }
+  public async findAllCourses(): Promise<Course[]> {
+    const AllCourses: Course[] = await this.prisma.course.findMany({ where: { deletedAt: null } });
     return AllCourses;
   }
 
@@ -42,6 +48,6 @@ export class CourseService {
   }
 
   async delete(id1: bigint): Promise<ICoursefull> {
-    return this.prisma.course.delete({ where: { id: id1 } });
+    return this.prisma.course.update({ where: { id: id1 }, data: { deletedAt: new Date() } });
   }
 }

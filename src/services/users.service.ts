@@ -7,7 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 
 @Service()
 export class UserService {
-  public prismaUser = new PrismaClient().user;
+  public prismaUser   = new PrismaClient().user;
 
   public async findAllUser(): Promise<IUser[]> {
     const allUsers: IUser[] = await this.prismaUser.findMany({
@@ -15,6 +15,7 @@ export class UserService {
         id: true,
         firstname: true,
         lastname: true,
+        email:true,
         address: true,
         message: true,
         signature: true,

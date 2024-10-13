@@ -15,9 +15,10 @@ export class CourseRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get('/courses', AuthMiddleware, this.courseController.findAllCourses);
+    this.router.get('/courses/me', AuthMiddleware, this.courseController.findMyAllCourses);
+    this.router.get('/courses', this.courseController.findAllCourses);
     this.router.post('/courses', AuthMiddleware, this.courseController.createCourse);
-    this.router.get('/courses/:id', AuthMiddleware, CheckCourseTeacher, this.courseController.findCourseById);
+    this.router.get('/courses/:id', CheckCourseTeacher, this.courseController.findCourseById);
     this.router.put('/courses/:id', AuthMiddleware, CheckCourseTeacher, this.courseController.updateCourse);
     this.router.delete('/courses/:id', AuthMiddleware, CheckCourseTeacher, this.courseController.deleteCourse);
   }

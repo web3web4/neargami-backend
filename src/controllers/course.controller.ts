@@ -24,7 +24,7 @@ export class CourseController {
     return null;
   };
 
-  public findAllCourses = async (req: Request, res: Response): Promise<void> => {
+  public findMyAllCourses = async (req: Request, res: Response): Promise<void> => {
     try {
       const Authorization = this.getAuthorization(req);
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
@@ -40,7 +40,21 @@ export class CourseController {
       res.status(400).json({ error: error.message });
     }
   };
+  public findAllCourses = async (req: Request, res: Response): Promise<void> => {
+    try {
 
+      const findAllCoursesData: ICoursefull[] = await this.courseService.findAllCourses();
+      // Convert any BigInt fields to strings
+      const processedCourses = findAllCoursesData.map(course => ({
+        ...course,
+        id: course.id.toString(), // Assuming 'id' is a BigInt field
+      }));
+
+      res.status(200).json({ data: processedCourses, message: 'findAll' });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
   public createCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const data1: ICoursewithoutUserId = req.body;
     try {

@@ -4,7 +4,7 @@ export class CreateUserDto {
   public firstname?: string;
   public lastname?: string;
   public address: string;
-
+  public email?: string;
   public message?: string;
 
   public signature: string;

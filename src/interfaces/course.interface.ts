@@ -28,7 +28,9 @@ export interface ICoursefull {
   description?: string;
   difficulty     ?:string;
   video          ?:string;
-   logo          ?:string;
+  logo?: string;
+  deletedAt?: Date;
+  createdAt?: Date;
   lectures?: ILecture[];
   userCourses?: IUserCoursesMapping[];
   teacher_user_id: string;
