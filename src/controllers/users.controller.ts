@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { Container, Service } from 'typedi';
 import { IUser } from '@/interfaces/user.interface';
 import { UserService } from '@services/users.service';
-import { validator } from 'validator';
 import { UpdateUserDto } from '@/dtos/users.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 @Service()
