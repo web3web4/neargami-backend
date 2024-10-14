@@ -1,7 +1,10 @@
-import { Router } from "express";
-import { LectureController } from "../controllers/lecture.controller";
-import { Service, Container } from "typedi";
-import { Routes } from "@/interfaces/routes.interface";
+import { Router } from 'express';
+import { LectureController } from '../controllers/lecture.controller';
+import { Service, Container } from 'typedi';
+import { Routes } from '@/interfaces/routes.interface';
+import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { ValidationMiddleware } from '@/middlewares/validation.middleware';
+import { CreateLectureDto, UpdateLectureDto } from '@/dtos/lecture.dto';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class lectureRoute implements Routes {
@@ -13,11 +16,21 @@ export class lectureRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get("/lectures", this.lectureController.findAll);
-    this.router.post("/lectures", this.lectureController.create);
-    this.router.get("/lectures/:id", this.lectureController.findOne);
-    this.router.put("/lectures/:id", this.lectureController.update);
-    this.router.delete("/lectures/:id", this.lectureController.delete);
+    this.router.get('/course/:courseId/lectures', AuthMiddleware, this.lectureController.findAll);
+    this.router.post(
+      '/course/:courseId/lectures',
+      AuthMiddleware,
+      ValidationMiddleware(CreateLectureDto, false, true, true),
+      this.lectureController.create,
+    );
+    this.router.get('/course/:courseId/lectures/:id', AuthMiddleware, this.lectureController.findOne);
+    this.router.put(
+      '/course/:courseId/lectures/:id',
+      AuthMiddleware,
+      ValidationMiddleware(UpdateLectureDto, false, true, true),
+      this.lectureController.update,
+    );
+    this.router.delete('/course/:courseId/lectures/:id', AuthMiddleware, this.lectureController.delete);
   }
 }
 

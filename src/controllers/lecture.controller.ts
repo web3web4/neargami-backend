@@ -1,85 +1,69 @@
-import { NextFunction, Request, Response } from "express";
-import { LectureService } from "../services/lecture.service";
-import { CreateLectureDto, UpdateLectureDto } from "../dtos/lecture.dto";
-import { Inject, Service } from "typedi";
-import { ILecture } from "@/interfaces/lecture.interface";
+import { NextFunction, Request, Response } from 'express';
+import { LectureService } from '../services/lecture.service';
+import { CreateLectureDto, UpdateLectureDto } from '../dtos/lecture.dto';
+import Container, { Service } from 'typedi';
+import { RequestWithUser } from '@/interfaces/auth.interface';
+import { Lecture } from '@prisma/client';
 
 @Service()
 export class LectureController {
-  constructor(@Inject(() => LectureService) private lectureService: LectureService) {
-    console.log("LectureController initialized");
-  }
+  public lectureService = Container.get(LectureService);
 
-  public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const data: CreateLectureDto = req.body;
+  public create = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const createLectureDto: CreateLectureDto = req.body;
+    const { courseId } = req.params;
+    const { id } = req.user;
     try {
-      const lecture = await this.lectureService.create(data);
-      res
-        .status(200)
-        .send(JSON.stringify({ data: lecture, message: "created" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+      const lecture = await this.lectureService.create(id, +courseId, createLectureDto);
+      res.status(201).send({ data: lecture, message: 'created' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  public findAll = async (req: Request, res: Response): Promise<void> => {
+  public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const lectures: ILecture[] = await this.lectureService.findAll();
-      const processedLectures = lectures.map(lecture => ({
-        ...lecture,
-        id: lecture.id.toString(),
+      const { courseId } = req.params;
+      const lectures: Lecture[] = await this.lectureService.findAll(+courseId);
 
-        // Assuming 'id' is a BigInt field
-      }));
-
-      res
-        .status(200)
-        .send(
-          JSON.stringify({ data: processedLectures, message: "findAll" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
-        );
+      res.status(200).send({ data: lectures, message: 'findAll' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
   public findOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = BigInt(req.params.id);
+    const { id } = req.params;
+    const { courseId } = req.params;
     try {
-      const lecture = await this.lectureService.findOne(id);
-      if (lecture) {
-        res
-          .status(200)
-          .send(JSON.stringify({ data: lecture, message: "found" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
-      } else {
-        res.status(404).json({ message: "Lecture not found" });
-      }
+      const lecture: Lecture = await this.lectureService.findOne(+id, +courseId);
+
+      res.status(200).send({ data: lecture, message: 'found' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  public update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = BigInt(req.params.id);
+  public update = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id, courseId } = req.params;
+    const userId = req.user.id;
     const data: UpdateLectureDto = req.body;
     try {
-      const lecture = await this.lectureService.update(id, data);
-      res
-        .status(200)
-        .send(JSON.stringify({ data: lecture, message: "updated" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+      const lecture = await this.lectureService.update(+id, +courseId, userId, data);
+      res.status(200).send({ data: lecture, message: 'updated' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  public delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = BigInt(req.params.id);
+  public delete = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id, courseId } = req.params;
+    const userId = req.user.id;
     try {
-      const lecture = await this.lectureService.delete(id);
-      res
-        .status(200)
-        .send(JSON.stringify({ data: lecture, message: "deleted" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+      const lecture = await this.lectureService.delete(+id, +courseId, userId);
+      res.status(200).send({ data: lecture, message: 'deleted' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 }

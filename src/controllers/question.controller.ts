@@ -1,24 +1,23 @@
-import { Request, Response } from "express";
-import { QuestionService } from "../services/question.service";
-import { CreateQuestionDto, UpdateQuestionDto } from "../dtos/question.dto";
-import { Inject, Service } from "typedi";
-
+import { Request, Response } from 'express';
+import { QuestionService } from '../services/question.service';
+import { CreateQuestionDto, UpdateQuestionDto } from '../dtos/question.dto';
+import Container, { Service } from 'typedi';
+import { RequestWithUser } from '@/interfaces/auth.interface';
+import { Question } from '@prisma/client';
 
 @Service()
 export class QuestionController {
-  constructor(@Inject(() => QuestionService) private questionService: QuestionService) {
-    console.log("QuestionController initialized");
-  }
+  public questionService = Container.get(QuestionService);
 
-  public create = async (req: Request, res: Response): Promise<void> => {
+  public create = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<Question> => {
     const data: CreateQuestionDto = req.body;
+    const { courseId, lectureId } = req.params;
+    const { id } = req.user;
     try {
-      const question = await this.questionService.create(data);
-      res
-        .status(200)
-        .send(JSON.stringify({ data: question, message: "created" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+      const question = await this.questionService.create(+courseId, +lectureId, id, data);
+      res.status(200).send({ data: question, message: 'created' });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
@@ -35,7 +34,7 @@ export class QuestionController {
       res
         .status(200)
         .send(
-          JSON.stringify({ data: processedquestions, message: "findAll" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
+          JSON.stringify({ data: processedquestions, message: 'findAll' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)),
         );
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -49,9 +48,9 @@ export class QuestionController {
       if (question) {
         res
           .status(200)
-          .send(JSON.stringify({ data: question, message: "found" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+          .send(JSON.stringify({ data: question, message: 'found' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
       } else {
-        res.status(404).json({ message: "Question not found" });
+        res.status(404).json({ message: 'Question not found' });
       }
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -65,7 +64,7 @@ export class QuestionController {
       const question = await this.questionService.update(id, data);
       res
         .status(200)
-        .send(JSON.stringify({ data: question, message: "updated" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+        .send(JSON.stringify({ data: question, message: 'updated' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -77,7 +76,7 @@ export class QuestionController {
       const question = await this.questionService.delete(id);
       res
         .status(200)
-        .send(JSON.stringify({ data: question, message: "deleted" }, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
+        .send(JSON.stringify({ data: question, message: 'deleted' }, (key, value) => (typeof value === 'bigint' ? value.toString() : value)));
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

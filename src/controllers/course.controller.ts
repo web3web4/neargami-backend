@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import Container, { Inject, Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { CourseService } from '../services/course.service';
-import { ICoursefull } from '@/interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from '../dtos/course.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Course } from '@prisma/client';

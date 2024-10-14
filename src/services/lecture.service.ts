@@ -1,31 +1,63 @@
-import { Lecture, PrismaClient } from "@prisma/client";
-import { CreateLectureDto, UpdateLectureDto } from "../dtos/lecture.dto";
-import { ILecture } from "../interfaces/lecture.interface";
-import { Service } from "typedi";
+import { Lecture, PrismaClient } from '@prisma/client';
+import { CreateLectureDto, UpdateLectureDto } from '../dtos/lecture.dto';
+import Container, { Service } from 'typedi';
+import { CourseService } from './course.service';
+import { HttpException } from '@/exceptions/HttpException';
+import { LectureWithRelations } from '@/interfaces/lecture.interface';
 
 @Service()
 export class LectureService {
-  public prisma = new PrismaClient();
-  async create(data1: CreateLectureDto): Promise<Lecture> {
-    return this.prisma.lecture.create({ data: data1 });
+  public lecture = new PrismaClient().lecture;
+  public course = Container.get(CourseService);
+  async create(userId: string, course_id: number, createLectureDto: CreateLectureDto): Promise<Lecture> {
+    const course = await this.course.findOne(course_id);
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    return this.lecture.create({ data: { course_id, ...createLectureDto } });
   }
 
-  async findAll(): Promise<ILecture[]> {
-    return this.prisma.lecture.findMany({ include: { course: true, question: true, userLecture: true } });
+  async findAll(course_id: number): Promise<Lecture[]> {
+    await this.course.findOne(course_id);
+
+    return this.lecture.findMany({ where: { course_id }, include: { course: true, question: true, userLecture: true } });
   }
 
-  async findOne(id1: bigint): Promise<ILecture | null> {
-    return this.prisma.lecture.findUnique({ where: { id: id1 }, include: { course: true, question: true, userLecture: true } });
+  async findOne(id: number, course_id: number): Promise<LectureWithRelations> {
+    await this.course.findOne(course_id);
+    const lecture = await this.lecture.findUnique({ where: { id }, include: { course: true, question: true, userLecture: true } });
+    if (!lecture) {
+      throw new HttpException(404, 'Lecture not found');
+    }
+    return lecture;
   }
 
-  async update(id1: bigint, data: UpdateLectureDto): Promise<ILecture> {
-    return this.prisma.lecture.update({
-      where: { id: id1 },
+  async update(id: number, course_id: number, userId: string, data: UpdateLectureDto): Promise<Lecture> {
+    const course = await this.course.findOne(course_id);
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+
+    const lecture = await this.lecture.findUnique({ where: { id } });
+    if (!lecture) {
+      throw new HttpException(404, 'Lecture not found');
+    }
+    return this.lecture.update({
+      where: { id },
       data,
     });
   }
 
-  async delete(id1: bigint): Promise<ILecture> {
-    return this.prisma.lecture.delete({ where: { id: id1 } });
+  async delete(id: number, course_id: number, userId: string): Promise<Lecture> {
+    const course = await this.course.findOne(course_id);
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+
+    const lecture = await this.lecture.findUnique({ where: { id } });
+    if (!lecture) {
+      throw new HttpException(404, 'Lecture not found');
+    }
+    return this.lecture.delete({ where: { id } });
   }
 }

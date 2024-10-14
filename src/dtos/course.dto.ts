@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ICoursewithoutUserId } from '@/interfaces/course.interface';
-import { IsEnum, IsString, IsUUID, Max, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 
 export enum Status {
   DRAFT = 'DRAFT',
@@ -28,18 +28,25 @@ export class CreateCourseDto {
 export class UpdateCourseDto {
   @IsString()
   @MaxLength(150)
+  @IsOptional()
   public title?: string;
+  @IsOptional()
   @IsEnum(Status)
   public publish_status?: Status;
   @IsString()
   @MaxLength(50)
+  @IsOptional()
   public name?: string;
   @IsString()
+  @IsOptional()
   public description?: string;
   @IsString()
+  @IsOptional()
   public difficulty?: string;
   @IsString()
+  @IsOptional()
   public video?: string;
   @IsString()
+  @IsOptional()
   public logo?: string;
 }
