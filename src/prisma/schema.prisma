@@ -118,6 +118,6 @@ model Answer {
   is_correct  Boolean 
   question_id Int
 
-  question   Question @relation(fields: [question_id], references: [id])
+  question   Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }
 

@@ -1,15 +1,17 @@
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsInstance, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CreateAnswerDto } from './answer.dto';
+import { Type } from 'class-transformer';
 
 export class CreateQuestionDto {
   @IsString()
   description: string;
-  @IsString()
-  @IsOptional()
+  @IsNumber()
   sequence?: number;
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(4)
+  @ValidateNested({ each: true })
+  @Type(() => CreateAnswerDto)
   options: CreateAnswerDto[];
 }
 
@@ -17,7 +19,7 @@ export class UpdateQuestionDto {
   @IsString()
   @IsOptional()
   description?: string;
-  @IsString()
+  @IsNumber()
   @IsOptional()
   sequence?: number;
 }
