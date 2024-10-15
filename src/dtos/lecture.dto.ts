@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateLectureDto {
   @IsString()
@@ -6,6 +6,8 @@ export class CreateLectureDto {
   public title: string;
   @IsString()
   public description: string;
+  @IsNumber()
+  public order: number;
   @IsString()
   @IsOptional()
   public video_path?: string;
@@ -28,6 +30,9 @@ export class UpdateLectureDto {
   @IsString()
   @IsOptional()
   description?: string;
+  @IsNumber()
+  @IsOptional()
+  public order?: number;
   @IsString()
   @IsOptional()
   video_path?: string;

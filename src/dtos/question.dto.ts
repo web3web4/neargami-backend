@@ -1,4 +1,5 @@
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString } from 'class-validator';
+import { CreateAnswerDto } from './answer.dto';
 
 export class CreateQuestionDto {
   @IsString()
@@ -6,14 +7,10 @@ export class CreateQuestionDto {
   @IsString()
   @IsOptional()
   sequence?: number;
-  @IsString()
-  @IsOptional()
-  score?: number;
   @IsArray()
-  @IsString({ each: true })
   @ArrayMinSize(2)
   @ArrayMaxSize(4)
-  options: string[];
+  options: CreateAnswerDto[];
 }
 
 export class UpdateQuestionDto {
@@ -23,13 +20,4 @@ export class UpdateQuestionDto {
   @IsString()
   @IsOptional()
   sequence?: number;
-  @IsString()
-  @IsOptional()
-  score?: number;
-  @IsArray()
-  @IsString({ each: true })
-  @ArrayMinSize(2)
-  @ArrayMaxSize(4)
-  @IsOptional()
-  options?: string[];
 }
