@@ -17,19 +17,19 @@ export class QuestionRoute implements Routes {
 
   private initializeRoutes() {
     this.router.post(
-      '/course/:courseId/:lectureId/questions',
+      '/course/:courseId/lecture/:lectureId/questions',
       AuthMiddleware,
       ValidationMiddleware(CreateQuestionDto, false, true, true),
       this.questionController.create,
     );
-    this.router.get('/course/:courseId/:lectureId/questions', AuthMiddleware, this.questionController.findAll);
-    this.router.get('/course/:courseId/:lectureId/questions/:id', AuthMiddleware, this.questionController.findOne);
+    this.router.get('/course/:courseId/lecture/:lectureId/questions', AuthMiddleware, this.questionController.findAll);
+    this.router.get('/course/:courseId/lecture/:lectureId/questions/:id', AuthMiddleware, this.questionController.findOne);
     this.router.put(
-      '/course/:courseId/:lectureId/questions/:id',
+      '/course/:courseId/lecture/:lectureId/questions/:id',
       AuthMiddleware,
       ValidationMiddleware(UpdateQuestionDto, false, true, true),
       this.questionController.update,
     );
-    this.router.delete('/courses/:courseId/:lectureId/questions/:id', AuthMiddleware, this.questionController.delete);
+    this.router.delete('/course/:courseId/lecture/:lectureId/questions/:id', AuthMiddleware, this.questionController.delete);
   }
 }

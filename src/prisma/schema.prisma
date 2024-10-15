@@ -95,6 +95,7 @@ model Lecture {
   course_id   Int
   pre_note    String?  @db.Text
   next_note   String?  @db.Text
+  order       Int    @default(1)
   picture     String?  @db.VarChar(60)
   course     Course @relation(fields: [course_id], references: [id])
   question   Question[]
@@ -106,7 +107,7 @@ model Question {
   description String   @db.Text
   lecture_id  Int
   sequence    Int?
-  score       Int?
+  score       Int?    @default(10)
   lecture    Lecture @relation(fields: [lecture_id], references: [id])
   answer     Answer[]
 }
@@ -117,6 +118,6 @@ model Answer {
   is_correct  Boolean 
   question_id Int
 
-  question   Question @relation(fields: [question_id], references: [id])
+  question   Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }
 
