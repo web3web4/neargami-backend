@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 
 export class CreateLectureDto {
   @IsString()
@@ -45,4 +46,16 @@ export class UpdateLectureDto {
   @IsString()
   @IsOptional()
   picture?: string;
+}
+export class UpdateLectureOrderDto {
+  @IsNumber()
+  id: number;
+  @IsNumber()
+  order: number;
+}
+export class UpdateLectureOrderArrayDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateLectureOrderDto)
+  public orders: UpdateLectureOrderDto[];
 }

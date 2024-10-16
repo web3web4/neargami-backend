@@ -1,5 +1,5 @@
 import { Lecture, PrismaClient } from '@prisma/client';
-import { CreateLectureDto, UpdateLectureDto } from '../dtos/lecture.dto';
+import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { CourseService } from './course.service';
 import { HttpException } from '@/exceptions/HttpException';
@@ -38,7 +38,7 @@ export class LectureService {
       throw new HttpException(403, 'Forbidden');
     }
 
-    const lecture = await this.lecture.findUnique({ where: { id } });
+    const lecture = await this.lecture.findFirst({ where: { AND: { id, course_id } } });
     if (!lecture) {
       throw new HttpException(404, 'Lecture not found');
     }
@@ -46,6 +46,37 @@ export class LectureService {
       where: { id },
       data,
     });
+  }
+  async updateOrders(course_id: number, userId: string, data: UpdateLectureOrderArrayDto): Promise<Lecture[]> {
+    const course = await this.course.findOne(course_id);
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    const lectureIds = data.orders.map(order => order.id); // Extract lecture IDs from the data
+
+    // Check if all lectures exist in one query
+    const lectures = await this.lecture.findMany({
+      where: { id: { in: lectureIds }, course_id },
+    });
+
+    if (lectures.length !== lectureIds.length) {
+      throw new HttpException(404, 'Some lectures not found');
+    }
+
+    // Prepare updates based on the orders
+    const updatePromises = data.orders.map(order => {
+      return this.lecture.update({
+        where: { id: order.id },
+        data: {
+          order: order.order,
+        },
+      });
+    });
+
+    // Execute all updates concurrently
+    const updatedLectures = await Promise.all(updatePromises);
+
+    return updatedLectures;
   }
 
   async delete(id: number, course_id: number, userId: string): Promise<Lecture> {

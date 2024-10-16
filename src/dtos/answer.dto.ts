@@ -1,4 +1,4 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateAnswerDto {
   @IsString()
@@ -8,7 +8,12 @@ export class CreateAnswerDto {
 }
 
 export class UpdateAnswerDto {
+  @IsNumber()
+  id: number;
+  @IsString()
+  @IsOptional()
   description?: string;
+  @IsBoolean()
+  @IsOptional()
   is_correct?: boolean;
-  question_id?: number;
 }
