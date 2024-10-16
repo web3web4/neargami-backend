@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { LectureService } from '../services/lecture.service';
-import { CreateLectureDto, UpdateLectureDto } from '../dtos/lecture.dto';
+import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Lecture } from '@prisma/client';
@@ -51,6 +51,17 @@ export class LectureController {
     try {
       const lecture = await this.lectureService.update(+id, +courseId, userId, data);
       res.status(200).send({ data: lecture, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public updateOrders = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+    const data: UpdateLectureOrderArrayDto = req.body;
+    try {
+      const lectures = await this.lectureService.updateOrders(+courseId, userId, data);
+      res.status(200).send({ data: lectures, message: 'updated' });
     } catch (error) {
       next(error);
     }
