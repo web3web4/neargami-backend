@@ -6,7 +6,7 @@ import { lectureRoute } from './routes/lecture.routes';
 import { QuestionRoute } from './routes/question.routes';
 import { AnswerRoute } from './routes/answer.routes';
 import { UserCoursesMapping } from './routes/user-courses-mapping.routes';
-import { UserLecturesMapping } from './routes/user-lecture-mapping';
+import { UserLecturesMapping } from './routes/user-lecture-mapping.routes';
 import { AuthRoute } from './routes/auth.route';
 ValidateEnv();
 

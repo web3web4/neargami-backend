@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "UserCoursesMapping" ALTER COLUMN "start_time" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "end_time" DROP NOT NULL;

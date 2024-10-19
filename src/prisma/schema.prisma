@@ -5,119 +5,135 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider      = "prisma-client-js"
-  
+  provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-            }
-model User {
- 
-  id        String  @id @default(uuid()) @db.Uuid
-  firstname      String?  @db.VarChar(50)
-  lastname      String?  @db.VarChar(50)
-  email         String? @db.VarChar(50)
-  address   String  @unique @db.VarChar(255)
-  signature String  @db.VarChar(255)
-  message   String?  @db.VarChar(255)
-  country   String?  @db.VarChar(50)
-  phone     String?  @db.VarChar(50)
-  linkedin  String?  @db.VarChar(60)
-  discord  String?  @db.VarChar(60)
-  facebook  String?  @db.VarChar(60)
-  twitter  String?  @db.VarChar(60)
-  score     Int     @default(0)
-  about     String? @db.Text
-  slug      String?  @db.VarChar(50)
-  createdAt   DateTime? @db.Timestamp()
-  image String? 
-  userCourses UserCoursesMapping[]
-
 }
 
-enum  Status{
-  DRAFT
-PENDING_REVIEW
-REJECTED
-APPROVED
-DEPRECATED
- 
+model User {
+  id                 String               @id @default(uuid()) @db.Uuid
+  firstname          String?              @db.VarChar(50)
+  lastname           String?              @db.VarChar(50)
+  email              String?              @db.VarChar(50)
+  address            String               @unique @db.VarChar(255)
+  signature          String               @db.VarChar(255)
+  message            String?              @db.VarChar(255)
+  country            String?              @db.VarChar(50)
+  phone              String?              @db.VarChar(50)
+  linkedin           String?              @db.VarChar(60)
+  discord            String?              @db.VarChar(60)
+  facebook           String?              @db.VarChar(60)
+  twitter            String?              @db.VarChar(60)
+  score              Int                  @default(0)
+  about              String?              @db.Text
+  slug               String?              @db.VarChar(50)
+  createdAt          DateTime?            @db.Timestamp()
+  image              String?
+  userCourses        UserCoursesMapping[]
+  userLecture        UserLectureMapping[]
+  UserQuestionAnswer UserQuestionAnswer[]
+}
 
+enum Status {
+  DRAFT
+  PENDING_REVIEW
+  REJECTED
+  APPROVED
+  DEPRECATED
 }
 
 model Course {
-  id             Int   @id @default(autoincrement())
-  title          String   @db.VarChar(150)
-  teacher_user_id String  @db.Uuid
-  publish_status  Status? 
-  name            String?
-  description     String?  @db.Text
-  difficulty      String?
-  video           String?
-  logo           String?
-  lecture       Lecture[]
-  userCourses    UserCoursesMapping[]
+  id                 Int                  @id @default(autoincrement())
+  title              String               @db.VarChar(150)
+  teacher_user_id    String               @db.Uuid
+  publish_status     Status?
+  name               String?
+  description        String?              @db.Text
+  difficulty         String?
+  video              String?
+  logo               String?
+  lecture            Lecture[]
+  userCourses        UserCoursesMapping[]
+  UserQuestionAnswer UserQuestionAnswer[]
+  UserLectureMapping UserLectureMapping[]
 }
 
 model UserCoursesMapping {
-  id          Int   @id @default(autoincrement())
-  start_time  DateTime
-  end_time    DateTime
-  user_id     String @db.Uuid
-  course_id   Int
+  id         Int       @id @default(autoincrement())
+  start_time DateTime  @default(now())
+  end_time   DateTime?
+  user_id    String    @db.Uuid
+  course_id  Int
 
-  user      User  @relation(fields: [user_id], references: [id])
-  course     Course @relation(fields: [course_id], references: [id])
-
-  userLecture UserLectureMapping[]
+  user   User   @relation(fields: [user_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id])
 }
 
 model UserLectureMapping {
-  id                   Int   @id @default(autoincrement())
-  lecture_id           Int
-  user_courses_mapping_id Int
-  start_at             DateTime 
-  end_at               DateTime
-  score                Int      @default(-1)
+  id         Int       @id @default(autoincrement())
+  lecture_id Int
+  user_id    String    @db.Uuid
+  course_id  Int
+  start_at   DateTime  @default(now())
+  end_at     DateTime?
+  score      Int       @default(0)
 
-  userCoursesMapping UserCoursesMapping @relation(fields: [user_courses_mapping_id], references: [id])
-  lecture           Lecture @relation(fields: [lecture_id], references: [id])
+  course  Course  @relation(fields: [course_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+  lecture Lecture @relation(fields: [lecture_id], references: [id])
 }
 
-
-
 model Lecture {
-  id          Int   @id @default(autoincrement())
-  title       String   @db.VarChar(150)
-  description String  @db.Text
-  video_path  String?   @db.VarChar(50)
-  course_id   Int
-  pre_note    String?  @db.Text
-  next_note   String?  @db.Text
-  order       Int    @default(1)
-  picture     String?  @db.VarChar(60)
-  course     Course @relation(fields: [course_id], references: [id])
-  question   Question[]
-  userLecture UserLectureMapping[]
+  id                 Int                  @id @default(autoincrement())
+  title              String               @db.VarChar(150)
+  description        String               @db.Text
+  video_path         String?              @db.VarChar(50)
+  course_id          Int
+  pre_note           String?              @db.Text
+  next_note          String?              @db.Text
+  order              Int                  @default(1)
+  picture            String?              @db.VarChar(60)
+  course             Course               @relation(fields: [course_id], references: [id])
+  question           Question[]
+  userLecture        UserLectureMapping[]
+  UserQuestionAnswer UserQuestionAnswer[]
 }
 
 model Question {
-  id          Int   @id @default(autoincrement())
-  description String   @db.Text
-  lecture_id  Int
-  sequence    Int?
-  score       Int?    @default(10)
-  lecture    Lecture @relation(fields: [lecture_id], references: [id])
-  answer     Answer[]
+  id                 Int                  @id @default(autoincrement())
+  description        String               @db.Text
+  lecture_id         Int
+  sequence           Int?
+  score              Int?                 @default(10)
+  lecture            Lecture              @relation(fields: [lecture_id], references: [id])
+  answer             Answer[]
+  UserQuestionAnswer UserQuestionAnswer[]
 }
 
 model Answer {
-  id          Int   @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   description String  @db.VarChar(150)
-  is_correct  Boolean 
+  is_correct  Boolean
   question_id Int
 
-  question   Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  question           Question             @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  UserQuestionAnswer UserQuestionAnswer[]
 }
 
+model UserQuestionAnswer {
+  id          Int    @id @default(autoincrement())
+  student_id  String @db.Uuid
+  course_id   Int
+  lecture_id  Int
+  question_id Int
+  answer_id   Int
+
+  user     User     @relation(fields: [student_id], references: [id])
+  course   Course   @relation(fields: [course_id], references: [id])
+  lecture  Lecture  @relation(fields: [lecture_id], references: [id])
+  question Question @relation(fields: [question_id], references: [id])
+  answer   Answer   @relation(fields: [answer_id], references: [id])
+}

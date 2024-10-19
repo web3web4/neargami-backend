@@ -1,7 +1,8 @@
-import { Router } from "express";
-import { UserCoursesMappingController } from "../controllers/user-courses-mapping.controller";
-import { Service, Container } from "typedi";
-import { Routes } from "@/interfaces/routes.interface";
+import { Router } from 'express';
+import { UserCoursesMappingController } from '../controllers/user-courses-mapping.controller';
+import { Service, Container } from 'typedi';
+import { Routes } from '@/interfaces/routes.interface';
+import { AuthMiddleware } from '@/middlewares/auth.middleware';
 
 @Service()
 export class UserCoursesMapping implements Routes {
@@ -13,10 +14,10 @@ export class UserCoursesMapping implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post("/user-courses-mappings", this.userCoursesMappingController.create);
-    this.router.get("/user-courses-mappings", this.userCoursesMappingController.findAll);
-    this.router.get("/user-courses-mappings/:id", this.userCoursesMappingController.findOne);
-    this.router.put("/user-courses-mappings/:id", this.userCoursesMappingController.update);
-    this.router.delete("/user-courses-mappings/:id", this.userCoursesMappingController.delete);
+    this.router.get('/user-courses/', AuthMiddleware, this.userCoursesMappingController.findAll);
+    this.router.post('/user-courses/start/:id', AuthMiddleware, this.userCoursesMappingController.register);
+    // this.router.get('/user-courses-mappings/:id', AuthMiddleware, this.userCoursesMappingController.findOne);
+    // this.router.put('/user-courses-mappings/:id', AuthMiddleware, this.userCoursesMappingController.update);
+    // this.router.delete('/user-courses-mappings/:id', AuthMiddleware, this.userCoursesMappingController.delete);
   }
 }
