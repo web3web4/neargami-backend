@@ -17,7 +17,6 @@ export class CreateUserDto {
 
   public slug?: string;
 
-  public score: number;
   public createdAt: Date;
   country?: string;
   discord?: string;
@@ -46,9 +45,6 @@ export class UpdateUserDto {
   @MaxLength(60)
   @IsOptional()
   public linkedin?: string;
-  @IsNumber()
-  @IsOptional()
-  public score?: number;
   @IsString()
   @IsOptional()
   public about?: string;

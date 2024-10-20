@@ -1,8 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { UserLectureMappingService } from '../services/user-lecture-mapping.service';
-import { CreateUserLectureMappingDto, UpdateUserLectureMappingDto } from '../dtos/user-lecture-mapping.dto';
-import Container, { Inject, Service } from 'typedi';
-import { IUserLectureMapping } from '@/interfaces/user-lecture-mapping.interface';
+import Container, { Service } from 'typedi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { UserLectureMapping } from '@prisma/client';
 
@@ -32,7 +30,29 @@ export class UserLectureMappingController {
       next(error);
     }
   };
+  public answer = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { courseId, lectureId, questionId } = req.params;
+    const { id: userId } = req.user;
+    const { answerId } = req.body;
+    try {
+      const userCreateLectures: boolean = await this.userLectureMappingService.answer(userId, +courseId, +lectureId, +questionId, +answerId);
 
+      res.status(200).send({ data: userCreateLectures, message: 'answered' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public finish = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { courseId, id } = req.params;
+    const { id: userId } = req.user;
+    try {
+      const userCreateLectures: UserLectureMapping = await this.userLectureMappingService.finish(userId, +courseId, +id);
+
+      res.status(200).send({ data: userCreateLectures, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
   // public findOne = async (req: Request, res: Response, next: Function): Promise<void> => {
   //   const id = BigInt(req.params.id);
   //   try {

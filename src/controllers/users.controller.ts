@@ -98,26 +98,25 @@ export class UserController {
     }
   };
 
-  // public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const userId = Number(req.params.id);
-  //     const userData: User = req.body;
-  //     const updateUserData: User = await this.user.updateUser(userId, userData);
+  public updateGame = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { game, pointsUsed } = req.body;
+    const { id } = req.params;
+    const { id: userId } = req.user;
+    try {
+      const user = await this.user.updateGame(id, userId, game, pointsUsed);
 
-  //     res.status(200).json({ data: updateUserData, message: 'updated' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
-
-  // public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const userId = Number(req.params.id);
-  //     const deleteUserData: User = await this.user.deleteUser(userId);
-
-  //     res.status(200).json({ data: deleteUserData, message: 'deleted' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
+      res.status(200).json({ data: user, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public getGame = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    try {
+      const user = await this.user.getUserGame(id);
+      res.status(200).json({ data: user, message: 'found' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

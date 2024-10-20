@@ -30,6 +30,17 @@ export class UserCoursesMappingController {
     }
   };
 
+  public finsih = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { id: userId } = req.user;
+      const userCoursesMappings = await this.userCoursesMappingService.finish(userId, +id);
+      res.status(200).send({ data: userCoursesMappings, message: 'finsih' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // public findOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   const { id } = req.params;
   //   try {
