@@ -16,11 +16,11 @@ export class CourseService {
     });
   }
   public async findAllTeacherCourses(id: string): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id } });
+    const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
     return AllCourses;
   }
   public async findAll(): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany();
+    const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;
   }
 

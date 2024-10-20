@@ -5,8 +5,6 @@ import { Type } from 'class-transformer';
 export class CreateQuestionDto {
   @IsString()
   description: string;
-  @IsNumber()
-  sequence?: number;
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(4)
@@ -19,9 +17,6 @@ export class UpdateQuestionDto {
   @IsString()
   @IsOptional()
   description?: string;
-  @IsNumber()
-  @IsOptional()
-  sequence?: number;
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(4)

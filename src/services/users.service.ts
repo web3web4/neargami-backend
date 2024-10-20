@@ -9,6 +9,11 @@ import { HttpException } from '@/exceptions/HttpException';
 export class UserService {
   public prismaUser = new PrismaClient().user;
 
+  public isValidUUID(uuid: string): boolean {
+    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return regex.test(uuid);
+  }
+
   public async findAllUser(): Promise<IUser[]> {
     const allUsers: IUser[] = await this.prismaUser.findMany({
       select: {
@@ -32,14 +37,18 @@ export class UserService {
     return allUsers;
   }
   public async findOneById(uid: string): Promise<User> {
-    return this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
+    if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
+    const user = this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
+    if (!user) throw new HttpException(404, "User doesn't exist");
+    return user;
   }
-  // public async findUserById(userId: string): Promise<IUser> {
-  //   const findUser: IUser = await this.prismaUser.findUnique({ where: { id: userId } });
-  //   if (!findUser) throw new HttpException(409, "User doesn't exist");
 
-  //   return findUser;
-  // }
+  public async getUserGame(id: string): Promise<any> {
+    if (!this.isValidUUID(id)) throw new HttpException(400, 'Invalid UUID');
+    const game = this.prismaUser.findUnique({ where: { id }, select: { id: true, score: true, game: true } });
+    if (!game) throw new HttpException(404, "User doesn't exist");
+    return game;
+  }
 
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
     createUserDto.createdAt = new Date();
@@ -64,6 +73,18 @@ export class UserService {
 
     const deleteUserData = await this.prismaUser.delete({ where: { id: `${uid}` } });
     return deleteUserData;
+  }
+
+  async updateGame(id: string, userId: string, game: Record<string, any>, pointsUsed: number): Promise<User> {
+    const user = await this.findOneById(id);
+    if (user.id !== userId) throw new HttpException(403, 'Forbidden');
+    if (pointsUsed < 0) throw new HttpException(400, 'Bad Reqeust');
+    if (user.score - pointsUsed < 0) throw new HttpException(400, 'Not enough points');
+    const newScore = user.score - pointsUsed;
+    return this.prismaUser.update({
+      where: { id },
+      data: { game, score: newScore },
+    });
   }
 }
 

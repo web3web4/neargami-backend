@@ -14,12 +14,17 @@ export class QuestionService {
       throw new HttpException(403, 'Forbidden');
     }
     const { options, ...data } = createQuestionDto;
-    return this.prisma.question.create({ data: { ...data, lecture_id, answer: { createMany: { data: options } } } });
+    return this.prisma.question.create({
+      data: { ...data, sequence: Math.floor(Math.random() * 1000), lecture_id, answer: { createMany: { data: options } } },
+    });
   }
 
   async findAll(course_id: number, lecture_id: number): Promise<Question[]> {
     await this.lecture.findOne(lecture_id, course_id);
-    return this.prisma.question.findMany({ where: { lecture_id }, include: { lecture: true, answer: true } });
+    return this.prisma.question.findMany({
+      where: { lecture_id },
+      include: { lecture: { include: { course: { select: { logo: true } } } }, answer: { omit: { is_correct: true } } },
+    });
   }
 
   async findOne(course_id: number, lecture_id: number, id: number): Promise<Question> {

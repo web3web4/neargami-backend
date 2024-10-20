@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -32,9 +33,11 @@ model User {
   slug               String?              @db.VarChar(50)
   createdAt          DateTime?            @db.Timestamp()
   image              String?
+  game               Json?                @db.JsonB
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
+  Course             Course[]
 }
 
 enum Status {
@@ -56,6 +59,7 @@ model Course {
   video              String?
   logo               String?
   lecture            Lecture[]
+  teacher            User                 @relation(fields: [teacher_user_id], references: [id])
   userCourses        UserCoursesMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   UserLectureMapping UserLectureMapping[]
