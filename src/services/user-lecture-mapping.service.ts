@@ -25,7 +25,7 @@ export class UserLectureMappingService {
 
     return this.prisma.userLectureMapping.create({ data: { user_id, lecture_id, course_id }, include: { lecture: true } });
   }
-  async answer(user_id: string, course_id: number, lecture_id: number, question_id: number, answer_id: number): Promise<boolean> {
+  async answer(user_id: string, course_id: number, lecture_id: number, question_id: number, answer_id: number): Promise<any> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
     if (lecture.course.teacher_user_id === user_id) {
       throw new HttpException(409, 'You are the teacher of this course');
@@ -43,11 +43,40 @@ export class UserLectureMappingService {
       throw new HttpException(404, 'Question not found');
     }
     const answer = await this.prisma.answer.findFirst({ where: { AND: { id: answer_id, question_id } } });
+    const correctAnswers = await this.prisma.answer.findMany({ where: { AND: { question_id, is_correct: true } } });
     if (!answer) {
       throw new HttpException(404, 'Answer not found');
     }
     await this.prisma.userQuestionAnswer.create({ data: { student_id: user_id, course_id, lecture_id, question_id, answer_id } });
-    return answer.is_correct;
+    return { correctAnswers, is_correct: answer.is_correct };
+  }
+  async answerMany(user_id: string, course_id: number, lecture_id: number, question_id: number, answer_ids: number[]): Promise<any> {
+    const lecture = await this.lecture.findOne(lecture_id, course_id);
+    if (lecture.course.teacher_user_id === user_id) {
+      throw new HttpException(409, 'You are the teacher of this course');
+    }
+    const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
+    if (!userCoures) {
+      throw new HttpException(409, 'Course not registered');
+    }
+    const userLecture = await this.prisma.userLectureMapping.findFirst({ where: { AND: { user_id, lecture_id, course_id } } });
+    if (!userLecture) {
+      throw new HttpException(409, 'Lecture not registered');
+    }
+    const question = await this.prisma.question.findFirst({ where: { AND: { id: question_id, lecture_id } } });
+    if (!question) {
+      throw new HttpException(404, 'Question not found');
+    }
+    const correctAnswers = await this.prisma.answer.findMany({ where: { AND: { question_id, is_correct: true } } });
+    for (const answer_id of answer_ids) {
+      if (!correctAnswers.some(correctAnswer => correctAnswer.id === answer_id)) {
+        throw new HttpException(404, 'Answer not found');
+      }
+    }
+    const data = answer_ids.map(answer_id => ({ student_id: user_id, course_id, lecture_id, question_id, answer_id }));
+    await this.prisma.userQuestionAnswer.createMany({ data });
+
+    return { correctAnswers };
   }
   async finish(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
