@@ -21,10 +21,11 @@ export class LectureController {
     }
   };
 
-  public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;
-      const lectures: Lecture[] = await this.lectureService.findAll(+courseId);
+      const { id: userId } = req.user;
+      const lectures: Lecture[] = await this.lectureService.findAll(userId, +courseId);
 
       res.status(200).send({ data: lectures, message: 'findAll' });
     } catch (error) {
