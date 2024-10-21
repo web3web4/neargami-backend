@@ -35,7 +35,7 @@ export class UserLectureMappingController {
     const { id: userId } = req.user;
     const { answerId } = req.body;
     try {
-      const userCreateLectures: boolean = await this.userLectureMappingService.answer(userId, +courseId, +lectureId, +questionId, +answerId);
+      const userCreateLectures: boolean = await this.userLectureMappingService.answerMany(userId, +courseId, +lectureId, +questionId, answerId);
 
       res.status(200).send({ data: userCreateLectures, message: 'answered' });
     } catch (error) {
