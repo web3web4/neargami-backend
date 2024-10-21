@@ -11,7 +11,7 @@ export class UserLectureMappingService {
   public lecture = Container.get(LectureService);
   async register(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
-    if (lecture.course.teacher_user_id !== user_id) {
+    if (lecture.course.teacher_user_id === user_id) {
       throw new HttpException(409, 'You are the teacher of this course');
     }
     const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
@@ -51,7 +51,7 @@ export class UserLectureMappingService {
   }
   async finish(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
-    if (lecture.course.teacher_user_id !== user_id) {
+    if (lecture.course.teacher_user_id === user_id) {
       throw new HttpException(409, 'You are the teacher of this course');
     }
     const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
