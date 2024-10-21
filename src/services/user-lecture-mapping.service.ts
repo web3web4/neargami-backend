@@ -27,7 +27,7 @@ export class UserLectureMappingService {
   }
   async answer(user_id: string, course_id: number, lecture_id: number, question_id: number, answer_id: number): Promise<boolean> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
-    if (lecture.course.teacher_user_id !== user_id) {
+    if (lecture.course.teacher_user_id === user_id) {
       throw new HttpException(409, 'You are the teacher of this course');
     }
     const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });

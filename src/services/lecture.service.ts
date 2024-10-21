@@ -17,10 +17,17 @@ export class LectureService {
     return this.lecture.create({ data: { course_id, ...createLectureDto } });
   }
 
-  async findAll(course_id: number): Promise<Lecture[]> {
+  async findAll(user_id: string, course_id: number): Promise<Lecture[]> {
     await this.course.findOne(course_id);
 
-    return this.lecture.findMany({ where: { course_id }, include: { course: true, question: true, userLecture: true } });
+    return this.lecture.findMany({
+      where: { course_id },
+      include: {
+        course: { include: { teacher: { select: { id: true, firstname: true, lastname: true, image: true } } } },
+        question: true,
+        userLecture: { where: { user_id }, select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+      },
+    });
   }
 
   async findOne(id: number, course_id: number): Promise<LectureWithRelations> {
