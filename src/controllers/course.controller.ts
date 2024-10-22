@@ -72,6 +72,17 @@ export class CourseController {
       next(error);
     }
   };
+  public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const publish_status: Status = req.body.publish_status;
+    try {
+      const course: Course = await this.courseService.updateStatus(+id, userId, publish_status);
+      res.status(200).send({ data: course, message: 'status updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
   public deleteCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
