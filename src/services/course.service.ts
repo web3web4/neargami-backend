@@ -19,6 +19,10 @@ export class CourseService {
     const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
     return AllCourses;
   }
+  public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({ where: { publish_status: id }, include: { lecture: true, teacher: true } });
+    return AllCourses;
+  }
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;
@@ -43,6 +47,20 @@ export class CourseService {
     return this.course.update({
       where: { id },
       data,
+    });
+  }
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+    
+    if (isAdmin ==false) {
+      throw new HttpException(403, 'this user is not admin to update status');
+    }
+    return this.course.update({
+      where: { id },
+      data: {publish_status:publish_status,},
     });
   }
 

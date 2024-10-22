@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Container, { Service } from 'typedi';
 import { CourseService } from '../services/course.service';
-import { CreateCourseDto, UpdateCourseDto } from '../dtos/course.dto';
+import { CreateCourseDto, Status, UpdateCourseDto } from '../dtos/course.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Course } from '@prisma/client';
 
@@ -22,6 +22,16 @@ export class CourseController {
     try {
       const { id } = req.params;
       const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
 
       res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
@@ -58,6 +68,18 @@ export class CourseController {
     try {
       const course: Course = await this.courseService.update(+id, userId, data);
       res.status(200).send({ data: course, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const isAdmin = req.user.isAdmin;
+    
+    const publish_status: Status = req.body.publish_status;
+    try {
+      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status);
+      res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
       next(error);
     }
