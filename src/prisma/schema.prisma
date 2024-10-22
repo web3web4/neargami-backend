@@ -34,6 +34,7 @@ model User {
   createdAt          DateTime?            @db.Timestamp()
   image              String?
   game               Json?                @db.JsonB
+  isAdmin            Boolean              @default(false)
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]

@@ -67,6 +67,12 @@ export class UserService {
       data,
     });
   }
+  async userToAddmin(uid: string): Promise<IUser> {
+    return await this.prismaUser.update({
+      where: { id: uid },
+      data:{isAdmin:true,},
+    });
+  }
   async deleteUserById(uid: string): Promise<IUser> {
     const findUser: IUser = await this.prismaUser.findUnique({ where: { id: `${uid}` } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");

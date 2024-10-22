@@ -49,13 +49,14 @@ export class CourseService {
       data,
     });
   }
-  async updateStatus(id: number, userId: string, publish_status: Status): Promise<Course> {
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
-    if (course.teacher_user_id !== userId) {
-      throw new HttpException(403, 'Forbidden');
+    
+    if (isAdmin ==false) {
+      throw new HttpException(403, 'this user is not admin to update status');
     }
     return this.course.update({
       where: { id },

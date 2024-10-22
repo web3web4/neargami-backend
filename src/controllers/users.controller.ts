@@ -87,6 +87,20 @@ export class UserController {
       res.status(400).json({ error: error.message });
     }
   };
+  public makeUserAddmin = async (req: RequestWithUser, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+   // const isAddmin: boolean = req.body.isAddmin;
+    const user = req.user;
+    if (user.id !== id) {
+      res.status(401).json({ message: 'Unauthorized' });
+    }
+    try {
+      const user = await this.user.userToAddmin(id);
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
 
   public deleteUser = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;

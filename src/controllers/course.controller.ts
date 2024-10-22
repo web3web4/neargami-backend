@@ -74,10 +74,11 @@ export class CourseController {
   };
   public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const userId = req.user.id;
+    const isAdmin = req.user.isAdmin;
+    
     const publish_status: Status = req.body.publish_status;
     try {
-      const course: Course = await this.courseService.updateStatus(+id, userId, publish_status);
+      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status);
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
       next(error);
