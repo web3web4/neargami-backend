@@ -49,6 +49,19 @@ export class CourseService {
       data,
     });
   }
+  async updateStatus(id: number, userId: string, publish_status: Status): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+    if (course.teacher_user_id !== userId) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    return this.course.update({
+      where: { id },
+      data: {publish_status:publish_status,},
+    });
+  }
 
   async delete(id: number, userId: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
