@@ -19,6 +19,10 @@ export class CourseService {
     const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
     return AllCourses;
   }
+  public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({ where: { publish_status: id }, include: { lecture: true, teacher: true } });
+    return AllCourses;
+  }
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;
