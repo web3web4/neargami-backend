@@ -77,8 +77,10 @@ export class CourseController {
     const isAdmin = req.user.isAdmin;
     
     const publish_status: Status = req.body.publish_status;
+    const publish_status_reson: string = req.body.publish_status_reson;
     try {
-      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status);
+      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status, publish_status_reson);
+
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
       next(error);
