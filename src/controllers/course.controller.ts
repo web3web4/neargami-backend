@@ -45,6 +45,30 @@ export class CourseController {
       next(error);
     }
   };
+  public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public findCoursesByTag = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { tag } = req.params;
+    
+        const courses: Course[] = await this.courseService.findAllByTag(tag);
+
+        res.status(200).json({ data: courses, message: `findAll courses by tag: ${tag} ` });
+
+      
+
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public createCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const data: CreateCourseDto = req.body;
