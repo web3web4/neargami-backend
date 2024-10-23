@@ -90,10 +90,10 @@ export class UserController {
   public makeUserAddmin = async (req: RequestWithUser, res: Response): Promise<void> => {
     const id: string = req.params.id;
    // const isAddmin: boolean = req.body.isAddmin;
-    const user = req.user;
-    if (user.id !== id) {
-      res.status(401).json({ message: 'Unauthorized' });
-    }
+   // const user = req.user;
+    // if (user.id !== id) {
+    //   res.status(401).json({ message: 'Unauthorized' });
+    // }
     try {
       const user = await this.user.userToAddmin(id);
       res.status(200).json(user);
