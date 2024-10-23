@@ -36,6 +36,20 @@ export class CourseService {
     });
     return AllCourses;
   }
+  public async findAllBySubTextSearch(phrase: string): Promise<Course[]> {
+    const allCourses: Course[] = await this.course.findMany({
+      where: {
+        OR: [
+          { name: { contains: phrase, mode: 'insensitive' } },
+          { title: { contains: phrase, mode: 'insensitive' } },
+          { tag: { contains: phrase, mode: 'insensitive' } }
+        ],
+      },
+      include: { lecture: true, teacher: true },
+    });
+    return allCourses;
+  }
+  
   public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({
       where: { publish_status: id },
