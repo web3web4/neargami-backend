@@ -2,10 +2,11 @@ import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
+import { max, maxDate } from 'class-validator';
 @Service()
 export class CourseService {
   public course = new PrismaClient().course;
-
+  public coursestatuslog = new PrismaClient().courseStatusLog;
   public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
     return this.course.create({
       data: {
@@ -19,8 +20,16 @@ export class CourseService {
     const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
     return AllCourses;
   }
+  public async findAllByTag(tag: string): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({ where: { tag: tag }, include: { lecture: true, teacher: true } });
+    return AllCourses;
+  }
   public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany({ where: { publish_status: id }, include: { lecture: true, teacher: true } });
+    const AllCourses: Course[] = await this.course.findMany({
+      where: { publish_status: id },
+    
+      include: {CourseStatusLog:{select:{changeStatusReson:true}}, lecture: true, teacher: true,  },
+    });
     return AllCourses;
   }
   public async findAll(): Promise<Course[]> {
@@ -49,7 +58,7 @@ export class CourseService {
       data,
     });
   }
-  async updateStatus(id: number, isAdmin: boolean, publish_status: Status): Promise<Course> {
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status,publish_status_reson:string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
@@ -58,6 +67,25 @@ export class CourseService {
     if (isAdmin ==false) {
       throw new HttpException(403, 'this user is not admin to update status');
     }
+    const changstatusdate = new Date();
+    //const coursestatuslogs = await this.coursestatuslog.findMany({ where: { course_id: id } });
+    //let maxdatestatuslog: Date = null;
+    // for (let i = 0; i < coursestatuslogs.length;i++){
+    //   if (coursestatuslogs[i].changeStatusDate > maxdatestatuslog) {
+    //     maxdatestatuslog = coursestatuslogs[i].changeStatusDate;
+      // }
+
+   // }
+    const statuslog=await this.coursestatuslog.create({
+      data: {
+        changeStatusReson: publish_status_reson,
+        last_publish_status: course.publish_status,
+        current_publish_status: publish_status,
+        changeStatusDate: changstatusdate,
+        course_id:course.id,
+      }
+  
+    });
     return this.course.update({
       where: { id },
       data: {publish_status:publish_status,},

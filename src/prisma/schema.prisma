@@ -59,13 +59,24 @@ model Course {
   difficulty         String?
   video              String?
   logo               String?
+  tag                String?              @db.Text
   lecture            Lecture[]
   teacher            User                 @relation(fields: [teacher_user_id], references: [id])
   userCourses        UserCoursesMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   UserLectureMapping UserLectureMapping[]
-}
 
+  CourseStatusLog CourseStatusLog[]
+}
+model CourseStatusLog {
+  id      Int                  @id @default(autoincrement())
+  last_publish_status     Status?
+  current_publish_status     Status?
+  changeStatusDate          DateTime?   @db.Timestamp()
+  changeStatusReson         String?    @db.Text
+  course_id  Int
+  course             Course    @relation(fields: [course_id], references: [id])
+}
 model UserCoursesMapping {
   id         Int       @id @default(autoincrement())
   start_time DateTime  @default(now())

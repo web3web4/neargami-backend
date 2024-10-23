@@ -31,9 +31,40 @@ export class CourseController {
   public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
+      if (id != "ALL" ) {
+        const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
+        res.status(200).json({ data: courses, message: 'findAll' });
+      } else {
+        const courses: Course[] = await this.courseService.findAll();
+
+        res.status(200).json({ data: courses, message: 'findAll satatus' });
+
+      }
+
+    } catch (error) {
+      next(error);
+    }
+  };
+  public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
 
       res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public findCoursesByTag = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { tag } = req.params;
+    
+        const courses: Course[] = await this.courseService.findAllByTag(tag);
+
+        res.status(200).json({ data: courses, message: `findAll courses by tag: ${tag} ` });
+
+      
+
     } catch (error) {
       next(error);
     }
@@ -77,8 +108,10 @@ export class CourseController {
     const isAdmin = req.user.isAdmin;
     
     const publish_status: Status = req.body.publish_status;
+    const publish_status_reson: string = req.body.publish_status_reson;
     try {
-      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status);
+      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status, publish_status_reson);
+
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
       next(error);

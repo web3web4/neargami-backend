@@ -23,6 +23,9 @@ export class CreateCourseDto {
   @IsString()
   @MaxLength(10)
   public difficulty: string;
+  @IsString()
+  @MaxLength(150)
+  public tag: string;
 }
 
 export class UpdateCourseDto {
@@ -49,4 +52,7 @@ export class UpdateCourseDto {
   @IsString()
   @IsOptional()
   public logo?: string;
+  @IsString()
+  @MaxLength(150)
+  public tag?: string;
 }
