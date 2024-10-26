@@ -14,8 +14,9 @@ export class QuestionService {
       throw new HttpException(403, 'Forbidden');
     }
     const { options, ...data } = createQuestionDto;
+    const questions = await this.prisma.question.findMany({ where: { lecture_id } });
     return this.prisma.question.create({
-      data: { ...data, sequence: Math.floor(Math.random() * 1000), lecture_id, answer: { createMany: { data: options } } },
+      data: { ...data, sequence: Math.floor(questions.length + 1), lecture_id, answer: { createMany: { data: options } } },
     });
   }
 
