@@ -70,7 +70,7 @@ export class UserService {
   async userToAddmin(uid: string): Promise<IUser> {
     return await this.prismaUser.update({
       where: { id: uid },
-      data:{isAdmin:true,},
+      data: { isAdmin: true },
     });
   }
   async deleteUserById(uid: string): Promise<IUser> {
@@ -91,6 +91,21 @@ export class UserService {
       where: { id },
       data: { game, score: newScore },
     });
+  }
+
+  async leaderBoard(page: number): Promise<any> {
+    const users = await this.prismaUser.findMany({
+      orderBy: { score: 'desc' },
+      select: {
+        firstname: true,
+        lastname: true,
+        image: true,
+        score: true,
+      },
+      skip: (page - 1) * 10,
+      take: 10,
+    });
+    return users;
   }
 }
 

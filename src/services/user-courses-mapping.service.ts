@@ -27,15 +27,15 @@ export class UserCoursesMappingService {
       include: { user: { include: { userLecture: true } }, course: { include: { teacher: true, lecture: { include: { question: true } } } } },
     });
     const result = userCourses.map(courseMapping => {
-      const startedLecturesCount = courseMapping.user.userLecture.filter(lecture => lecture.start_at !== null && lecture.end_at === null).length;
-      const endedLecturesCount = courseMapping.user.userLecture.filter(lecture => lecture.end_at !== null).length;
+      const endedLecturesCount = courseMapping.user.userLecture.filter(
+        lecture => lecture.end_at !== null && lecture.course_id === courseMapping.course_id,
+      ).length;
       const questionCounts = courseMapping.course.lecture.reduce((total, lecture) => {
         return total + lecture.question.length;
       }, 0);
 
       return {
         ...courseMapping,
-        startedLecturesCount,
         endedLecturesCount,
         totalPoints: questionCounts * 10,
       };

@@ -67,7 +67,7 @@ export class UserLectureMappingService {
     if (!question) {
       throw new HttpException(404, 'Question not found');
     }
-    const correctAnswers = await this.prisma.answer.findMany({ where: { AND: { question_id, is_correct: true } } });
+    const correctAnswers = await this.prisma.answer.findMany({ where: { AND: { question_id } } });
     for (const answer_id of answer_ids) {
       if (!correctAnswers.some(correctAnswer => correctAnswer.id === answer_id)) {
         throw new HttpException(404, 'Answer not found');

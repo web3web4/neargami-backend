@@ -89,8 +89,8 @@ export class UserController {
   };
   public makeUserAddmin = async (req: RequestWithUser, res: Response): Promise<void> => {
     const id: string = req.params.id;
-   // const isAddmin: boolean = req.body.isAddmin;
-   // const user = req.user;
+    // const isAddmin: boolean = req.body.isAddmin;
+    // const user = req.user;
     // if (user.id !== id) {
     //   res.status(401).json({ message: 'Unauthorized' });
     // }
@@ -129,6 +129,16 @@ export class UserController {
     try {
       const user = await this.user.getUserGame(id);
       res.status(200).json({ data: user, message: 'found' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public leaderBoard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page } = req.query;
+      const users = await this.user.leaderBoard(+page || 1);
+      res.status(200).json({ data: users, message: 'found' });
     } catch (error) {
       next(error);
     }
