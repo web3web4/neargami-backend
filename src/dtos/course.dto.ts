@@ -17,14 +17,14 @@ export class CreateCourseDto {
   @MaxLength(150)
   public title: string;
   @IsString()
-  public logo: string;
+  public logo?: string;
   @IsString()
-  public description: string;
+  public description?: string;
   @IsString()
   @MaxLength(10)
-  public difficulty: string;
- @IsEmpty()
+  public difficulty?: string;
   public tag?: string;
+ 
 }
 
 export class UpdateCourseDto {
