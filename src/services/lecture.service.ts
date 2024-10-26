@@ -23,7 +23,9 @@ export class LectureService {
     return this.lecture.findMany({
       where: { course_id },
       include: {
-        course: { include: { teacher: { select: { id: true, firstname: true, lastname: true, image: true } } } },
+        course: {
+          include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, score: true, game: true } } },
+        },
         question: true,
         userLecture: { where: { user_id }, select: { id: true, lecture_id: true, start_at: true, end_at: true } },
       },
