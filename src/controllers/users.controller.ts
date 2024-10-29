@@ -20,7 +20,7 @@ export class UserController {
 
   public claimNgcs = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const user = req.user;
-    const ngcs = req.body;
+    const { ngcs } = req.body;
     try {
       const claim = await this.user.claimNgcs(user, ngcs);
       res.status(201).json({ data: claim, message: 'created' });

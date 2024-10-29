@@ -91,13 +91,13 @@ export class UserLectureMappingService {
     if (preAnswers.length === 0) {
       this.prisma.userQuestionAnswer.createMany({ data });
       if (trueAnswer) {
-        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 } } });
+        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
       }
     } else if (preAnswers.length > 0 && preAnswers.some(preAnswer => preAnswer.answer.is_correct === false)) {
       await this.prisma.userQuestionAnswer.deleteMany({ where: { student_id: user_id, course_id, lecture_id, question_id } });
       this.prisma.userQuestionAnswer.createMany({ data });
       if (trueAnswer) {
-        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 } } });
+        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
       }
     }
     return { correctAnswers };
