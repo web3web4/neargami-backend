@@ -9,7 +9,7 @@ export interface IUser {
   phone: string;
   slug: string;
   linkedin: string;
-  score: number;
+  ngc: number;
   about: string;
   createdAt: Date;
   country?: string;

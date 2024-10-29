@@ -1,14 +1,16 @@
-import { Lecture, PrismaClient } from '@prisma/client';
+import { Lecture } from '@prisma/client';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { CourseService } from './course.service';
 import { HttpException } from '@/exceptions/HttpException';
 import { LectureWithRelations } from '@/interfaces/lecture.interface';
+import { PrismaService } from './prisma.service';
 
 @Service()
 export class LectureService {
-  public lecture = new PrismaClient().lecture;
-  public course = Container.get(CourseService);
+  private prismaService = Container.get(PrismaService);
+  private lecture = this.prismaService.lecture;
+  private course = Container.get(CourseService);
   async create(userId: string, course_id: number, createLectureDto: CreateLectureDto): Promise<Lecture> {
     const course = await this.course.findOne(course_id);
     if (course.teacher_user_id !== userId) {
@@ -24,7 +26,7 @@ export class LectureService {
       where: { course_id },
       include: {
         course: {
-          include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, score: true, game: true } } },
+          include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
         },
         question: true,
         userLecture: { where: { user_id }, select: { id: true, lecture_id: true, start_at: true, end_at: true } },

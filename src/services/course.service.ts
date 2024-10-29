@@ -1,13 +1,13 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
-import { max, maxDate } from 'class-validator';
-import { title } from 'process';
+import { PrismaService } from './prisma.service';
 @Service()
 export class CourseService {
-  public course = new PrismaClient().course;
-  public coursestatuslog = new PrismaClient().courseStatusLog;
+  private prismaService = Container.get(PrismaService);
+  private course = this.prismaService.course;
+  private coursestatuslog = this.prismaService.courseStatusLog;
   public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
     return this.course.create({
       data: {
@@ -28,11 +28,9 @@ export class CourseService {
   public async findAllByTextSearch(phras: string): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({
       where: {
-        OR: [
-         {name:phras},{title:phras},{tag:phras}
-       ],   
-       
-      }, include: { lecture: true, teacher: true }
+        OR: [{ name: phras }, { title: phras }, { tag: phras }],
+      },
+      include: { lecture: true, teacher: true },
     });
     return AllCourses;
   }
@@ -42,19 +40,19 @@ export class CourseService {
         OR: [
           { name: { contains: phrase, mode: 'insensitive' } },
           { title: { contains: phrase, mode: 'insensitive' } },
-          { tag: { contains: phrase, mode: 'insensitive' } }
+          { tag: { contains: phrase, mode: 'insensitive' } },
         ],
       },
       include: { lecture: true, teacher: true },
     });
     return allCourses;
   }
-  
+
   public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({
       where: { publish_status: id },
-    
-      include: {CourseStatusLog:{select:{changeStatusReson:true}}, lecture: true, teacher: true,  },
+
+      include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
     });
     return AllCourses;
   }
@@ -84,13 +82,13 @@ export class CourseService {
       data,
     });
   }
-  async updateStatus(id: number, isAdmin: boolean, publish_status: Status,publish_status_reson:string): Promise<Course> {
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
-    
-    if (isAdmin ==false) {
+
+    if (isAdmin == false) {
       throw new HttpException(403, 'this user is not admin to update status');
     }
     const changstatusdate = new Date();
@@ -99,22 +97,21 @@ export class CourseService {
     // for (let i = 0; i < coursestatuslogs.length;i++){
     //   if (coursestatuslogs[i].changeStatusDate > maxdatestatuslog) {
     //     maxdatestatuslog = coursestatuslogs[i].changeStatusDate;
-      // }
+    // }
 
-   // }
-    const statuslog=await this.coursestatuslog.create({
+    // }
+    const statuslog = await this.coursestatuslog.create({
       data: {
         changeStatusReson: publish_status_reson,
         last_publish_status: course.publish_status,
         current_publish_status: publish_status,
         changeStatusDate: changstatusdate,
-        course_id:course.id,
-      }
-  
+        course_id: course.id,
+      },
     });
     return this.course.update({
       where: { id },
-      data: {publish_status:publish_status,},
+      data: { publish_status: publish_status },
     });
   }
 

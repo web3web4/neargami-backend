@@ -1,14 +1,18 @@
-import { PrismaClient, UserLectureMapping } from '@prisma/client';
-import { CreateUserLectureMappingDto, UpdateUserLectureMappingDto } from '../dtos/user-lecture-mapping.dto';
-import { IUserLectureMapping } from '../interfaces/user-lecture-mapping.interface';
+import { UserLectureMapping } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { LectureService } from './lecture.service';
 import { HttpException } from '@/exceptions/HttpException';
+import { PrismaService } from './prisma.service';
+import { UserCoursesMappingService } from './user-courses-mapping.service';
 
 @Service()
 export class UserLectureMappingService {
-  public prisma = new PrismaClient();
-  public lecture = Container.get(LectureService);
+  private prismaService = Container.get(PrismaService);
+  private prisma = this.prismaService.prisma;
+  private lecture = Container.get(LectureService);
+  private lecturePrisma = this.prismaService.lecture;
+  private userCourseService = Container.get(UserCoursesMappingService);
+
   async register(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
     if (lecture.course.teacher_user_id === user_id) {
@@ -73,9 +77,29 @@ export class UserLectureMappingService {
         throw new HttpException(404, 'Answer not found');
       }
     }
+    let trueAnswer = true;
+    for (const answer_id of answer_ids) {
+      if (correctAnswers.some(correctAnswers => correctAnswers.id === answer_id && !correctAnswers.is_correct)) {
+        trueAnswer = false;
+      }
+    }
     const data = answer_ids.map(answer_id => ({ student_id: user_id, course_id, lecture_id, question_id, answer_id }));
-    await this.prisma.userQuestionAnswer.createMany({ data });
-
+    const preAnswers = await this.prisma.userQuestionAnswer.findMany({
+      where: { student_id: user_id, course_id, lecture_id, question_id },
+      include: { answer: true },
+    });
+    if (preAnswers.length === 0) {
+      this.prisma.userQuestionAnswer.createMany({ data });
+      if (trueAnswer) {
+        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 } } });
+      }
+    } else if (preAnswers.length > 0 && preAnswers.some(preAnswer => preAnswer.answer.is_correct === false)) {
+      await this.prisma.userQuestionAnswer.deleteMany({ where: { student_id: user_id, course_id, lecture_id, question_id } });
+      this.prisma.userQuestionAnswer.createMany({ data });
+      if (trueAnswer) {
+        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 } } });
+      }
+    }
     return { correctAnswers };
   }
   async finish(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
@@ -91,6 +115,10 @@ export class UserLectureMappingService {
     if (!userLecture) {
       throw new HttpException(409, 'Lecture not registered');
     }
+    const lectures = await this.lecturePrisma.findMany({ where: { course_id }, orderBy: { order: 'desc' } });
+    if (lecture.order === lectures[0].order) {
+    }
+    this.userCourseService.finish(user_id, course_id);
     return this.prisma.userLectureMapping.update({
       where: { id: userLecture.id },
       data: { end_at: new Date() },

@@ -17,6 +17,37 @@ export class UserController {
       next(error);
     }
   };
+
+  public claimNgcs = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const user = req.user;
+    const ngcs = req.body;
+    try {
+      const claim = await this.user.claimNgcs(user, ngcs);
+      res.status(201).json({ data: claim, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getNgcs = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.user;
+    try {
+      const ngcs = await this.user.getNgcs(id);
+      res.status(200).json({ data: ngcs, message: 'found' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public getTopPoints = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.user;
+    try {
+      const topPoints = await this.user.getTopPoints(id);
+      res.status(200).json({ data: topPoints, message: 'found' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public findOneUserById = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
