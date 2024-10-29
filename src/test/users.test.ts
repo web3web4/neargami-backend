@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import request from 'supertest';
 import App from '@/app';
 import { CreateUserDto } from '@dtos/users.dto';
-import UserRoute from '@routes/users.route';
+import UserRoute from '@/routes/users.routes';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));

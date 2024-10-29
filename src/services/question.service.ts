@@ -1,13 +1,15 @@
-import { PrismaClient, Question } from '@prisma/client';
+import { Question } from '@prisma/client';
 import { CreateQuestionDto, UpdateQuestionDto } from '../dtos/question.dto';
 import Container, { Service } from 'typedi';
 import { LectureService } from './lecture.service';
 import { HttpException } from '@/exceptions/HttpException';
+import { PrismaService } from './prisma.service';
 
 @Service()
 export class QuestionService {
-  public prisma = new PrismaClient();
-  public lecture = Container.get(LectureService);
+  private prismaService = Container.get(PrismaService);
+  private prisma = this.prismaService.prisma;
+  private lecture = Container.get(LectureService);
   async create(course_id: number, lecture_id: number, userId: string, createQuestionDto: CreateQuestionDto): Promise<Question> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
     if (lecture.course.teacher_user_id !== userId) {

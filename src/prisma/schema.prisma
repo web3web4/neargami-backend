@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["omitApi"]
 }
 
@@ -28,7 +28,8 @@ model User {
   discord            String?              @db.VarChar(60)
   facebook           String?              @db.VarChar(60)
   twitter            String?              @db.VarChar(60)
-  score              Int                  @default(0)
+  ngc                Int                  @default(0)
+  top_points         Int                  @default(0)
   about              String?              @db.Text
   slug               String?              @db.VarChar(50)
   createdAt          DateTime?            @db.Timestamp()
@@ -39,6 +40,17 @@ model User {
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   Course             Course[]
+  Claims             Claims[]
+}
+
+model Claims {
+  id          Int      @id @default(autoincrement())
+  ngc_claimed Int
+  user_id     String   @db.Uuid
+  user        User     @relation(fields: [user_id], references: [id])
+  executed    Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime 
 }
 
 enum Status {
@@ -68,15 +80,17 @@ model Course {
 
   CourseStatusLog CourseStatusLog[]
 }
+
 model CourseStatusLog {
-  id      Int                  @id @default(autoincrement())
-  last_publish_status     Status?
-  current_publish_status     Status?
-  changeStatusDate          DateTime?   @db.Timestamp()
-  changeStatusReson         String?    @db.Text
-  course_id  Int
-  course             Course    @relation(fields: [course_id], references: [id])
+  id                     Int       @id @default(autoincrement())
+  last_publish_status    Status?
+  current_publish_status Status?
+  changeStatusDate       DateTime? @db.Timestamp()
+  changeStatusReson      String?   @db.Text
+  course_id              Int
+  course                 Course    @relation(fields: [course_id], references: [id])
 }
+
 model UserCoursesMapping {
   id         Int       @id @default(autoincrement())
   start_time DateTime  @default(now())

@@ -1,12 +1,14 @@
-import { PrismaClient, UserCoursesMapping } from '@prisma/client';
+import { UserCoursesMapping } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { CourseService } from './course.service';
 import { HttpException } from '@/exceptions/HttpException';
+import { PrismaService } from './prisma.service';
 
 @Service()
 export class UserCoursesMappingService {
-  public prisma = new PrismaClient();
-  public course = Container.get(CourseService);
+  private prismaService = Container.get(PrismaService);
+  private prisma = this.prismaService.prisma;
+  private course = Container.get(CourseService);
   async register(user_id: string, course_id: number): Promise<UserCoursesMapping> {
     await this.course.findOne(course_id);
     return this.prisma.userCoursesMapping.create({ data: { user_id, course_id }, include: { course: true } });
