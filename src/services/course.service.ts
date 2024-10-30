@@ -1,13 +1,13 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
-import Container, { Service } from 'typedi';
+import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
-import { PrismaService } from './prisma.service';
+import { max, maxDate } from 'class-validator';
+import { title } from 'process';
 @Service()
 export class CourseService {
-  private prismaService = Container.get(PrismaService);
-  private course = this.prismaService.course;
-  private coursestatuslog = this.prismaService.courseStatusLog;
+  public course = new PrismaClient().course;
+  public coursestatuslog = new PrismaClient().courseStatusLog;
   public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
     return this.course.create({
       data: {
@@ -22,30 +22,49 @@ export class CourseService {
     return AllCourses;
   }
   public async findAllByTag(tag: string): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany({ where: { tag: tag }, include: { lecture: true, teacher: true } });
-    return AllCourses;
-  }
-  public async findAllByTextSearch(phras: string): Promise<Course[]> {
+    const currentStatus = Status.APPROVED;
     const AllCourses: Course[] = await this.course.findMany({
       where: {
-        OR: [{ name: phras }, { title: phras }, { tag: phras }],
+        AND: [{ publish_status: currentStatus }, { tag: tag }],
       },
       include: { lecture: true, teacher: true },
     });
     return AllCourses;
   }
-  public async findAllBySubTextSearch(phrase: string): Promise<Course[]> {
-    const allCourses: Course[] = await this.course.findMany({
+  public async findAllByTextSearch(phras: string): Promise<Course[]> {
+    const currentStatus = Status.APPROVED;
+    const AllCourses: Course[] = await this.course.findMany({
       where: {
-        OR: [
-          { name: { contains: phrase, mode: 'insensitive' } },
-          { title: { contains: phrase, mode: 'insensitive' } },
-          { tag: { contains: phrase, mode: 'insensitive' } },
+        AND: [
+          { publish_status: currentStatus }, // Only include courses with 'APPROVED' status
+          {
+            OR: [{ title: { equals: phras } }, { name: { equals: phras } }, { tag: phras }],
+          },
         ],
       },
       include: { lecture: true, teacher: true },
     });
-    return allCourses;
+    return AllCourses;
+  }
+
+  public async findAllBySubTextSearch(phrase: string): Promise<Course[]> {
+    const currentStatus = Status.APPROVED;
+    const AllCourses: Course[] = await this.course.findMany({
+      where: {
+        AND: [
+          { publish_status: currentStatus }, // Only include courses with 'APPROVED' status
+          {
+            OR: [
+              { name: { contains: phrase, mode: 'insensitive' } },
+              { title: { contains: phrase, mode: 'insensitive' } },
+              { tag: { contains: phrase, mode: 'insensitive' } },
+            ],
+          },
+        ],
+      },
+      include: { lecture: true, teacher: true },
+    });
+    return AllCourses;
   }
 
   public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
@@ -126,3 +145,4 @@ export class CourseService {
     return this.course.delete({ where: { id } });
   }
 }
+  
