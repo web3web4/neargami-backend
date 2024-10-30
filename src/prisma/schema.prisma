@@ -160,6 +160,7 @@ model UserQuestionAnswer {
   lecture_id  Int
   question_id Int
   answer_id   Int
+  is_correct  Boolean @default(false)
 
   user     User     @relation(fields: [student_id], references: [id])
   course   Course   @relation(fields: [course_id], references: [id])

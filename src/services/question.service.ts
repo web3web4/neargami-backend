@@ -26,7 +26,10 @@ export class QuestionService {
     await this.lecture.findOne(lecture_id, course_id);
     return this.prisma.question.findMany({
       where: { lecture_id },
-      include: { lecture: { include: { course: { select: { logo: true } } } }, answer: { omit: { is_correct: true } } },
+      include: {
+        lecture: { include: { course: { select: { logo: true } } } },
+        answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
+      },
     });
   }
 

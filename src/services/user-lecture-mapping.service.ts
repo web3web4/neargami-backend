@@ -83,21 +83,21 @@ export class UserLectureMappingService {
         trueAnswer = false;
       }
     }
-    const data = answer_ids.map(answer_id => ({ student_id: user_id, course_id, lecture_id, question_id, answer_id }));
+    const data = answer_ids.map(answer_id => ({ student_id: user_id, course_id, lecture_id, question_id, answer_id, is_correct: trueAnswer }));
     const preAnswers = await this.prisma.userQuestionAnswer.findMany({
       where: { student_id: user_id, course_id, lecture_id, question_id },
       include: { answer: true },
     });
     if (preAnswers.length === 0) {
-      this.prisma.userQuestionAnswer.createMany({ data });
+      await this.prisma.userQuestionAnswer.createMany({ data });
       if (trueAnswer) {
-        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
+        await this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
       }
     } else if (preAnswers.length > 0 && preAnswers.some(preAnswer => preAnswer.answer.is_correct === false)) {
       await this.prisma.userQuestionAnswer.deleteMany({ where: { student_id: user_id, course_id, lecture_id, question_id } });
-      this.prisma.userQuestionAnswer.createMany({ data });
+      await this.prisma.userQuestionAnswer.createMany({ data });
       if (trueAnswer) {
-        this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
+        await this.prisma.user.update({ where: { id: user_id }, data: { ngc: { increment: 10 }, top_points: { increment: 10 } } });
       }
     }
     return { correctAnswers };
