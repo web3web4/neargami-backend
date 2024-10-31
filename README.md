@@ -1,5 +1,7 @@
 # Gamfi Near Backend
 
+The backend of neargami.com
+
 ## Getting started
 
 to start you need to put these environment variables
@@ -20,3 +22,7 @@ npm run prisma:init
 npm run prisma:migrate
 npm run dev
 ```
+
+# Licence
+
+MIT
