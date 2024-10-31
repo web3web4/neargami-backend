@@ -23,6 +23,6 @@ npm run prisma:migrate
 npm run dev
 ```
 
-# Licence
+# License
 
 MIT
