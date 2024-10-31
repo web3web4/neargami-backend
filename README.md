@@ -20,3 +20,7 @@ npm run prisma:init
 npm run prisma:migrate
 npm run dev
 ```
+
+# Licence
+
+MIT
