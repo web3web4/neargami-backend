@@ -1,5 +1,7 @@
 # Gamfi Near Backend
 
+The backend of neargami.com
+
 ## Getting started
 
 to start you need to put these environment variables
