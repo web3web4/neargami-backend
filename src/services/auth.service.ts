@@ -14,7 +14,7 @@ export class AuthService {
   private users = this.prismaService.user;
   public createChallenge(): { challenge: string; message: string } {
     const challenge = randomBytes(32).toString('base64');
-    const message = 'Login with near';
+    const message = 'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
     return { challenge, message };
   }
   public async createUser({ accountId, publicKey, signature, challenge, message }) {
