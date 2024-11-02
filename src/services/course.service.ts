@@ -2,8 +2,6 @@ import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
-import { max, maxDate } from 'class-validator';
-import { title } from 'process';
 @Service()
 export class CourseService {
   public course = new PrismaClient().course;
@@ -145,4 +143,3 @@ export class CourseService {
     return this.course.delete({ where: { id } });
   }
 }
-  

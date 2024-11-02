@@ -11,6 +11,10 @@ export class UserCoursesMappingService {
   private course = Container.get(CourseService);
   async register(user_id: string, course_id: number): Promise<UserCoursesMapping> {
     await this.course.findOne(course_id);
+    const pre = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
+    if (pre) {
+      throw new HttpException(409, 'Course already registered');
+    }
     return this.prisma.userCoursesMapping.create({ data: { user_id, course_id }, include: { course: true } });
   }
 
