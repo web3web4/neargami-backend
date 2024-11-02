@@ -2,6 +2,7 @@ import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
+import { SUPER_ADMIN_PASS } from '@/config';
 @Service()
 export class CourseService {
   public course = new PrismaClient().course;
@@ -65,12 +66,22 @@ export class CourseService {
     return AllCourses;
   }
 
-  public async findAllCoursesByStatus(id: Status): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany({
-      where: { publish_status: id },
+  public async findAllCoursesByStatus(id: Status, pass: string): Promise<Course[]> {
+    if (pass !== SUPER_ADMIN_PASS) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    let AllCourses: Course[];
+    if (id) {
+      AllCourses = await this.course.findMany({
+        where: { publish_status: id },
 
-      include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
-    });
+        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
+      });
+    } else {
+      AllCourses = await this.course.findMany({
+        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
+      });
+    }
     return AllCourses;
   }
   public async findAll(): Promise<Course[]> {
@@ -139,6 +150,9 @@ export class CourseService {
     }
     if (course.teacher_user_id !== userId) {
       throw new HttpException(403, 'Forbidden');
+    }
+    if (course.publish_status !== Status.REJECTED) {
+      throw new HttpException(409, 'Cannot delete aproved courses');
     }
     return this.course.delete({ where: { id } });
   }

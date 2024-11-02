@@ -120,13 +120,30 @@ export class UserController {
   };
   public makeUserAddmin = async (req: RequestWithUser, res: Response): Promise<void> => {
     const id: string = req.params.id;
+    const { pass } = req.body;
     // const isAddmin: boolean = req.body.isAddmin;
     // const user = req.user;
     // if (user.id !== id) {
     //   res.status(401).json({ message: 'Unauthorized' });
     // }
     try {
-      const user = await this.user.userToAddmin(id);
+      const user = await this.user.userToAddmin(id, pass);
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  public makeAdminUser = async (req: RequestWithUser, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    const { pass } = req.body;
+    // const isAddmin: boolean = req.body.isAddmin;
+    // const user = req.user;
+    // if (user.id !== id) {
+    //   res.status(401).json({ message: 'Unauthorized' });
+    // }
+    try {
+      const user = await this.user.adminToUser(id, pass);
       res.status(200).json(user);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -135,8 +152,9 @@ export class UserController {
 
   public deleteUser = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
+    const { pass } = req.body;
     try {
-      const user = await this.user.deleteUserById(id);
+      const user = await this.user.deleteUserById(id, pass);
       res.status(200).json(user);
     } catch (error) {
       res.status(400).json({ error: error.message });
