@@ -1,12 +1,15 @@
 import { PrismaClient, Claims } from '@prisma/client';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { connect, WalletConnection, keyStores, KeyPair, Contract } from 'near-api-js';
 import { PRIVATE_KEY } from '@/config';
 import { KeyPairString } from 'near-api-js/lib/utils';
+import { PrismaService } from './prisma.service';
 @Service()
 export class ClaimsService {
-  private claims = new PrismaClient().claims;
+  private prismaService = Container.get(PrismaService);
+  private claims = this.prismaService.claims;
+  private prisma = this.prismaService.prisma;
   private nearConfig;
   private near;
   private CONTRACT_ACCOUNT = '0b33f9bba623b149eda8dfb13f255197abf9f6459dd2386a52ed0bbd668d48ef';
@@ -59,10 +62,25 @@ export class ClaimsService {
       include: { user: { select: { address: true, ngc: true } } },
     });
 
+    const results = [];
+
     for (const claim of claims) {
-      await this.transferTokens(claim.user.address, claim.ngc_claimed.toString() + '000000000000000000');
-      await this.claims.update({ where: { id: claim.id }, data: { executed: true } });
+      try {
+        // Start a transaction
+        await this.prisma.$transaction(async prisma => {
+          await this.transferTokens(claim.user.address, claim.ngc_claimed.toString() + '000000000000000000');
+          await prisma.claims.update({ where: { id: claim.id }, data: { executed: true } });
+        });
+
+        results.push({ id: claim.id, status: 'success' });
+      } catch (error) {
+        console.error(`Failed to process claim ${claim.id}:`, error);
+        results.push({ id: claim.id, status: 'failed', error: error.message });
+        // Optionally, you could choose to continue processing other claims
+        // If you want to stop processing on first error, you could add a "break" here
+      }
     }
-    return;
+
+    return results;
   }
 }

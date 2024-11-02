@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { AnswerController } from '../controllers/answer.controller';
 import { Service, Container } from 'typedi';
 import { Routes } from '@/interfaces/routes.interface';
 import { ClaimsController } from '@/controllers/claims.controller';
@@ -15,7 +14,7 @@ export class ClaimsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get('/lkajsdfkoljuiophkalsdfkojjlkasdf', AuthMiddleware, this.claimsController.execute);
+    this.router.get('/execute', AuthMiddleware, this.claimsController.execute);
     this.router.get('/claims', AuthMiddleware, this.claimsController.findAll);
   }
 }
