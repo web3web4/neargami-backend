@@ -4,22 +4,87 @@ import axios from 'axios';
 import { DataStoredInToken, TokenData } from '@/interfaces/auth.interface';
 import { SECRET_KEY } from '@/config';
 import { sign } from 'jsonwebtoken';
-import { User } from '@prisma/client';
+import { challangelog, User } from '@prisma/client';
 import { CreateUserDto } from '@/dtos/users.dto';
 import { PrismaService } from './prisma.service';
+import { Signature } from 'near-api-js/lib/transaction';
 
 @Service()
 export class AuthService {
   private prismaService = Container.get(PrismaService);
   private users = this.prismaService.user;
-  public createChallenge(): { challenge: string; message: string } {
-    const challenge = randomBytes(32).toString('base64');
-    const message = 'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policy and our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
-    return { challenge, message };
+  private challangelog = this.prismaService.challangelog;
+  public createChallenge(): { challange: string; message: string } {
+    const challange = randomBytes(32).toString('base64');
+    const message =
+      'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
+    return { challange, message };
+  }
+  public async createChallangeLog(accountid: string, challange1: string) {
+    const newchallangelog = await this.challangelog.create({
+      data: {
+        accountId: accountid,
+        signature: null,
+        challange: challange1,
+      },
+    });
+    return newchallangelog;
+  }
+  public async checkUser(accountid: string) {
+    const user = await this.challangelog.findMany({ where: { accountId: accountid } });
+    if (user.length == 0) {
+      return 'no user';
+    }
+  }
+  public async checkSignature(accountid: string) {
+    let nullsignature: string;
+    const nosignature = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
+    if (nosignature.length == 0) {
+      nullsignature = null;
+    } else {
+      nullsignature = 'one value';
+    }
+    console.log(nullsignature);
+    return nullsignature;
+  }
+  public async returnSameChallenge(accountid: string) {
+    const challangelog = await this.challangelog.findFirst({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
+    const challange = challangelog.challange;
+    const message =
+      'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
+    return { challange, message };
+  }
+  public async checkChallenge(accountId: string) {
+    //check if there no challenge or if challenge is exsist with signature then generate new challenge
+    //if challenge exsist without signature then return challenge
+    const check = await this.challangelog.findMany({});
+    let challange: string;
+    let message: string;
+    if (!check) {
+      // return check[0].challange;
+      challange = 'you have aleardy challange without signature';
+      message = 'you have aleardy challange without signature';
+      console.log('you have aleardy challange without signature');
+    } else {
+      challange = randomBytes(32).toString('base64');
+      message =
+        'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://neargami.com/privacy-policy and our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
+    }
+    console.log({ challange, message });
+    return { challange, message };
+
+    //const createnewchallangelog = await this.challangelog.create({ data });
+  }
+  public async getallchallangeLog() {
+    const challangelog = await this.challangelog.findMany({});
+    return challangelog;
   }
   public async createUser({ accountId, publicKey, signature, challenge, message }) {
     // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
     // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+
+    const challangelog = await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
+
     const user = await this.users.upsert({
       where: { address: accountId },
       create: { address: accountId, message, signature, phone: challenge },

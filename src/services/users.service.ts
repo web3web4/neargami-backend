@@ -5,6 +5,7 @@ import { UpdateUserDto } from '@dtos/users.dto';
 import { IUser } from '@/interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { PrismaService } from './prisma.service';
+import { SUPER_ADMIN_PASS } from '@/config';
 
 @Service()
 export class UserService {
@@ -49,7 +50,8 @@ export class UserService {
 
   public async findAllUser(): Promise<any> {
     const allUsers = await this.prismaUser.findMany({
-      omit: { address: true, message: true, signature: true },
+      omit: { message: true, signature: true },
+      orderBy: { top_points: 'desc' },
     });
     return allUsers;
   }
@@ -84,13 +86,29 @@ export class UserService {
       data,
     });
   }
-  async userToAddmin(uid: string): Promise<IUser> {
+  async userToAddmin(uid: string, pass: string): Promise<IUser> {
+    if (pass !== SUPER_ADMIN_PASS) {
+      throw new HttpException(403, 'Forbidden');
+    }
     return await this.prismaUser.update({
       where: { id: uid },
       data: { isAdmin: true },
     });
   }
-  async deleteUserById(uid: string): Promise<IUser> {
+
+  async adminToUser(uid: string, pass: string): Promise<IUser> {
+    if (pass !== SUPER_ADMIN_PASS) {
+      throw new HttpException(403, 'Forbidden');
+    }
+    return await this.prismaUser.update({
+      where: { id: uid },
+      data: { isAdmin: false },
+    });
+  }
+  async deleteUserById(uid: string, pass: string): Promise<IUser> {
+    if (pass !== SUPER_ADMIN_PASS) {
+      throw new HttpException(403, 'Forbidden');
+    }
     const findUser: IUser = await this.prismaUser.findUnique({ where: { id: `${uid}` } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
