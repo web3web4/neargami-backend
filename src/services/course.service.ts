@@ -1,12 +1,15 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { SUPER_ADMIN_PASS } from '@/config';
+import { PrismaService } from './prisma.service';
 @Service()
 export class CourseService {
-  public course = new PrismaClient().course;
-  public coursestatuslog = new PrismaClient().courseStatusLog;
+  private prismaService = Container.get(PrismaService);
+  private course = this.prismaService.course;
+  private coursestatuslog = this.prismaService.courseStatusLog;
+  private prisma = this.prismaService.prisma;
   public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
     return this.course.create({
       data: {
@@ -66,22 +69,27 @@ export class CourseService {
     return AllCourses;
   }
 
-  public async findAllCoursesByStatus(id: Status, pass: string): Promise<Course[]> {
-    if (pass !== SUPER_ADMIN_PASS) {
-      throw new HttpException(403, 'Forbidden');
-    }
+  public async findAllCoursesByStatus(id: string): Promise<any> {
     let AllCourses: Course[];
-    if (id) {
+    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
+    });
+    if (id === 'ALL') {
       AllCourses = await this.course.findMany({
-        where: { publish_status: id },
-
         include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
       });
     } else {
       AllCourses = await this.course.findMany({
+        where: { publish_status: id as Status },
+
         include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
       });
     }
+    AllCourses = AllCourses.map(course => ({ ...course, counts: userCoursesCounts.find(c => c.course_id === course.id) }));
     return AllCourses;
   }
   public async findAll(): Promise<Course[]> {
