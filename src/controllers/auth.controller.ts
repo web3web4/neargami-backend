@@ -19,29 +19,35 @@ export class AuthController {
       next(error);
     }
   };
-  public checkChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const data = req.body;
 
-      res.status(200).json({ data: this.auth.checkChallenge(data) });
-    } catch (error) {
-      next(error);
-    }
-  };
   public createChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const data: challangelog = req.body;
+    const accountid: string = req.params.accountId;
+    console.log(accountid);
     try {
-      const newUser = await this.auth.checkUser(data.accountId);
+      const newUser = await this.auth.checkUser(accountid);
+      console.log(newUser);
       if (newUser) {
+        //this is first time ...must create a challenge and store user in challengeLog.......
         const { challange, message } = this.auth.createChallenge();
-        res.status(200).json({ challange, message });
+        console.log({ challange, message });
+        const createchallangelog = await this.auth.createChallangeLog(accountid, challange);
+        console.log(createchallangelog);
+        res.status(200).json({ challange, message, createchallangelog });
       } else {
-        res.status(200).json({ data: 'this user is already exsist' });
-      }
-      // const checkChallenge = await this.auth.checkChallenge(data.accountId);
+        const isSignature = await this.auth.checkSignature(accountid);
+        if (isSignature) {
+          //return same challange to signature until pass it
+          const { challange, message } = await this.auth.returnSameChallenge(accountid);
 
-      // const { challange, message } = this.auth.createChallenge();
-      // res.status(200).json({ challange, message });
+          res.status(200).json({ challange, message });
+        } else {
+          //create new challange to this user
+          const { challange, message } = this.auth.createChallenge();
+
+          const createchallangelog = await this.auth.createChallangeLog(accountid, challange);
+          res.status(200).json({ challange, message, createchallangelog });
+        }
+      }
     } catch (error) {
       next(error);
     }

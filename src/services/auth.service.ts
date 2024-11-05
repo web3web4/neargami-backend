@@ -20,13 +20,40 @@ export class AuthService {
       'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
     return { challange, message };
   }
+  public async createChallangeLog(accountid: string, challange1: string) {
+    const newchallangelog = await this.challangelog.create({
+      data: {
+        accountId: accountid,
+        signature: null,
+        challange: challange1,
+      },
+    });
+    return newchallangelog;
+  }
   public async checkUser(accountid: string) {
     const user = await this.challangelog.findMany({ where: { accountId: accountid } });
     if (user.length == 0) {
       return 'no user';
     }
   }
-
+  public async checkSignature(accountid: string) {
+    let nullsignature: string;
+    const nosignature = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
+    if (nosignature.length == 0) {
+      nullsignature = null;
+    } else {
+      nullsignature = 'one value';
+    }
+    console.log(nullsignature);
+    return nullsignature;
+  }
+  public async returnSameChallenge(accountid: string) {
+    const challangelog = await this.challangelog.findFirst({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
+    const challange = challangelog.challange;
+    const message =
+      'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
+    return { challange, message };
+  }
   public async checkChallenge(accountId: string) {
     //check if there no challenge or if challenge is exsist with signature then generate new challenge
     //if challenge exsist without signature then return challenge
@@ -55,6 +82,9 @@ export class AuthService {
   public async createUser({ accountId, publicKey, signature, challenge, message }) {
     // const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey });
     // const valid_signature = this.verifySignature({ publicKey, signature, accountId, challenge, message });
+
+    const challangelog = await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
+
     const user = await this.users.upsert({
       where: { address: accountId },
       create: { address: accountId, message, signature, phone: challenge },
