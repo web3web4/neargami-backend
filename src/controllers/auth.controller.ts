@@ -19,8 +19,16 @@ export class AuthController {
       next(error);
     }
   };
-
   public createChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { challange, message } = this.auth.createChallenge();
+      res.status(200).json({ challange, message });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createNewChallenge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const accountid: string = req.params.accountId;
     console.log(accountid);
     try {
