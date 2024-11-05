@@ -31,9 +31,8 @@ export class CourseController {
   public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const { pass } = req.body;
 
-      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status, pass);
+      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
       res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
       next(error);

@@ -11,6 +11,7 @@ export class LectureService {
   private prismaService = Container.get(PrismaService);
   private lecture = this.prismaService.lecture;
   private course = Container.get(CourseService);
+  private prisma = this.prismaService.prisma;
   async create(userId: string, course_id: number, createLectureDto: CreateLectureDto): Promise<Lecture> {
     const course = await this.course.findOne(course_id);
     if (course.teacher_user_id !== userId) {
@@ -19,10 +20,18 @@ export class LectureService {
     return this.lecture.create({ data: { course_id, ...createLectureDto } });
   }
 
-  async findAll(user_id: string, course_id: number): Promise<Lecture[]> {
+  async findAll(user_id: string, course_id: number): Promise<any> {
     await this.course.findOne(course_id);
+    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
+      where: { course_id },
+    });
 
-    return this.lecture.findMany({
+    const lectures = await this.lecture.findMany({
       where: { course_id },
       include: {
         course: {
@@ -32,6 +41,7 @@ export class LectureService {
         userLecture: { where: { user_id }, select: { id: true, lecture_id: true, start_at: true, end_at: true } },
       },
     });
+    return { lectures, counts: userCoursesCounts };
   }
 
   async findOne(id: number, course_id: number): Promise<LectureWithRelations> {
