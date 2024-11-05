@@ -13,7 +13,15 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+model challangelog{
+  id                Int      @id @default(autoincrement())
+  accountId          String?               @db.VarChar(255) 
+  challange          String?               @db.VarChar(255) 
+  message         String?               @db.VarChar(255)
+  signature          String?               @db.VarChar(255)
+  publickey          String?              @db.VarChar(255)
+  nonce             String?               @db.VarChar(255)
+}
 model User {
   id                 String               @id @default(uuid()) @db.Uuid
   firstname          String?              @db.VarChar(50)
