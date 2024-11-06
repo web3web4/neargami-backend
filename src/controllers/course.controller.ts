@@ -31,40 +31,30 @@ export class CourseController {
   public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      if (id != "ALL" ) {
-        const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
-        res.status(200).json({ data: courses, message: 'findAll' });
-      } else {
-        const courses: Course[] = await this.courseService.findAll();
 
-        res.status(200).json({ data: courses, message: 'findAll satatus' });
-
-      }
-
-    } catch (error) {
-      next(error);
-    }
-  };
-  public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
-
+      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
       res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
       next(error);
     }
   };
+  // public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   try {
+  //     const { id } = req.params;
+  //     const courses: Course[] = await this.courseService.findAllTeacherCourses(id as string);
+
+  //     res.status(200).json({ data: courses, message: 'findAll' });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
   public findCoursesByTag = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { tag } = req.params;
-    
-        const courses: Course[] = await this.courseService.findAllByTag(tag);
 
-        res.status(200).json({ data: courses, message: `findAll courses by tag: ${tag} ` });
+      const courses: Course[] = await this.courseService.findAllByTag(tag);
 
-      
-
+      res.status(200).json({ data: courses, message: `findAll courses by tag: ${tag} ` });
     } catch (error) {
       next(error);
     }
@@ -72,13 +62,10 @@ export class CourseController {
   public findCoursesByTextSearch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { phras } = req.params;
-    
-        const courses: Course[] = await this.courseService.findAllByTextSearch(phras);
 
-        res.status(200).json({ data: courses, message: `findAll courses about : ${phras} ` });
+      const courses: Course[] = await this.courseService.findAllByTextSearch(phras);
 
-      
-
+      res.status(200).json({ data: courses, message: `findAll courses about : ${phras} ` });
     } catch (error) {
       next(error);
     }
@@ -86,13 +73,10 @@ export class CourseController {
   public findCoursesBySubTextSearch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { phras } = req.params;
-    
-        const courses: Course[] = await this.courseService.findAllBySubTextSearch(phras);
 
-        res.status(200).json({ data: courses, message: `findAll courses about : ${phras} ` });
+      const courses: Course[] = await this.courseService.findAllBySubTextSearch(phras);
 
-      
-
+      res.status(200).json({ data: courses, message: `findAll courses about : ${phras} ` });
     } catch (error) {
       next(error);
     }
@@ -133,7 +117,7 @@ export class CourseController {
   public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const isAdmin = req.user.isAdmin;
-    
+
     const publish_status: Status = req.body.publish_status;
     const publish_status_reson: string = req.body.publish_status_reson;
     try {
