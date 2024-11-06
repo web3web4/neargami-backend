@@ -68,7 +68,7 @@ export class AuthService {
     } else {
       challange = randomBytes(32).toString('base64');
       message =
-        'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://eargami.com/privacy-policyand our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
+        'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://neargami.com/privacy-policy and our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
     }
     console.log({ challange, message });
     return { challange, message };
