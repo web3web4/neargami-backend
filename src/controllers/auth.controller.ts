@@ -72,9 +72,8 @@ export class AuthController {
   };
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // const userData: User = req.body;
-      const signUpUserData: User = await this.auth.createUser(req.body);
-      const authenticate = await this.auth.authenticate(req.body);
+      const signUpUserData: User = await this.auth.validateAndCreateUser(req.body);
+      const authenticate = await this.auth.createToken(signUpUserData.id);
       res.status(201).json({ data: { signUpUserData, authenticate }, message: 'signup' });
     } catch (error) {
       next(error);
