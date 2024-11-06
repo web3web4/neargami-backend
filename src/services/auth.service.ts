@@ -20,15 +20,15 @@ class Payload {
   public message: string;
   public nonce: Buffer;
   public recipient: string;
-  // public callbackUrl?: string;
+  public callbackUrl?: string;
 
   constructor({ message, nonce, recipient, callbackUrl }: { message: string; nonce: Buffer; recipient: string; callbackUrl?: string }) {
     this.message = message;
     this.nonce = nonce;
     this.recipient = recipient;
-    // if (callbackUrl) {
-    //   this.callbackUrl = callbackUrl;
-    // }
+    if (callbackUrl) {
+      this.callbackUrl = callbackUrl;
+    }
   }
 }
 
@@ -39,7 +39,7 @@ const payloadSchema = {
     message: 'string',
     nonce: { array: { type: 'u8', len: 32 } },
     recipient: 'string',
-    // callbackUrl: { option: 'string' },
+    callbackUrl: { option: 'string' },
   },
 };
 
@@ -62,9 +62,6 @@ export class AuthService {
         challange: challange1,
       },
     });
-    // TODO: delete the next 2 lines
-    const challangelogs = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }] } });
-    console.log('challangelogs', challangelogs);
     return newchallangelog;
   }
   public async checkUser(accountid: string) {
@@ -85,10 +82,6 @@ export class AuthService {
     return nullsignature;
   }
   public async returnSameChallenge(accountid: string) {
-    // TODO: delete the next 2 lines
-    const challangelogs = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }] } });
-    console.log('challangelogs', challangelogs);
-
     const challangelog = await this.challangelog.findFirst({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
     const challange = challangelog.challange;
     const message =
@@ -96,8 +89,8 @@ export class AuthService {
     return { challange, message };
   }
   public async checkChallenge(accountId: string) {
-    //check if there no challenge or if challenge is exsist with signature then generate new challenge
-    //if challenge exsist without signature then return challenge
+    //check if there no challenge or if challenge is exist with signature then generate new challenge
+    //if challenge exist without signature then return challenge
     const check = await this.challangelog.findMany({});
     let challange: string;
     let message: string;
@@ -113,38 +106,25 @@ export class AuthService {
     }
     console.log({ challange, message });
     return { challange, message };
-
-    //const createnewchallangelog = await this.challangelog.create({ data });
   }
   public async getallchallangeLog() {
     const challangelog = await this.challangelog.findMany({});
     return challangelog;
   }
-  public async createUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID) {
-    const authValid = await this.isAuthenticationValid({ accountId, publicKey, signature }, networkId);
-    if (!authValid) {
-      throw new HttpException(400, 'Authentication Failed');
-    }
+  public async validateAndCreateUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID) {
+    await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
 
-    const challangelog = await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
+    await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
 
     const user = await this.users.upsert({
       where: { address: accountId },
-      // ???: هليتم تخزين التشالينج في الهاتف، صحيح هذا مبدئيا فنتركه كما هو؟
+      //TODO: check saving challenge field
       create: { address: accountId, message, signature, phone: challenge },
       update: { message, signature },
     });
     return user;
   }
 
-  public async authenticate({ accountId, publicKey, signature }, networkId = NETWORK_ID) {
-    if (!(await this.isAuthenticationValid({ accountId, publicKey, signature }, networkId))) {
-      // ???: هلهل الأفضل رمي خطأ أم إعادة متحول فيه رسالة خطأ؟ ما هي الطريقة المستخدمة في بقية التوابع؟:
-      throw new Error('Authentication failed!');
-    }
-    const user = await this.users.findFirst({ where: { address: accountId } });
-    return this.createToken(user.id);
-  }
   // Aux method
   private async fetch_all_user_keys({ accountId }, networkId) {
     try {
@@ -180,7 +160,7 @@ export class AuthService {
   //   const message = "Login with near";
   //   return { challenge, message };
   // }
-  public async isAuthenticationValid({ accountId, publicKey, signature }, networkId) {
+  public async ensureAuthentication({ accountId, publicKey, signature }, networkId) {
     // A user is correctly authenticated if:
     // - The key used to sign belongs to the user and is a Full Access Key
     // - The object signed contains the right message and domain
@@ -196,7 +176,9 @@ export class AuthService {
     const valid_signature = this.verifySignature({ publicKey, signature }, originalMessageObject);
     console.log('isAuthenticationValid(...) -> Is the Signature Valid?', valid_signature);
 
-    return valid_signature && full_key_of_user;
+    if (!(valid_signature && full_key_of_user)) {
+      throw new HttpException(400, 'Authentication Failed');
+    }
   }
 
   public verifySignature({ publicKey, signature }, originalMessageObject: ChallengeObject) {
