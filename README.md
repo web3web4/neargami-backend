@@ -16,11 +16,11 @@ to start you need to put these environment variables
   and then run these commands
 
 ```
-npm i
+yarn
 docker compose up -d
-npm run prisma:init
-npm run prisma:migrate
-npm run dev
+yarn run prisma:init
+yarn run prisma:migrate
+yarn run dev
 ```
 
 # License

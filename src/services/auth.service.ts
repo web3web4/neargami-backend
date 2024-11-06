@@ -1,8 +1,8 @@
 import Container, { Service } from 'typedi';
 import { randomBytes } from 'crypto';
 import axios from 'axios';
-import borsh from 'borsh';
-import nearApiJs from 'near-api-js';
+import { serialize } from 'borsh';
+import { utils as nearApiJsUtils } from 'near-api-js';
 import { sha256 } from 'js-sha256';
 import { DataStoredInToken, TokenData } from '@/interfaces/auth.interface';
 import { SECRET_KEY } from '@/config';
@@ -10,6 +10,7 @@ import { sign } from 'jsonwebtoken';
 import { challangelog, User } from '@prisma/client';
 import { CreateUserDto } from '@/dtos/users.dto';
 import { PrismaService } from './prisma.service';
+import { HttpException } from '@/exceptions/HttpException';
 
 const NETWORK_ID = process.env.NETWORK_ID ?? 'testnet';
 
@@ -17,17 +18,17 @@ type ChallengeObject = { message: string; nonce: string; recipient: string; call
 class Payload {
   public tag = 2147484061;
   public message: string;
-  public nonce: string;
+  public nonce: Buffer;
   public recipient: string;
-  public callbackUrl?: string;
+  // public callbackUrl?: string;
 
-  constructor({ message, nonce, recipient, callbackUrl }: { message: string; nonce: string; recipient: string; callbackUrl?: string }) {
+  constructor({ message, nonce, recipient, callbackUrl }: { message: string; nonce: Buffer; recipient: string; callbackUrl?: string }) {
     this.message = message;
     this.nonce = nonce;
     this.recipient = recipient;
-    if (callbackUrl) {
-      this.callbackUrl = callbackUrl;
-    }
+    // if (callbackUrl) {
+    //   this.callbackUrl = callbackUrl;
+    // }
   }
 }
 
@@ -38,7 +39,7 @@ const payloadSchema = {
     message: 'string',
     nonce: { array: { type: 'u8', len: 32 } },
     recipient: 'string',
-    callbackUrl: { option: 'string' },
+    // callbackUrl: { option: 'string' },
   },
 };
 
@@ -61,6 +62,9 @@ export class AuthService {
         challange: challange1,
       },
     });
+    // TODO: delete the next 2 lines
+    const challangelogs = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }] } });
+    console.log('challangelogs', challangelogs);
     return newchallangelog;
   }
   public async checkUser(accountid: string) {
@@ -81,7 +85,11 @@ export class AuthService {
     return nullsignature;
   }
   public async returnSameChallenge(accountid: string) {
-    const challangelog = await this.challangelog.findLast({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
+    // TODO: delete the next 2 lines
+    const challangelogs = await this.challangelog.findMany({ where: { AND: [{ accountId: accountid }] } });
+    console.log('challangelogs', challangelogs);
+
+    const challangelog = await this.challangelog.findFirst({ where: { AND: [{ accountId: accountid }, { signature: null }] } });
     const challange = challangelog.challange;
     const message =
       'By using our service you automatically acknowledge and agree to our Privacy Policy existed at: https://neargami.com/privacy-policy and our Legal Disclaimer existed at https://neargami.com/legal-disclaimer.';
@@ -112,10 +120,11 @@ export class AuthService {
     const challangelog = await this.challangelog.findMany({});
     return challangelog;
   }
-  public async createUser({ accountId, publicKey, signature, challenge, message }) {
-    // ???: هل يلزم استخدام الكود التالي:
-    // const authValid = await this.isAuthenticationValid({ accountId, publicKey, signature }, networkId)
-    // if(!authValid) { throw some error or return some error }
+  public async createUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID) {
+    const authValid = await this.isAuthenticationValid({ accountId, publicKey, signature }, networkId);
+    if (!authValid) {
+      throw new HttpException(400, 'Authentication Failed');
+    }
 
     const challangelog = await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
 
@@ -191,17 +200,24 @@ export class AuthService {
   }
 
   public verifySignature({ publicKey, signature }, originalMessageObject: ChallengeObject) {
-    // Reconstruct the payload that was **actually signed**
-    const payload = new Payload(originalMessageObject);
-    const borsh_payload = borsh.serialize(payloadSchema, payload);
-    const to_sign = Uint8Array.from(sha256.array(borsh_payload));
+    try {
+      // Reconstruct the payload that was **actually signed**
+      const payload = new Payload({
+        ...originalMessageObject,
+        nonce: Buffer.from(originalMessageObject.nonce, 'base64'),
+      });
+      const borsh_payload = serialize(payloadSchema, payload);
+      const to_sign = Uint8Array.from(sha256.array(borsh_payload));
 
-    // Reconstruct the signature from the parameter given in the URL
-    let real_signature = Buffer.from(signature, 'base64');
+      // Reconstruct the signature from the parameter given in the URL
+      let real_signature = Buffer.from(signature, 'base64');
 
-    // Use the public Key to verify that the private-counterpart signed the message
-    const myPK = nearApiJs.utils.PublicKey.from(publicKey);
-    return myPK.verify(to_sign, real_signature);
+      // Use the public Key to verify that the private-counterpart signed the message
+      const myPK = nearApiJsUtils.PublicKey.from(publicKey);
+      return myPK.verify(to_sign, real_signature);
+    } catch (error) {
+      throw error;
+    }
   }
   public async verifyFullKeyBelongsToUser({ publicKey, accountId }, networkId) {
     // Call the public RPC asking for all the users' keys
