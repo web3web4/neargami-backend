@@ -30,7 +30,23 @@ export class UserCoursesMappingService {
   async findAll(user_id: string): Promise<UserCoursesMapping[]> {
     const userCourses = await this.prisma.userCoursesMapping.findMany({
       where: { user_id },
-      include: { user: { include: { userLecture: true } }, course: { include: { teacher: true, lecture: { include: { question: true } } } } },
+      include: {
+        user: { include: { userLecture: true } },
+        course: {
+          include: {
+            teacher: true,
+            lecture: { include: { question: true } },
+          },
+        },
+      },
+    });
+
+    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
     });
     const result = userCourses.map(courseMapping => {
       const endedLecturesCount = courseMapping.user.userLecture.filter(
@@ -39,9 +55,10 @@ export class UserCoursesMappingService {
       const questionCounts = courseMapping.course.lecture.reduce((total, lecture) => {
         return total + lecture.question.length;
       }, 0);
-
+      const counts = userCoursesCounts.find(c => c.course_id === courseMapping.course_id);
       return {
         ...courseMapping,
+        counts,
         endedLecturesCount,
         totalPoints: questionCounts * 10,
       };

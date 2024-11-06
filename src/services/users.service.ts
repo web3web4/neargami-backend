@@ -50,7 +50,7 @@ export class UserService {
 
   public async findAllUser(): Promise<any> {
     const allUsers = await this.prismaUser.findMany({
-      omit: { address: true, message: true, signature: true },
+      omit: { message: true, signature: true },
       orderBy: { top_points: 'desc' },
     });
     return allUsers;
