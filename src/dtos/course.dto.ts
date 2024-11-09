@@ -17,6 +17,9 @@ export class CreateCourseDto {
   @MaxLength(150)
   public title: string;
   @IsString()
+  @IsOptional()
+  public language?: string;
+  @IsString()
   public logo?: string;
   @IsString()
   public description?: string;
@@ -24,7 +27,6 @@ export class CreateCourseDto {
   @MaxLength(10)
   public difficulty?: string;
   public tag?: string;
- 
 }
 
 export class UpdateCourseDto {
@@ -45,6 +47,9 @@ export class UpdateCourseDto {
   @IsString()
   @IsOptional()
   public difficulty?: string;
+  @IsString()
+  @IsOptional()
+  public language?: string;
   @IsString()
   @IsOptional()
   public video?: string;
