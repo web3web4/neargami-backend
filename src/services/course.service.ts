@@ -96,6 +96,21 @@ export class CourseService {
     }));
     return AllCourses;
   }
+  public async findAllPage({ offset, limit }: { offset: number; limit: number }): Promise<Course[]> {
+    const paginatedCourses: Course[] = await this.course.findMany({
+      skip: offset, // Skip the specified number of records
+      take: limit, // Limit the number of records fetched
+      include: { teacher: true }, // Include related teacher information
+    });
+    return paginatedCourses;
+  }
+
+  public async countAll(): Promise<number> {
+    const totalCourses: number = await this.course.count();
+    return totalCourses;
+  }
+  
+
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;

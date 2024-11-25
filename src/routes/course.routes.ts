@@ -17,6 +17,7 @@ export class CourseRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get('/courses/page', this.courseController.findAllCoursesPage);
     this.router.get('/courses', AuthMiddleware, this.courseController.findAllCourses);
     this.router.get('/courses/teacher/:id', AuthMiddleware, this.courseController.findTeacherCourses);
     this.router.get('/courses/status/:id', this.courseController.findCoursesByStatus);
