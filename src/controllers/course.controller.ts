@@ -8,6 +8,36 @@ import { Course } from '@prisma/client';
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   public courseService = Container.get(CourseService);
+  public findAllCoursesPage = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page = 1, limit = 10 } = req.query; // Extract page and limit from query parameters
+      const pageNumber = Math.max(1, parseInt(page as string, 10)); // Ensure page is a positive integer
+      const limitNumber = Math.max(1, parseInt(limit as string, 10)); // Ensure limit is a positive integer
+  
+      // Calculate offset for pagination
+      const offset = (pageNumber - 1) * limitNumber;
+  
+      // Fetch courses with pagination
+      const courses: Course[] = await this.courseService.findAllPage({ offset, limit: limitNumber });
+  
+      // Fetch total count for calculating total pages
+      const totalCourses: number = await this.courseService.countAll();
+      const totalPages = Math.ceil(totalCourses / limitNumber);
+  
+      res.status(200).json({
+        data: courses,
+        meta: {
+          totalItems: totalCourses,
+          totalPages,
+          currentPage: pageNumber,
+          itemsPerPage: limitNumber,
+        },
+        message: 'findAll with pagination',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public findAllCourses = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
