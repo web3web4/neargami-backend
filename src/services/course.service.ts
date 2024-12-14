@@ -80,18 +80,37 @@ export class CourseService {
     });
     if (id === 'ALL') {
       AllCourses = await this.course.findMany({
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
+        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
       });
     } else {
       AllCourses = await this.course.findMany({
         where: { publish_status: id as Status },
 
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: true, teacher: true },
+        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
       });
     }
-    AllCourses = AllCourses.map(course => ({ ...course, counts: userCoursesCounts.find(c => c.course_id === course.id) }));
+    AllCourses = (AllCourses as any).map(course => ({
+      ...course,
+      counts: userCoursesCounts.find(c => c.course_id === course.id),
+      total_score: course.lecture.reduce((total, lecture) => total + lecture.question.length * 10, 0),
+    }));
     return AllCourses;
   }
+  public async findAllPage({ offset, limit }: { offset: number; limit: number }): Promise<Course[]> {
+    const paginatedCourses: Course[] = await this.course.findMany({
+      skip: offset, // Skip the specified number of records
+      take: limit, // Limit the number of records fetched
+      include: { teacher: true }, // Include related teacher information
+    });
+    return paginatedCourses;
+  }
+
+  public async countAll(): Promise<number> {
+    const totalCourses: number = await this.course.count();
+    return totalCourses;
+  }
+  
+
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;

@@ -52,6 +52,7 @@ export class UserController {
     const id: string = req.params.id;
     try {
       const userone = await this.user.findOneById(id);
+      console.log(userone);
 
       if (userone) {
         res

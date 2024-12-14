@@ -55,11 +55,16 @@ export class UserService {
     });
     return allUsers;
   }
-  public async findOneById(uid: string): Promise<User> {
+  public async findOneById(uid: string): Promise<any> {
     if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
-    const user = this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
+    const user = await this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
     if (!user) throw new HttpException(404, "User doesn't exist");
-    return user;
+    const claimsSum = await this.prisma.claims.aggregate({
+      _sum: { ngc_claimed: true },
+      where: { user_id: uid, executed: false },
+    });
+
+    return { ...user, ngc_claimed: claimsSum._sum.ngc_claimed || 0 };
   }
 
   public async getUserGame(id: string): Promise<any> {

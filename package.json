@@ -4,8 +4,10 @@
   "description": "TypeScript + Prisma + MySQL + Express API Server",
   "author": "",
   "license": "ISC",
+  "main": "src/app.js",
   "scripts": {
-    "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
+    "start": "node src/app.js",
+ 
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
     "build:tsc": "tsc && tsc-alias",

@@ -79,6 +79,7 @@ model Course {
   video              String?
   logo               String?
   tag                String?              @db.Text
+  language           String               @default("english")
   lecture            Lecture[]
   teacher            User                 @relation(fields: [teacher_user_id], references: [id])
   userCourses        UserCoursesMapping[]

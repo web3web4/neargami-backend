@@ -16,6 +16,7 @@ to start you need to put these environment variables
   and then run these commands
 
 ```
+
 yarn
 docker compose up -d
 yarn run prisma:init
