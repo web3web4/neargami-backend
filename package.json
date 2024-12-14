@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node src/app.js",
  
-    "vercel-build": "yarn && npm run prisma:migrate  "
+    "vercel-build": "yarn && npm run prisma:migrate  ",
  
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
