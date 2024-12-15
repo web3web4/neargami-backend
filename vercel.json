@@ -5,9 +5,9 @@
    "src": "src/app.ts",
    "use": "@vercel/node",
    "config": { 
-    "includeFiles": ["dist/**", "node_modules/**"]
-    ,
-      "excludeFiles": [ "prisma/**"] 
+    "includeFiles": ["dist/**"]
+      ,
+     "excludeFiles": [ "prisma/**", "node_modules/**"] 
       }
   
   }
