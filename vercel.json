@@ -4,7 +4,12 @@
   {
    "src": "src/app.ts",
    "use": "@vercel/node",
-   "config": { "includeFiles": ["dist/**", "node_modules/**"] }
+   "config": { 
+    "includeFiles": ["dist/**", "node_modules/**"]
+    ,
+      "excludeFiles": [ "prisma/**"] 
+      }
+  
   }
  ],
  "routes": [
