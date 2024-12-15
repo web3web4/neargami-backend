@@ -26,6 +26,7 @@
     "schema": "src/prisma/schema.prisma"
   },
   "dependencies": {
+      "tslib": "^2.0.0",
      "config": "^1.0.0",
     "@prisma/client": "^5.21.1",
     "axios": "^1.7.7",
