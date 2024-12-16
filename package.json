@@ -4,12 +4,10 @@
   "description": "TypeScript + Prisma + MySQL + Express API Server",
   "author": "",
   "license": "ISC",
-  "main": "src/app.js",
+  "main": "src/app.ts",
   "scripts": {
-    "start": "node src/app.js",
- 
-    "vercel-build": "npm cache clean --force &&   npm install  &&  npm install typescript tslib --save &&  npm run build  && npm run prisma:migrate  ",
- 
+    "start": "node dist/app.js",
+    "vercel-build": "npm cache clean --force && npm run build  && npm run prisma:migrate  ",
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
     "build:tsc": "tsc && tsc-alias",
@@ -26,8 +24,8 @@
     "schema": "src/prisma/schema.prisma"
   },
   "dependencies": {
-      "tslib": "^2.0.0",
-     "config": "^1.0.0",
+    "tslib": "^2.0.0",
+    "config": "^1.0.0",
     "@prisma/client": "^5.21.1",
     "axios": "^1.7.7",
     "bcrypt": "^5.0.1",
@@ -93,7 +91,6 @@
     "typescript": "^4.7.4"
   },
   "engines": {
-  "node": "18.20.4"
-}
-
+    "node": "18.20.4"
+  }
 }
