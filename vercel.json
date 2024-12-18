@@ -9,11 +9,10 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/server.js"
+      "dest": "src/server.ts"
     }
   ],
   "buildCommand": "npm run build  && npm run prisma:migrate",
   "installCommand": "npm install",
-  "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/src/server.ts" }]
+  "outputDirectory": "dist"
 }
