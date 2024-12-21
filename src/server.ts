@@ -1,6 +1,6 @@
-import { App } from '@/app';
-import { UserRoute } from '@/routes/users.routes';
-import { ValidateEnv } from '@utils/validateEnv';
+import { App } from './app';
+import { UserRoute } from './routes/users.routes';
+import { ValidateEnv } from './utils/validateEnv';
 import { CourseRoute } from './routes/course.routes';
 import { lectureRoute } from './routes/lecture.routes';
 import { QuestionRoute } from './routes/question.routes';
