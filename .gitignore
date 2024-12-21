@@ -5,3 +5,4 @@ dist
 src/logs
 logs
 .history
+.vercel
