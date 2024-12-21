@@ -5,6 +5,41 @@
   "author": "",
   "license": "ISC",
   "main": "src/app.ts",
+  "paths": {
+    "@/*": [
+      "src/*"
+    ],
+    "@server": [
+      "src/server"
+    ],
+    "@config": [
+      "src/config"
+    ],
+    "@controllers/*": [
+      "src/controllers/*"
+    ],
+    "@dtos/*": [
+      "src/dtos/*"
+    ],
+    "@exceptions/*": [
+      "src/exceptions/*"
+    ],
+    "@interfaces/*": [
+      "src/interfaces/*"
+    ],
+    "@middlewares/*": [
+      "src/middlewares/*"
+    ],
+    "@routes/*": [
+      "src/routes/*"
+    ],
+    "@services/*": [
+      "src/services/*"
+    ],
+    "@utils/*": [
+      "src/utils/*"
+    ]
+  },
   "scripts": {
     "start": "node dist/app.js",
     "vercel-build": "npm cache clean --force && npm run build  && npm run prisma:migrate  ",
