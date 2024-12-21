@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build  && npm run prisma:migrate",
   "installCommand": "npm install",
-  "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/dist/app.js" }]
+  "outputDirectory": "dist"
 }
