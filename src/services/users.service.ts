@@ -1,11 +1,10 @@
 import { Claims, PrismaClient, User } from '@prisma/client';
 import Container, { Service } from 'typedi';
-import { CreateUserDto } from '@dtos/users.dto';
-import { UpdateUserDto } from '@dtos/users.dto';
-import { IUser } from '@/interfaces/user.interface';
-import { HttpException } from '@/exceptions/HttpException';
+import { CreateUserDto, UpdateUserDto } from '../dtos/users.dto';
+import { IUser } from '../interfaces/user.interface';
+import { HttpException } from '../exceptions/HttpException';
 import { PrismaService } from './prisma.service';
-import { SUPER_ADMIN_PASS } from '@/config';
+import { SUPER_ADMIN_PASS } from '../config';
 
 @Service()
 export class UserService {

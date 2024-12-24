@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container, Inject, Service } from 'typedi';
-import { RequestWithUser } from '@interfaces/auth.interface';
-import { IUser } from '@/interfaces/user.interface';
-import { AuthService } from '@services/auth.service';
+import { AuthService } from '../services/auth.service';
 import { User, challangelog } from '@prisma/client';
 import Jwt from 'jsonwebtoken';
 @Service()
@@ -13,8 +11,8 @@ export class AuthController {
   public validate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // const userData: User = req.body;
-      const signUpUserData = await this.auth.authenticate(req.body);
-      res.status(201).json({ data: signUpUserData, message: 'signup' });
+      // const signUpUserData = await this.auth.authenticate(req.body);
+      res.status(201).json({ data: 'signUpUserData', message: 'signup' });
     } catch (error) {
       next(error);
     }

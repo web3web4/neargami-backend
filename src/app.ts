@@ -8,10 +8,10 @@ import hpp from 'hpp';
 import morgan from 'morgan';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
-import { Routes } from '@interfaces/routes.interface';
-import { ErrorMiddleware } from '@middlewares/error.middleware';
-import { logger, stream } from '@utils/logger';
+import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from './config';
+import { Routes } from './interfaces/routes.interface';
+import { ErrorMiddleware } from './middlewares/error.middleware';
+import { logger, stream } from './utils/logger';
 import { Container } from 'typedi';
 import winston from 'winston';
 //import errorHandler from '../src/middlewares/error.middleware'; // Adjust the path to your middleware

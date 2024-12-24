@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Container, { Service } from 'typedi';
 
-import { ClaimsService } from '@/services/claims.service';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { ClaimsService } from '../services/claims.service';
+import { RequestWithUser } from '../interfaces/auth.interface';
 
 @Service() // Add this decorator to register CourseController
 export class ClaimsController {

@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
-import { HttpException } from '@/exceptions/HttpException';
-import { SECRET_KEY } from '@/config';
+import { DataStoredInToken, RequestWithUser } from '../interfaces/auth.interface';
+import { HttpException } from '../exceptions/HttpException';
+import { SECRET_KEY } from '../config';
 import { verify } from 'jsonwebtoken';
 
 const getAuthorization = (req: RequestWithUser) => {

@@ -1,7 +1,7 @@
 import { UserCoursesMapping } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { CourseService } from './course.service';
-import { HttpException } from '@/exceptions/HttpException';
+import { HttpException } from '../exceptions/HttpException';
 import { PrismaService } from './prisma.service';
 
 @Service()

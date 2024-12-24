@@ -1,4 +1,4 @@
-import { IQuestion } from "./question.interface";
+import { IQuestion } from './question.interface';
 
 export interface IAnswer {
   id: bigint;

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { QuestionService } from '../services/question.service';
 import { CreateQuestionDto, UpdateQuestionDto } from '../dtos/question.dto';
 import Container, { Service } from 'typedi';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithUser } from '../interfaces/auth.interface';
 
 @Service()
 export class QuestionController {

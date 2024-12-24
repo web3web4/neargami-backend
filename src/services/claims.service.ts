@@ -1,8 +1,8 @@
 import { PrismaClient, Claims } from '@prisma/client';
 import Container, { Service } from 'typedi';
-import { HttpException } from '@/exceptions/HttpException';
+import { HttpException } from '../exceptions/HttpException';
 import { connect, WalletConnection, keyStores, KeyPair, Contract } from 'near-api-js';
-import { PRIVATE_KEY } from '@/config';
+import { PRIVATE_KEY } from '../config';
 import { KeyPairString } from 'near-api-js/lib/utils';
 import { PrismaService } from './prisma.service';
 @Service()

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import Container, { Service } from 'typedi';
 import { CourseService } from '../services/course.service';
 import { CreateCourseDto, Status, UpdateCourseDto } from '../dtos/course.dto';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithUser } from '../interfaces/auth.interface';
 import { Course } from '@prisma/client';
 
 @Service() // Add this decorator to register CourseController
@@ -13,17 +13,17 @@ export class CourseController {
       const { page = 1, limit = 10 } = req.query; // Extract page and limit from query parameters
       const pageNumber = Math.max(1, parseInt(page as string, 10)); // Ensure page is a positive integer
       const limitNumber = Math.max(1, parseInt(limit as string, 10)); // Ensure limit is a positive integer
-  
+
       // Calculate offset for pagination
       const offset = (pageNumber - 1) * limitNumber;
-  
+
       // Fetch courses with pagination
       const courses: Course[] = await this.courseService.findAllPage({ offset, limit: limitNumber });
-  
+
       // Fetch total count for calculating total pages
       const totalCourses: number = await this.courseService.countAll();
       const totalPages = Math.ceil(totalCourses / limitNumber);
-  
+
       res.status(200).json({
         data: courses,
         meta: {

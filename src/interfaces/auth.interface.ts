@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { IUser } from '@/interfaces/user.interface';
+import { IUser } from '../interfaces/user.interface';
 import { User } from '@prisma/client';
 
 export interface DataStoredInToken {

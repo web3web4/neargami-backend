@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { ILecture } from '../interfaces/lecture.interface';
+import { LectureWithRelations } from '../interfaces/lecture.interface';
 import { IUserCoursesMapping } from '../interfaces/user-courses-mapping.interface';
 import { Status } from '@/dtos/course.dto';
 
@@ -13,10 +13,10 @@ export interface ICoursewithoutUserId {
   publish_status?: Status;
   name?: string;
   description?: string;
-  difficulty     ?:string;
-  video          ?:string;
-   logo          ?:string;
-  lectures?: ILecture[];
+  difficulty?: string;
+  video?: string;
+  logo?: string;
+  lectures?: LectureWithRelations[];
   userCourses?: IUserCoursesMapping[];
 }
 
@@ -26,10 +26,10 @@ export interface ICoursefull {
   publish_status?: Status;
   name?: string;
   description?: string;
-  difficulty     ?:string;
-  video          ?:string;
-   logo          ?:string;
-  lectures?: ILecture[];
+  difficulty?: string;
+  video?: string;
+  logo?: string;
+  lectures?: LectureWithRelations[];
   userCourses?: IUserCoursesMapping[];
   teacher_user_id: string;
 }

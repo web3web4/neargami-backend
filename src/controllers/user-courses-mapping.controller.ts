@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import { UserCoursesMappingService } from '../services/user-courses-mapping.service';
 import { CreateUserCoursesMappingDto, UpdateUserCoursesMappingDto } from '../dtos/user-courses-mapping.dto';
 import Container, { Inject, Service } from 'typedi';
-import { IUserCoursesMapping } from '@/interfaces/user-courses-mapping.interface';
+import { IUserCoursesMapping } from '../interfaces/user-courses-mapping.interface';
 import { UserCoursesMapping } from '@prisma/client';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithUser } from '../interfaces/auth.interface';
 
 @Service()
 export class UserCoursesMappingController {

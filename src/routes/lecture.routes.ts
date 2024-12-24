@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { LectureController } from '../controllers/lecture.controller';
 import { Service, Container } from 'typedi';
-import { Routes } from '@/interfaces/routes.interface';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
-import { ValidationMiddleware } from '@/middlewares/validation.middleware';
-import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '@/dtos/lecture.dto';
+import { Routes } from '../interfaces/routes.interface';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
+import { ValidationMiddleware } from '../middlewares/validation.middleware';
+import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class lectureRoute implements Routes {

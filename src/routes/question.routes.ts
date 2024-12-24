@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { QuestionController } from '../controllers/question.controller';
 import { Service, Container } from 'typedi';
-import { Routes } from '@/interfaces/routes.interface';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
-import { ValidationMiddleware } from '@/middlewares/validation.middleware';
-import { CreateQuestionDto, UpdateQuestionDto } from '@/dtos/question.dto';
+import { Routes } from '../interfaces/routes.interface';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
+import { ValidationMiddleware } from '../middlewares/validation.middleware';
+import { CreateQuestionDto, UpdateQuestionDto } from '../dtos/question.dto';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class QuestionRoute implements Routes {

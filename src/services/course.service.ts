@@ -1,8 +1,8 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import Container, { Service } from 'typedi';
-import { HttpException } from '@/exceptions/HttpException';
-import { SUPER_ADMIN_PASS } from '@/config';
+import { HttpException } from '../exceptions/HttpException';
+import { SUPER_ADMIN_PASS } from '../config';
 import { PrismaService } from './prisma.service';
 @Service()
 export class CourseService {
@@ -109,7 +109,6 @@ export class CourseService {
     const totalCourses: number = await this.course.count();
     return totalCourses;
   }
-  
 
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });

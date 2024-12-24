@@ -2,7 +2,7 @@ import { Question } from '@prisma/client';
 import { CreateQuestionDto, UpdateQuestionDto } from '../dtos/question.dto';
 import Container, { Service } from 'typedi';
 import { LectureService } from './lecture.service';
-import { HttpException } from '@/exceptions/HttpException';
+import { HttpException } from '../exceptions/HttpException';
 import { PrismaService } from './prisma.service';
 
 @Service()

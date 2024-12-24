@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { LectureService } from '../services/lecture.service';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithUser } from '../interfaces/auth.interface';
 import { Lecture } from '@prisma/client';
 
 @Service()

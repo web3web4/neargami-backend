@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { UserLectureMappingController } from '../controllers/user-lecture-mapping.controller';
 import { Service, Container } from 'typedi';
-import { Routes } from '@/interfaces/routes.interface';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
+import { Routes } from '../interfaces/routes.interface';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
 
 @Service()
 export class UserLecturesMapping implements Routes {

@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import { UserLectureMappingService } from '../services/user-lecture-mapping.service';
 import Container, { Service } from 'typedi';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithUser } from '../interfaces/auth.interface';
 import { UserLectureMapping } from '@prisma/client';
 
 @Service()

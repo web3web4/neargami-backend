@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm run prisma:migrate",
+  "buildCommand": "npm run prisma:migrate && npm run prisma:generate",
   "installCommand": "npm install",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }] 
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }

@@ -1,5 +1,5 @@
-import { ILecture } from "../interfaces/lecture.interface";
-import { IAnswer } from "../interfaces/answer.interface";
+import { LectureWithRelations } from '../interfaces/lecture.interface';
+import { IAnswer } from '../interfaces/answer.interface';
 
 export interface IQuestion {
   id: bigint;
@@ -7,6 +7,6 @@ export interface IQuestion {
   lecture_id: number;
   sequence?: number;
   score?: number;
-  lecture: ILecture;
+  lecture: LectureWithRelations;
   answer: IAnswer[];
 }

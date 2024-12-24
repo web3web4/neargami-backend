@@ -2,8 +2,8 @@ import { Lecture } from '@prisma/client';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { CourseService } from './course.service';
-import { HttpException } from '@/exceptions/HttpException';
-import { LectureWithRelations } from '@/interfaces/lecture.interface';
+import { HttpException } from '../exceptions/HttpException';
+import { LectureWithRelations } from '../interfaces/lecture.interface';
 import { PrismaService } from './prisma.service';
 
 @Service()

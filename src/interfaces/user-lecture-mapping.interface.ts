@@ -1,5 +1,5 @@
-import { ILecture } from "./lecture.interface";
-import { IUserCoursesMapping } from "./user-courses-mapping.interface";
+import { LectureWithRelations } from './lecture.interface';
+import { IUserCoursesMapping } from './user-courses-mapping.interface';
 
 export interface IUserLectureMapping {
   id: bigint;
@@ -8,6 +8,6 @@ export interface IUserLectureMapping {
   start_at: Date;
   end_at: Date;
   score: number;
-  lecture: ILecture;
+  lecture: LectureWithRelations;
   userCoursesMapping: IUserCoursesMapping;
 }

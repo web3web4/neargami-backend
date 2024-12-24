@@ -2,10 +2,6 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
 import { Routes } from '../interfaces/routes.interface';
 import { Service, Container } from 'typedi';
-import { AuthService } from '@/services/auth.service';
-import { ValidationMiddleware } from '@/middlewares/validation.middleware';
-import { CreateUserDto } from '@/dtos/users.dto';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
 @Service()
 export class AuthRoute implements Routes {
   public path = '/auth/';
@@ -22,7 +18,7 @@ export class AuthRoute implements Routes {
 
   private initializeRoutes() {
     // this.router.post(`${this.path}validate`, this.auth.validate);
-   // this.router.post(`${this.path}checkchallenge`, this.auth.checkChallenge);
+    // this.router.post(`${this.path}checkchallenge`, this.auth.checkChallenge);
     this.router.get(`${this.path}challenge/:accountId`, this.auth.createNewChallenge);
     this.router.get(`${this.path}challenge`, this.auth.createChallenge);
     this.router.get(`${this.path}challengelog`, this.auth.getAllChallangeLog);

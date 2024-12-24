@@ -4,13 +4,13 @@ import axios from 'axios';
 import { serialize } from 'borsh';
 import { utils as nearApiJsUtils } from 'near-api-js';
 import { sha256 } from 'js-sha256';
-import { DataStoredInToken, TokenData } from '@/interfaces/auth.interface';
-import { SECRET_KEY } from '@/config';
+import { DataStoredInToken, TokenData } from '../interfaces/auth.interface';
+import { SECRET_KEY } from '../config';
 import { sign } from 'jsonwebtoken';
 import { challangelog, User } from '@prisma/client';
-import { CreateUserDto } from '@/dtos/users.dto';
+import { CreateUserDto } from '../dtos/users.dto';
 import { PrismaService } from './prisma.service';
-import { HttpException } from '@/exceptions/HttpException';
+import { HttpException } from '../exceptions/HttpException';
 
 const NETWORK_ID = process.env.NETWORK_ID ?? 'testnet';
 

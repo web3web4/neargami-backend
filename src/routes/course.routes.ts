@@ -1,9 +1,8 @@
-import { CourseController } from '@/controllers/course.controller';
-import { CreateCourseDto, UpdateCourseDto } from '@/dtos/course.dto';
-import { Routes } from '@/interfaces/routes.interface';
-import { AuthMiddleware } from '@/middlewares/auth.middleware';
-import { CheckCourseTeacher } from '@/middlewares/course-teacher.middleware';
-import { ValidationMiddleware } from '@/middlewares/validation.middleware';
+import { CourseController } from '../controllers/course.controller';
+import { CreateCourseDto, UpdateCourseDto } from '../dtos/course.dto';
+import { Routes } from '../interfaces/routes.interface';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
+import { ValidationMiddleware } from '../middlewares/validation.middleware';
 import { Router } from 'express';
 import { Service, Container } from 'typedi';
 
