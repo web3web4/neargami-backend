@@ -4,9 +4,31 @@ import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '
 import Container, { Service } from 'typedi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Lecture } from '@prisma/client';
+import multer from 'multer';
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+const app = express();
 
 @Service()
 export class LectureController {
+  public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Assuming the image file is sent as a 'file' field in the request
+      const file = req.file; // Use middleware like multer for handling file uploads
+      if (!file) {
+        res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const fileName = file.originalname; // Use the original file name
+      const response = await this.lectureService.uploadImageToImageKit(file.path, fileName);
+      res.status(200).json({ success: true, data: response });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  };
   public lectureService = Container.get(LectureService);
 
   public create = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -79,3 +101,4 @@ export class LectureController {
     }
   };
 }
+
