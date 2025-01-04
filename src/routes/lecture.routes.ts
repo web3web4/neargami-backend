@@ -5,17 +5,24 @@ import { Routes } from '@/interfaces/routes.interface';
 import { AuthMiddleware } from '@/middlewares/auth.middleware';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '@/dtos/lecture.dto';
-
+import multer from 'multer';
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 @Service() // Register this as a service to ensure DI works across the app
 export class lectureRoute implements Routes {
   public router = Router();
   public lectureController = Container.get(LectureController);
-
+ 
+  //upload = multer({ storage: multer.memoryStorage() }); //
   constructor() {
     this.initializeRoutes();
   }
-
+  upload = multer({ dest: 'uploads/' });
+  storage = multer.memoryStorage();
   private initializeRoutes() {
+    //this.router.post('/uploadImage', this.lectureController.uploadImage);
+    this.router.post('/upload', this.upload.single('file'), this.lectureController.uploadImage);
     this.router.get('/course/:courseId/lectures', AuthMiddleware, this.lectureController.findAll);
     this.router.post(
       '/course/:courseId/lectures',

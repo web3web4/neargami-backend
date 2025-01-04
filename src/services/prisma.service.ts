@@ -5,6 +5,7 @@ import { Service } from 'typedi';
 export class PrismaService {
   public prisma: PrismaClient;
   public user: PrismaClient['user'];
+  public challangelog: PrismaClient['challangelog'];
   public course: PrismaClient['course'];
   public lecture: PrismaClient['lecture'];
   public answer: PrismaClient['answer'];
@@ -17,6 +18,7 @@ export class PrismaService {
   constructor() {
     this.prisma = new PrismaClient();
     this.user = this.prisma.user;
+    this.challangelog = this.prisma.challangelog;
     this.answer = this.prisma.answer;
     this.course = this.prisma.course;
     this.lecture = this.prisma.lecture;
