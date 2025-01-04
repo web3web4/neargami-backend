@@ -5,6 +5,14 @@ import { CourseService } from './course.service';
 import { HttpException } from '../exceptions/HttpException';
 import { LectureWithRelations } from '../interfaces/lecture.interface';
 import { PrismaService } from './prisma.service';
+import ImageKit from 'imagekit';
+import fs from 'fs';
+
+const imagekit = new ImageKit({
+  publicKey: 'public_UwYz1I2ID7IZOXNoogcH+wJvwn0=',
+  privateKey: 'private_msO5wyd+ECoSS/Ua4K5kL+NCzOc=',
+  urlEndpoint: 'https://ik.imagekit.io/lybbxavs0',
+});
 
 @Service()
 export class LectureService {
@@ -18,6 +26,18 @@ export class LectureService {
       throw new HttpException(403, 'Forbidden');
     }
     return this.lecture.create({ data: { course_id, ...createLectureDto } });
+  }
+  async uploadImageToImageKit(filePath: string, fileName: string): Promise<string> {
+    try {
+      const response = await imagekit.upload({
+        file: fs.createReadStream(filePath), // Read the file
+        fileName: fileName,
+      });
+      return response;
+    } catch (error) {
+      console.error('Error in ImageKit service:', error);
+      throw error;
+    }
   }
 
   async findAll(user_id: string, course_id: number): Promise<any> {
