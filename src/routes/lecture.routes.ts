@@ -23,6 +23,9 @@ export class lectureRoute implements Routes {
       ValidationMiddleware(CreateLectureDto, false, true, true),
       this.lectureController.create,
     );
+    this.router.post('/upload', this.upload.single('file'), this.lectureController.uploadImage);
+
+
     this.router.get('/course/:courseId/lectures/:id', AuthMiddleware, this.lectureController.findOne);
     this.router.put(
       '/course/:courseId/lectures/orders',
