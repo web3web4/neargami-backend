@@ -40,7 +40,7 @@ export class LectureController {
     }
   };
 
-  public findAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;
      // const { id: userId } = req.user;
