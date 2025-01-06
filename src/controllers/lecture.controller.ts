@@ -43,8 +43,8 @@ export class LectureController {
   public findAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;
-      const { id: userId } = req.user;
-      const lectures: Lecture[] = await this.lectureService.findAll(userId, +courseId);
+     // const { id: userId } = req.user;
+      const lectures: Lecture[] = await this.lectureService.findAll( +courseId);
 
       res.status(200).send({ data: lectures, message: 'findAll' });
     } catch (error) {
