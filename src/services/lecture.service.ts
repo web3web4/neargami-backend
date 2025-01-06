@@ -40,7 +40,7 @@ export class LectureService {
     }
   }
 
-  async findAll(user_id: string, course_id: number): Promise<any> {
+  async findAll( course_id: number): Promise<any> {
     await this.course.findOne(course_id);
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
