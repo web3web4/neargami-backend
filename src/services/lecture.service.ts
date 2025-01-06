@@ -58,7 +58,7 @@ export class LectureService {
           include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
         },
         question: true,
-        userLecture: { where: { user_id }, select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+        userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
       },
     });
     return { lectures, counts: userCoursesCounts };
