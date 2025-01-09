@@ -1,23 +1,55 @@
 import { PrismaClient, Course } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import Container, { Service } from 'typedi';
-import { HttpException } from '@/exceptions/HttpException';
-import { SUPER_ADMIN_PASS } from '@/config';
+import { HttpException } from '../exceptions/HttpException';
+import { SUPER_ADMIN_PASS } from '../config';
 import { PrismaService } from './prisma.service';
+import { max } from 'class-validator';
 @Service()
 export class CourseService {
-  private prismaService = Container.get(PrismaService);
+private prismaService = Container.get(PrismaService);
   private course = this.prismaService.course;
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
-  public async createNewCourse(teacher_user_id: string, createcourseDto: CreateCourseDto): Promise<Course> {
+
+  // Example usage
+ 
+   // Output: A random UUID like 'e58d48b6-2e34-4c41-9f5d-3bb7b02d3c4e'
+  
+  public async createNewCourse(teacher_user_id:string, data1 : CreateCourseDto,sluge:string): Promise<Course> {
+
     return this.course.create({
       data: {
         teacher_user_id: teacher_user_id,
         publish_status: Status.DRAFT,
-        ...createcourseDto,
+       slug:sluge,
+        ...data1,
       },
     });
+  }
+  public async getLastUserId(): Promise<number | null> {
+    const lastCourse = await this.course.findFirst({
+      orderBy: {
+        id: 'desc', // Sort by ID in descending order
+      },
+      select: {
+        id: true, // Select only the ID field
+      },
+    });
+  
+    return lastCourse?.id+1 || null; // Return the ID or null if no record exists
+  }
+  public async getUserId(id:number): Promise<number | null> {
+    const lastCourse = await this.course.findUnique({
+    where:{id}
+    });
+  
+    return lastCourse?.id || null; // Return the ID or null if no record exists
+  }
+   
+  public async findUniqueCourseBySlug (slug:string): Promise<Course>{
+
+    return this.course.findFirst({where:{slug}});
   }
   public async findAllTeacherCourses(id: string): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
@@ -109,7 +141,6 @@ export class CourseService {
     const totalCourses: number = await this.course.count();
     return totalCourses;
   }
-  
 
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
@@ -124,7 +155,7 @@ export class CourseService {
     return course;
   }
 
-  async update(id: number, userId: string, data: UpdateCourseDto): Promise<Course> {
+  async update(id: number, userId: string, data: UpdateCourseDto,sluge:string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
@@ -132,12 +163,31 @@ export class CourseService {
     if (course.teacher_user_id !== userId) {
       throw new HttpException(403, 'Forbidden');
     }
+   
+    
     return this.course.update({
       where: { id },
-      data,
+      data:{
+        title:data.title,
+        publish_status:data.publish_status,
+        name:data.name,
+        description:data.description,
+        difficulty:data.difficulty,
+        language:data.language,
+        video:data.video,
+        logo:data.logo,
+        tag:data.tag,
+         slug:sluge,
+
+      },
     });
   }
-  async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string): Promise<Course> {
+  async findUniqueByTitle (id: number):Promise<Course>{
+
+    const course = await this.course.findUnique( { where: { id } });
+    return course;
+  }
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string,sluge:string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
@@ -164,9 +214,12 @@ export class CourseService {
         course_id: course.id,
       },
     });
+    // const sluge=this.stringToSlug(course.title,course.id);
     return this.course.update({
       where: { id },
-      data: { publish_status: publish_status },
+      data: { publish_status: publish_status,
+         slug:sluge
+       },
     });
   }
 
