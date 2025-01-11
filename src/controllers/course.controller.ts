@@ -7,8 +7,22 @@ import { Course } from '@prisma/client';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
+
   public courseService = Container.get(CourseService);
- 
+  public makeAllCoursesHaveSlug=async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> =>{
+try{
+const AllCourses=await this.courseService.findAll();
+for (let i=0;i<AllCourses.length;i++){
+  this.stringToSlugById(AllCourses[i].title,AllCourses[i].id);
+}
+res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
+} catch (error) {
+      next(error);
+    }
+  }
+
+
+
   public findAllCoursesPage = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = 1, limit = 10 } = req.query; // Extract page and limit from query parameters

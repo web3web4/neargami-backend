@@ -18,6 +18,7 @@ export class CourseRoute implements Routes {
 //
 //
   private initializeRoutes() {
+    this.router.get('/courses/slug', this.courseController.makeAllCoursesHaveSlug);
     this.router.get('/courses/page', this.courseController.findAllCoursesPage);
     this.router.get('/courses/:slug', this.courseController.findCourseBySlug);
     this.router.get('/courses', this.courseController.findAllCourses);
@@ -27,7 +28,7 @@ export class CourseRoute implements Routes {
     this.router.get('/courses/search/:phras', this.courseController.findCoursesByTextSearch);
     this.router.get('/courses/full-search/:phras', this.courseController.findCoursesBySubTextSearch);
     this.router.post('/courses', ValidationMiddleware(CreateCourseDto, false, false, true), this.courseController.createCourse);
-    this.router.get('/courses/:id', this.courseController.findCourseById);
+    this.router.get('/courses/:id', AuthMiddleware,this.courseController.findCourseById);
     this.router.put('/courses/:id',AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true),  this.courseController.updateCourse);
     this.router.put('/courses/status/:id',AuthMiddleware, this.courseController.updateCourseStatus);
     this.router.delete('/courses/:id', AuthMiddleware, this.courseController.deleteCourse);
