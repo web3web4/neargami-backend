@@ -11,10 +11,8 @@ export class CourseController {
   public courseService = Container.get(CourseService);
   public makeAllCoursesHaveSlug=async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> =>{
 try{
-const AllCourses=await this.courseService.findAll();
-for (let i=0;i<AllCourses.length;i++){
-  this.stringToSlugById(AllCourses[i].title,AllCourses[i].id);
-}
+
+const AllCourses=await this.courseService.updateForAllSlug();
 res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
 } catch (error) {
       next(error);

@@ -223,6 +223,44 @@ private prismaService = Container.get(PrismaService);
     });
   }
 
+async stringToSlugById(title:string,id:number){
+  const baseSlug = title
+  .toLowerCase() // Convert to lowercase
+  .trim() // Trim whitespace from both ends
+  .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+  .replace(/\s+/g, '-') // Replace spaces with hyphens
+  .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+  .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+
+const uniqueSuffix = id;// Use timestamp for uniqueness
+return `${baseSlug}-${uniqueSuffix}`;
+
+
+}
+async updateForAllSlug( ){
+const AllCourses: Course[]=await this.findAll();
+for (let i=0;i<AllCourses.length;i++){
+  let id = AllCourses[i].id;
+  let title= AllCourses[i].title;
+   AllCourses[i].slug= await this.stringToSlugById(title,id);
+   let sluge=AllCourses[i].slug;
+   const updateCourses: Course=await this.course.update({where:{id},
+    data:{
+slug:sluge
+
+    }
+  
+  })
+  }
+
+//const updatAll= await this.course.updateMany({data:AllCourses});
+return AllCourses;
+
+
+
+
+
+}
   async delete(id: number, userId: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
