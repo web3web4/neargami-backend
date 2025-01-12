@@ -71,6 +71,7 @@ enum Status {
 model Course {
   id                 Int                  @id @default(autoincrement())
   title              String               @db.VarChar(150)
+  slug                String?              @db.VarChar(250) 
   teacher_user_id    String               @db.Uuid
   publish_status     Status?
   name               String?
