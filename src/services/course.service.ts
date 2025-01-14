@@ -146,8 +146,12 @@ private prismaService = Container.get(PrismaService);
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;
   }
+public async findOneCourse(id:number):Promise<Course>{
 
-  async findOne(id: number): Promise<Course> {
+  const course =await this.course.findUnique({where:{id}});
+  return course;
+}
+  public async findOne(id: number): Promise<Course> {
     const course = await this.course.findUnique({ where: { id }, include: { lecture: true, userCourses: true } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
