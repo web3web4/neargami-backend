@@ -3,7 +3,8 @@ import { LectureService } from '../services/lecture.service';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { RequestWithUser } from '../interfaces/auth.interface';
-import { Lecture } from '@prisma/client';
+import { Course, Lecture } from '@prisma/client';
+import { CourseService } from '@/services/course.service';
 
 @Service()
 export class LectureController {
@@ -39,7 +40,23 @@ export class LectureController {
       next(error);
     }
   };
+  /////////////////
+public findAllByCourseSlug= async (req: Request, res: Response, next: NextFunction)=>{
+try{
+const { slug }=req.params;
+console.log(slug);
+const course: Course =await this.lectureService.findUniqueCourseBySlug(slug) ;
 
+const id:number=course.id;
+console.log(id);
+ const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId(id);
+
+res.status(200).send({ data: course, message: 'findAll Lectures by course slug' });
+} catch (error) {
+next(error);
+}
+
+}
   public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;

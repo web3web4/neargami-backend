@@ -8,12 +8,16 @@ import { PrismaService } from './prisma.service';
 import ImageKit from 'imagekit';
 import fs from 'fs';
 
+// const imagekit = new ImageKit({
+//   publicKey: 'public_UwYz1I2ID7IZOXNoogcH+wJvwn0=',
+//   privateKey: 'private_msO5wyd+ECoSS/Ua4K5kL+NCzOc=',
+//   urlEndpoint: 'https://ik.imagekit.io/lybbxavs0',
+// });
 const imagekit = new ImageKit({
-  publicKey: 'public_UwYz1I2ID7IZOXNoogcH+wJvwn0=',
-  privateKey: 'private_msO5wyd+ECoSS/Ua4K5kL+NCzOc=',
-  urlEndpoint: 'https://ik.imagekit.io/lybbxavs0',
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY || '',
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || '',
 });
-
 @Service()
 export class LectureService {
   private prismaService = Container.get(PrismaService);
@@ -39,9 +43,54 @@ export class LectureService {
       throw error;
     }
   }
+async findUniqueCourseBySlug(slug:string):Promise<any>{
+return await this.prismaService.course.findFirst({where:{slug}});
+//await this.prisma.lecture.findMany({include:{course:{}}})
 
-  async findAll( course_id: number): Promise<any> {
-    await this.course.findOne(course_id);
+
+}
+///
+
+public async findAll_LecturesByCourseId( course_id: number): Promise<any> {
+  // await this.course.findOne(course_id);
+   const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+     by: ['course_id'],
+     _count: {
+       start_time: true,
+       end_time: true,
+     },
+     where: { course_id },
+   });
+
+   const lectures = await this.lecture.findMany({
+     where: { course_id },
+     include: {
+       course: {
+         include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
+       },
+       question: true,
+       userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+     },
+   });
+   return { lectures };
+ }
+
+
+
+
+
+
+///
+
+
+
+
+
+
+
+
+  public async findAll( course_id: number): Promise<any> {
+   // await this.course.findOne(course_id);
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
       _count: {
