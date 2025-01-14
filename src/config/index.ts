@@ -16,4 +16,6 @@ export const {
   IMAGEKIT_PRIVATE_KEY,
   IMAGEKIT_URL_ENDPOINT,
   PLATFORM,
+  EMAIL_NAME,
+  EMAIL_PASSWORD,
 } = process.env;

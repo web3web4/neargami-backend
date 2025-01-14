@@ -1,6 +1,8 @@
 import { Service } from 'typedi';
 import nodemailer from 'nodemailer';
-import { BREVO_EMAIL, BREVO_KEY } from '@/config';
+import * as fs from 'fs';
+import * as handlebars from 'handlebars';
+import { EMAIL_NAME, EMAIL_PASSWORD } from '@/config';
 
 @Service()
 export class MailService {
@@ -12,13 +14,18 @@ export class MailService {
       port: 587,
       secure: false,
       auth: {
-        user: BREVO_EMAIL,
-        pass: BREVO_KEY,
+        user: EMAIL_NAME,
+        pass: EMAIL_PASSWORD,
       },
     });
   }
 
-  async sendEmail(to: string, subject: string, htmlContent: string): Promise<void> {
+  async sendEmail(to: string, subject: string, templateName: string, data: any): Promise<void> {
+    const templateSource = fs.readFileSync(`../templates/${templateName}.hbs`, 'utf8');
+
+    const template = handlebars.compile(templateSource);
+
+    const htmlContent = template(data);
     const mailOptions = {
       from: process.env.BREVO_EMAIL,
       to: to,
