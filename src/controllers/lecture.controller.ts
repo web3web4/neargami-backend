@@ -49,7 +49,7 @@ const course: Course =await this.lectureService.findUniqueCourseBySlug(slug) ;
 
 const id:number=course.id;
 console.log(id);
- const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId(id);
+ const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId_Ordered(id);
 
 res.status(200).send({ data: course, message: 'findAll Lectures by course slug' });
 } catch (error) {
@@ -57,11 +57,11 @@ next(error);
 }
 
 }
-  public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;
-     // const { id: userId } = req.user;
-      const lectures: Lecture[] = await this.lectureService.findAll( +courseId);
+      const { id: userId } = req.user;
+      const lectures: Lecture[] = await this.lectureService.findAll( +courseId,userId);
 
       res.status(200).send({ data: lectures, message: 'findAll' });
     } catch (error) {

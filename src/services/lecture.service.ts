@@ -74,6 +74,50 @@ public async findAll_LecturesByCourseId( course_id: number): Promise<any> {
    });
    return { lectures };
  }
+///
+public async findAll_LecturesByCourseId_Ordered(course_id: number): Promise<any> {
+  // Group the user courses
+  const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+    by: ['course_id'],
+    _count: {
+      start_time: true,
+      end_time: true,
+    },
+    where: { course_id },
+  });
+
+  // Fetch the lectures and order them by the 'order' field
+  const lectures = await this.lecture.findMany({
+    where: { course_id },
+    include: {
+      course: {
+        include: {
+          teacher: {
+            omit: {
+              address: true,
+              signature: true,
+              message: true,
+              createdAt: true,
+              isAdmin: true,
+              ngc: true,
+              game: true,
+            },
+          },
+        },
+      },
+      question: true,
+      userLecture: {
+        select: { id: true, lecture_id: true, start_at: true, end_at: true },
+      },
+    },
+    orderBy: {
+      order: 'asc', // Specify the order field and direction ('asc' for ascending or 'desc' for descending)
+    },
+  });
+
+  // Return the ordered lectures
+  return { lectures };
+}
 
 
 
@@ -89,7 +133,7 @@ public async findAll_LecturesByCourseId( course_id: number): Promise<any> {
 
 
 
-  public async findAll( course_id: number): Promise<any> {
+  public async findAll( course_id: number,user_id): Promise<any> {
    // await this.course.findOne(course_id);
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
@@ -107,7 +151,7 @@ public async findAll_LecturesByCourseId( course_id: number): Promise<any> {
           include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
         },
         question: true,
-        userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+        userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true },where:{user_id} },
       },
     });
     return { lectures, counts: userCoursesCounts };
