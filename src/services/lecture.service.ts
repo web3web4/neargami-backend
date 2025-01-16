@@ -7,6 +7,7 @@ import { LectureWithRelations } from '../interfaces/lecture.interface';
 import { PrismaService } from './prisma.service';
 import ImageKit from 'imagekit';
 import fs from 'fs';
+import { count } from 'console';
 
 // const imagekit = new ImageKit({
 //   publicKey: 'public_UwYz1I2ID7IZOXNoogcH+wJvwn0=',
@@ -68,14 +69,14 @@ public async findAll_LecturesByCourseId( course_id: number): Promise<any> {
        course: {
          include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
        },
-       question: true,
-       userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+       //question: true,
+      //  userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
      },
    });
    return { lectures };
  }
 ///
-public async findAll_LecturesByCourseId_Ordered(course_id: number): Promise<any> {
+public async findAll_LecturesByCourseId_Ordered(course_id: number, user_id: string): Promise<any> {
   // Group the user courses
   const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
     by: ['course_id'],
@@ -86,7 +87,94 @@ public async findAll_LecturesByCourseId_Ordered(course_id: number): Promise<any>
     where: { course_id },
   });
 
+  // Fetch completed user lectures
+  const completedUserLecture = await this.prisma.userLectureMapping.groupBy({
+    by: ['lecture_id'],
+    _count: { end_at: true },
+    where: { user_id },
+  });
+
+  // Calculate total completed lessons
+  const completedLessons = completedUserLecture.reduce((total, lecture) => total + lecture._count.end_at, 0);
+
   // Fetch the lectures and order them by the 'order' field
+  const lectures = await this.lecture.findMany({
+    where: { course_id },
+    include: {
+      course: {
+        include: {
+          teacher: {
+            omit: {
+              address: true,
+              signature: true,
+              message: true,
+              createdAt: true,
+              isAdmin: true,
+              ngc: true,
+              game: true,
+            },
+          },
+        },
+      },
+      question: true, // Includes the questions for each lecture
+      userLecture: {
+        select: { id: true, lecture_id: true, start_at: true, end_at: true },
+        where: { user_id },
+      },
+    },
+    orderBy: {
+      order: 'asc', // Specify the order field and direction ('asc' for ascending or 'desc' for descending)
+    },
+  });
+
+  // Add total prize to each lecture (number of questions * 10)
+  const lecturesWithPrize = lectures.map((lecture) => ({
+    ...lecture,
+    totalPrize: lecture.question.length * 10, // Calculate prize based on the number of questions
+  }));
+
+  // Return the ordered lectures with prizes and other details
+  return {
+    lectures: lecturesWithPrize,
+    completedLessons,
+    counts: userCoursesCounts,
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///
+public async findAll(course_id: number, user_id: string): Promise<any> {
+  // Fetch grouped counts for user courses
+  const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+    by: ['course_id'],
+    _count: {
+      start_time: true,
+      end_time: true,
+    },
+    where: { course_id },
+  });
+
+  // Fetch completed user lectures
+  const completedUserLecture = await this.prisma.userLectureMapping.groupBy({
+    by: ['lecture_id'],
+    _count: { end_at: true },
+    where: { user_id },
+  });
+
+  // Fetch lectures with related data
   const lectures = await this.lecture.findMany({
     where: { course_id },
     include: {
@@ -108,54 +196,40 @@ public async findAll_LecturesByCourseId_Ordered(course_id: number): Promise<any>
       question: true,
       userLecture: {
         select: { id: true, lecture_id: true, start_at: true, end_at: true },
+        where: { user_id },
       },
-    },
-    orderBy: {
-      order: 'asc', // Specify the order field and direction ('asc' for ascending or 'desc' for descending)
     },
   });
 
-  // Return the ordered lectures
-  return { lectures };
+  // Group questions by lecture_id to count questions
+  const questionCounts = await this.prisma.question.groupBy({
+    by: ['lecture_id'],
+    _count: { id: true },
+  });
+
+  // Calculate totalPrize for each lecture
+  const totalPrize = questionCounts.map((q) => ({
+    lecture_id: q.lecture_id,
+    prize: q._count.id * 10, // Prize = number of questions * 10
+  }));
+
+  // Merge totalPrize into lectures
+  const lecturesWithPrize = lectures.map((lecture) => {
+    const prizeInfo = totalPrize.find((t) => t.lecture_id === lecture.id);
+    return {
+      ...lecture,
+      totalPrize: prizeInfo ? prizeInfo.prize : 0, // If no questions, totalPrize = 0
+    };
+  });
+
+  // Return the final response
+  return {
+    lectures: lecturesWithPrize,
+    counts: userCoursesCounts,
+    completedLessons: completedUserLecture,
+   
+  };
 }
-
-
-
-
-
-
-///
-
-
-
-
-
-
-
-
-  public async findAll( course_id: number,user_id): Promise<any> {
-   // await this.course.findOne(course_id);
-    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
-      by: ['course_id'],
-      _count: {
-        start_time: true,
-        end_time: true,
-      },
-      where: { course_id },
-    });
-
-    const lectures = await this.lecture.findMany({
-      where: { course_id },
-      include: {
-        course: {
-          include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
-        },
-        question: true,
-        userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true },where:{user_id} },
-      },
-    });
-    return { lectures, counts: userCoursesCounts };
-  }
 
   async findOne(id: number, course_id: number): Promise<LectureWithRelations> {
     await this.course.findOne(course_id);

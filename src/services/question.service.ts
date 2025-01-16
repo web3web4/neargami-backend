@@ -29,7 +29,8 @@ export class QuestionService {
       include: {
         lecture: { include: { course: { select: { logo: true } } } },
         answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
-      },
+        
+      },orderBy:{sequence:'asc'},
     });
   }
 

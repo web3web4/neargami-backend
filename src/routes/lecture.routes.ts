@@ -24,9 +24,9 @@ export class lectureRoute implements Routes {
 
     this.router.get('/course/:courseId/lectures',AuthMiddleware, this.lectureController.findAll);
 
-    this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlug);
+    this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlugWithoutAuth);
 
-      this.router.get('/course/slug/:slug/lectures',AuthMiddleware, this.lectureController.findAllByCourseSlug);
+      this.router.get('/course/slugAuth/:slug/lectures',AuthMiddleware, this.lectureController.findAllByCourseSlug);
     this.router.post(
       '/course/:courseId/lectures',
       AuthMiddleware,
