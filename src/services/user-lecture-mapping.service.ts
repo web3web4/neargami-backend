@@ -20,14 +20,16 @@ export class UserLectureMappingService {
     }
     const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
     if (!userCoures) {
-      throw new HttpException(409, 'Course not registered');
+      
+      const userCoursesMapping=await this.prisma.userCoursesMapping.create({ data: { user_id, course_id } });
+      console.log(userCoursesMapping);
     }
     const userLecture = await this.prisma.userLectureMapping.findFirst({ where: { AND: { user_id, lecture_id, course_id } } });
     if (userLecture) {
       throw new HttpException(409, 'Lecture allready registered');
     }
 
-    return this.prisma.userLectureMapping.create({ data: { user_id, lecture_id, course_id }, include: { lecture: true } });
+    return await this.prisma.userLectureMapping.create({ data: { user_id, lecture_id, course_id }, include: { lecture: true } });
   }
   async answer(user_id: string, course_id: number, lecture_id: number, question_id: number, answer_id: number): Promise<any> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
