@@ -141,6 +141,33 @@ public async findAll_LecturesByCourseId_Ordered(course_id: number, user_id: stri
   };
 }
 
+////
+
+
+public async findAll( course_id: number): Promise<any> {
+  // await this.course.findOne(course_id);
+   const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+     by: ['course_id'],
+     _count: {
+       start_time: true,
+       end_time: true,
+     },
+     where: { course_id },
+   });
+
+   const lectures = await this.lecture.findMany({
+     where: { course_id },
+     include: {
+       course: {
+         include: { teacher: { omit: { address: true, signature: true, message: true, createdAt: true, isAdmin: true, ngc: true, game: true } } },
+       },
+       question: true,
+      // userLecture: {  select: { id: true, lecture_id: true, start_at: true, end_at: true } },
+     },
+   });
+   return { lectures, counts: userCoursesCounts };
+ }
+
 
 
 
@@ -156,7 +183,7 @@ public async findAll_LecturesByCourseId_Ordered(course_id: number, user_id: stri
 
 
 ///
-public async findAll(course_id: number, user_id: string): Promise<any> {
+public async findAllWithIdAuthServic(course_id: number, user_id: string): Promise<any> {
   // Fetch grouped counts for user courses
   const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
     by: ['course_id'],
