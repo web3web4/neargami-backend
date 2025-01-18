@@ -40,28 +40,72 @@ export class LectureController {
       next(error);
     }
   };
-  /////////////////
-public findAllByCourseSlug= async (req: Request, res: Response, next: NextFunction)=>{
+
+  /////////////////find lectures of course by slug without auth/////////////////////////////////////////
+
+
+  public findAllByCourseSlugWithoutAuth= async (req: Request, res: Response, next: NextFunction)=>{
+    try{
+    const { slug }=req.params;
+   
+    const course: Course =await this.lectureService.findUniqueCourseBySlug(slug) ;
+    
+    const id:number=course.id;
+    
+     const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId(id);
+    
+    res.status(200).send({ data: lectures, message: 'findAll Lectures by course slug' });
+    } catch (error) {
+    next(error);
+    }
+    
+    }
+
+  //////////////////  find lectures of course by slug ordered by order number with auth////////
+public findAllByCourseSlug= async (req: RequestWithUser, res: Response, next: NextFunction)=>{
 try{
 const { slug }=req.params;
-console.log(slug);
+const {id:userId}=req.user
+
 const course: Course =await this.lectureService.findUniqueCourseBySlug(slug) ;
 
 const id:number=course.id;
-console.log(id);
- const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId(id);
 
-res.status(200).send({ data: course, message: 'findAll Lectures by course slug' });
+ const lectures: Lecture[] = await this.lectureService.findAll_LecturesByCourseId_Ordered(id,userId);
+
+res.status(200).send({ data: lectures, message: 'findAll Lectures by course slug' });
 } catch (error) {
 next(error);
 }
 
 }
-  public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+////find all lectures of courses by course ID without Auth
+
+public findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { courseId } = req.params;
+   // const { id: userId } = req.user;
+    const lectures: Lecture[] = await this.lectureService.findAll( +courseId);
+
+    res.status(200).send({ data: lectures, message: 'findAll' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
+
+
+
+
+//////find all lectures of courses by course ID with Auth /////////////////////////////
+  public findAllWithIdAuth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { courseId } = req.params;
-     // const { id: userId } = req.user;
-      const lectures: Lecture[] = await this.lectureService.findAll( +courseId);
+      const { id: userId } = req.user;
+      const lectures: Lecture[] = await this.lectureService.findAllWithIdAuthServic( +courseId,userId);
 
       res.status(200).send({ data: lectures, message: 'findAll' });
     } catch (error) {

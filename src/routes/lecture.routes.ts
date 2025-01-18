@@ -22,11 +22,11 @@ export class lectureRoute implements Routes {
   private initializeRoutes() {
     this.router.post('/upload', this.upload.single('file'), this.lectureController.uploadImage);
 
+    this.router.get('/course/IdAuth/:courseId/lectures',AuthMiddleware, this.lectureController.findAllWithIdAuth);
     this.router.get('/course/:courseId/lectures', this.lectureController.findAll);
+    this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlugWithoutAuth);
 
-    this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlug);
-
-      this.router.get('/course/slug/:slug/lectures',AuthMiddleware, this.lectureController.findAllByCourseSlug);
+      this.router.get('/course/slugAuth/:slug/lectures',AuthMiddleware, this.lectureController.findAllByCourseSlug);
     this.router.post(
       '/course/:courseId/lectures',
       AuthMiddleware,
