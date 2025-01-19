@@ -8,11 +8,30 @@ import { Course } from '@prisma/client';
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   public courseService = Container.get(CourseService);
+ 
+
+  public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> =>{
+      try{
+      const{id}=req.params;
+      const AllCourses=await this.courseService.getAllUsersStartingCourse(+id);
+      res.status(200).json({ data: AllCourses, message: 'All Users witch starting with this course' });
+      } catch (error) {
+            next(error);
+      }
+    }
+
+
+
+
+
+
+ 
   public makeAllCoursesHaveSlug = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const AllCourses = await this.courseService.updateForAllSlug();
       res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
     } catch (error) {
+ 
       next(error);
     }
   };

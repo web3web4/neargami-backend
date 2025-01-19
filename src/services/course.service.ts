@@ -14,8 +14,17 @@ export class CourseService {
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
 
-  // Example usage
+ 
+public async getAllUsersStartingCourse(course_id:number ){
+const users= await this.prisma.userCoursesMapping.findMany({where :{course_id}});
+const AllUsers= await this.prisma.user.findMany({where:{id:{in:users.map((user)=>user.user_id)}}});
+return AllUsers;
 
+
+
+
+}
+ 
   // Output: A random UUID like 'e58d48b6-2e34-4c41-9f5d-3bb7b02d3c4e'
 
   public async createNewCourse(teacher_user_id: string, data1: CreateCourseDto, sluge: string): Promise<Course> {
@@ -187,13 +196,13 @@ export class CourseService {
     const course = await this.course.findUnique({ where: { id } });
     return course;
   }
-  async updateStatus(id: number, user: User, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
+ async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string,sluge:string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
 
-    if (false) {
+    if (isAdmin == false) {
       throw new HttpException(403, 'this user is not admin to update status');
     }
     const changstatusdate = new Date();
@@ -215,29 +224,14 @@ export class CourseService {
       },
     });
     // const sluge=this.stringToSlug(course.title,course.id);
-    const updated = this.course.update({
+    return this.course.update({
       where: { id },
-      data: { publish_status: publish_status, slug: sluge },
+      data: { publish_status: publish_status,
+         slug:sluge
+       },
     });
-    if (publish_status === Status.APPROVED) {
-      await this.mailService.sendEmail(user.email, 'Course Approved', 'accept', {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        title: course.title,
-        id: course.id,
-        publish_date: changstatusdate,
-      });
-    }
-    if (publish_status === Status.REJECTED) {
-      await this.mailService.sendEmail(user.email, 'Course Rejected', 'reject', {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        title: course.title,
-        reasons: [publish_status_reson],
-      });
-    }
-    return updated;
   }
+
 
   async stringToSlugById(title: string, id: number) {
     const baseSlug = title
@@ -248,6 +242,7 @@ export class CourseService {
       .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
       .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 
+ 
     const uniqueSuffix = id; // Use timestamp for uniqueness
     return `${baseSlug}-${uniqueSuffix}`;
   }
@@ -269,6 +264,7 @@ export class CourseService {
     //const updatAll= await this.course.updateMany({data:AllCourses});
     return AllCourses;
   }
+ 
   async delete(id: number, userId: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {

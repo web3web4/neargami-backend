@@ -3,12 +3,66 @@ import { LectureService } from '../services/lecture.service';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import Container, { Service } from 'typedi';
 import { RequestWithUser } from '../interfaces/auth.interface';
-import { Course, Lecture } from '@prisma/client';
+import { Course, Lecture, UserLectureMapping } from '@prisma/client';
 import { CourseService } from '@/services/course.service';
 
 @Service()
 export class LectureController {
+  public lectureService = Container.get(LectureService);
+
+
+
+  public findAllLecturesbySlug=async(req:RequestWithUser,res:Response,next:NextFunction)=>{
+const {slug}=req.params;
+    try{
+      const Lectures=await this.lectureService.findAllLEcturesBySlug(slug);
+      res.status(200).json({ data: Lectures, message: 'Lecture with Slug' });
+      } catch (error) {
+            next(error);
+          }
+        };
+  public findAllLecturesbySlugAuth=async(req:RequestWithUser,res:Response,next:NextFunction)=>{
+          const {slug}=req.params;
+          const {id}=req.user;
+              try{
+                const Lectures=await this.lectureService.findAllLEcturesBySlugAuth(slug,id);
+                res.status(200).json({ data: Lectures, message: 'Lecture with Slug auth' });
+                } catch (error) {
+                      next(error);
+                    }
+                  }
+                
+              
+    
+  public makeSlugeToAllLectures=async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> =>{
+    try{
+    const Lectures=await this.lectureService.updateForAllSlug();
+    res.status(200).json({ data: Lectures, message: 'All Lectures Have Slug' });
+    } catch (error) {
+          next(error);
+        }
+      }
+    
+    
+public checkLectureStart = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  const {id:user_id}=req.user;
+  const {lecture_id}=req.params;
+try{
+  const lecture =await this.lectureService.checkLectureStart(user_id,+lecture_id);
+ 
+  if (lecture !==null){
+    res.status(200).send({ data: lecture, message: 'this lecture has been started befor' });
+  }else{
+    res.status(200).send({ data: lecture, message: 'this is first time with this lecture' });
+  }
   
+} catch (error) {
+next(error);
+}
+
+}
+
+
   public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Assuming the image file is sent as a 'file' field in the request
@@ -27,7 +81,7 @@ export class LectureController {
   };
 
 
-  public lectureService = Container.get(LectureService);
+ 
 
   public create = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const createLectureDto: CreateLectureDto = req.body;
@@ -102,6 +156,7 @@ public findAll = async (req: Request, res: Response, next: NextFunction): Promis
 
 //////find all lectures of courses by course ID with Auth /////////////////////////////
   public findAllWithIdAuth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+
     try {
       const { courseId } = req.params;
       const { id: userId } = req.user;
