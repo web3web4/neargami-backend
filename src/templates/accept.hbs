@@ -1,0 +1,27 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Course Acceptance Notification</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #ebf5ef; color: #333; line-height: 1.6; padding: 20px; } .container { background: #fff;
+      padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); } h1 { color: #5cb85c; border-bottom: 2px solid #5cb85c;
+      padding-bottom: 10px; } ul { padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <h1>Course Acceptance</h1>
+      <p>Dear {{{firstname}}} {{{lastname}}},</p>
+      <p>We are pleased to inform you that your course "{{{title}}}" has been <strong>accepted</strong>! Congratulations on this achievement.</p>
+      <p>Your course will soon be available on our platform for students to enroll. Here's what you need to know:</p>
+      <ul>
+        <li>Your course ID: {{{id}}}</li>
+        <li>Expected publication date: {{publish_date}}</li>
+      </ul>
+      <p>We look forward to seeing how your course benefits our community.</p>
+      <p>Best regards,<br />
+        The Neargami Team</p>
+    </div>
+  </body>
+</html>

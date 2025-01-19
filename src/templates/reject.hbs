@@ -1,0 +1,28 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Course Rejection Notification</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; line-height: 1.6; padding: 20px; } .container { background: #fff;
+      padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); } h1 { color: #d9534f; border-bottom: 2px solid #d9534f;
+      padding-bottom: 10px; } ul { padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <h1>Course Rejection</h1>
+      <p>Dear {{{firstname}}} {{{lastname}}},</p>
+      <p>We regret to inform you that your course submission for "{{{title}}}" has been <strong>rejected</strong>. Here are some reasons why:</p>
+      <ul>
+        {{#each reasons}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      <p>We appreciate your interest in contributing to our platform. Please consider the feedback provided to enhance your proposal for future
+        submissions.</p>
+      <p>Best regards,<br />
+        The Neargami Team</p>
+    </div>
+  </body>
+</html>
