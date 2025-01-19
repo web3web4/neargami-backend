@@ -7,16 +7,16 @@ import { Course } from '@prisma/client';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
-
   public courseService = Container.get(CourseService);
+ 
 
-public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> =>{
-  try{
-  const{id}=req.params;
-  const AllCourses=await this.courseService.getAllUsersStartingCourse(+id);
-  res.status(200).json({ data: AllCourses, message: 'All Users witch starting with this course' });
-  } catch (error) {
-        next(error);
+  public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> =>{
+      try{
+      const{id}=req.params;
+      const AllCourses=await this.courseService.getAllUsersStartingCourse(+id);
+      res.status(200).json({ data: AllCourses, message: 'All Users witch starting with this course' });
+      } catch (error) {
+            next(error);
       }
     }
 
@@ -25,17 +25,16 @@ public findUsersStartingCourse = async (req: Request, res: Response, next: NextF
 
 
 
-  public makeAllCoursesHaveSlug=async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> =>{
-try{
-
-const AllCourses=await this.courseService.updateForAllSlug();
-res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
-} catch (error) {
+ 
+  public makeAllCoursesHaveSlug = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const AllCourses = await this.courseService.updateForAllSlug();
+      res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
+    } catch (error) {
+ 
       next(error);
     }
-  }
-
-
+  };
 
   public findAllCoursesPage = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -97,7 +96,7 @@ res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
       next(error);
     }
   };
-  public findCourseBySlug = async(req: Request,res:Response,next: NextFunction): Promise<void> => {
+  public findCourseBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { slug } = req.params;
 
@@ -151,15 +150,15 @@ res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
     }
   };
 
-public getLastId=async()=>{
-  const id= await this.courseService.getLastUserId();
-return id;
-}
-public getId=async(uid:number)=>{
-  const id= await this.courseService.getUserId(uid);
-return id;
-}
-  public stringToSlugById=async(title: string,id:number) => {
+  public getLastId = async () => {
+    const id = await this.courseService.getLastUserId();
+    return id;
+  };
+  public getId = async (uid: number) => {
+    const id = await this.courseService.getUserId(uid);
+    return id;
+  };
+  public stringToSlugById = async (title: string, id: number) => {
     const baseSlug = title
       .toLowerCase() // Convert to lowercase
       .trim() // Trim whitespace from both ends
@@ -167,11 +166,11 @@ return id;
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
       .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
-  
-    const uniqueSuffix = await this.getId(id);// Use timestamp for uniqueness
+
+    const uniqueSuffix = await this.getId(id); // Use timestamp for uniqueness
     return `${baseSlug}-${uniqueSuffix}`;
-  }
-  public stringToSlug=async(title: string) => {
+  };
+  public stringToSlug = async (title: string) => {
     const baseSlug = title
       .toLowerCase() // Convert to lowercase
       .trim() // Trim whitespace from both ends
@@ -179,19 +178,18 @@ return id;
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
       .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
-  
-    const uniqueSuffix = await this.getLastId();// Use timestamp for uniqueness
+
+    const uniqueSuffix = await this.getLastId(); // Use timestamp for uniqueness
     return `${baseSlug}-${uniqueSuffix}`;
-  }
+  };
   public createCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-     const data: CreateCourseDto = req.body;
-   //const data: Course = req.body;//with uuid
-   const sluge = await this.stringToSlug(data.title);
-   const teacher_user_id=req.user.id;
-  // const teacher_user_id="a4aebc8f-d5c3-47f7-97f2-6fa0731975bc";
+    const data: CreateCourseDto = req.body;
+    //const data: Course = req.body;//with uuid
+    const sluge = await this.stringToSlug(data.title);
+    const teacher_user_id = req.user.id;
+    // const teacher_user_id="a4aebc8f-d5c3-47f7-97f2-6fa0731975bc";
     try {
-    
-      const createdCourse: Course = await this.courseService.createNewCourse(teacher_user_id, data,sluge);
+      const createdCourse: Course = await this.courseService.createNewCourse(teacher_user_id, data, sluge);
 
       res.status(201).send({ data: createdCourse, message: 'created' });
     } catch (error) {
@@ -211,14 +209,14 @@ return id;
   };
   public updateCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-   const userId = req.user.id;
-   
+    const userId = req.user.id;
+
     const data: UpdateCourseDto = req.body;
-    const courseinfo: Course =await this.courseService.findUniqueByTitle(+id);
-    const sluge=await this.stringToSlugById(courseinfo.title,+id);
-   
+    const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+    const sluge = await this.stringToSlugById(courseinfo.title, +id);
+
     try {
-      const course: Course = await this.courseService.update(+id, userId, data,sluge);
+      const course: Course = await this.courseService.update(+id, userId, data, sluge);
       res.status(200).send({ data: course, message: 'updated' });
     } catch (error) {
       next(error);
@@ -226,15 +224,15 @@ return id;
   };
   public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-   const isAdmin =true;
-   // req.user.isAdmin;
-   
+    const user = req.user;
+    // req.user.isAdmin;
+
     const publish_status: Status = req.body.publish_status;
     const publish_status_reson: string = req.body.publish_status_reson;
-    const courseinfo: Course =await this.courseService.findUniqueByTitle(+id);
-    const sluge=await this.stringToSlugById(courseinfo.title,+id);
+    const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+    const sluge = await this.stringToSlugById(courseinfo.title, +id);
     try {
-      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status, publish_status_reson,sluge);
+      const course: Course = await this.courseService.updateStatus(+id, user, publish_status, publish_status_reson, sluge);
 
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
