@@ -7,6 +7,20 @@ import { UserLectureMapping } from '@prisma/client';
 @Service()
 export class UserLectureMappingController {
   public userLectureMappingService = Container.get(UserLectureMappingService);
+//
+public registerNow=async(req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  const { id } = req.params;
+  const { id: userId } = req.user;
+  try {
+    const userCreateLectures: UserLectureMapping = await this.userLectureMappingService.registerNow(userId, +id);
+
+    res.status(200).send({ data: userCreateLectures, message: 'created' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
   public register = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { courseId, id } = req.params;
     const { id: userId } = req.user;

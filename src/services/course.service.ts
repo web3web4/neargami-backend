@@ -12,10 +12,15 @@ private prismaService = Container.get(PrismaService);
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
 
-  // Example usage
- 
-   // Output: A random UUID like 'e58d48b6-2e34-4c41-9f5d-3bb7b02d3c4e'
-  
+public async getAllUsersStartingCourse(course_id:number ){
+const users= await this.prisma.userCoursesMapping.findMany({where :{course_id}});
+const AllUsers= await this.prisma.user.findMany({where:{id:{in:users.map((user)=>user.user_id)}}});
+return AllUsers;
+
+
+
+
+}
   public async createNewCourse(teacher_user_id:string, data1 : CreateCourseDto,sluge:string): Promise<Course> {
 
     return this.course.create({
@@ -259,10 +264,6 @@ slug:sluge
 
 //const updatAll= await this.course.updateMany({data:AllCourses});
 return AllCourses;
-
-
-
-
 
 }
   async delete(id: number, userId: string): Promise<Course> {
