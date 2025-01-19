@@ -47,10 +47,12 @@ export class UserService {
     return user.top_points;
   }
 
-  public async findAllUser(): Promise<any> {
+  public async findAllUser(page: number): Promise<any> {
     const allUsers = await this.prismaUser.findMany({
       omit: { message: true, signature: true },
       orderBy: { top_points: 'desc' },
+      skip: (page - 1) * 20,
+      take: 20,
     });
     return allUsers;
   }
