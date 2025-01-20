@@ -42,12 +42,48 @@ const payloadSchema = {
     callbackUrl: { option: 'string' },
   },
 };
-
+interface Flags {
+  new_user: boolean;
+  first_request_approved_courses: boolean;
+  [key: string]: boolean;
+}
 @Service()
 export class AuthService {
   private prismaService = Container.get(PrismaService);
   private users = this.prismaService.user;
   private challangelog = this.prismaService.challangelog;
+
+  async  manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {
+    // Fetch the user
+    const user = await this.users.findUnique({ where: { address:userId } });
+    if (!user) {
+      return null;
+    }else{
+    // Parse the current flags
+    let currentFlags: Flags = JSON.parse(user.flags);
+      // Check if it's the user's second login
+    if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
+      flagsToUpdate.new_user = false;
+    }
+    // Update the flags
+    const updatedFlags = { ...currentFlags, ...flagsToUpdate };
+      // Save the updated flags back to the database
+    await this.users.update({
+      where: { address: userId },
+      data: { flags: JSON.stringify(updatedFlags) }
+    });
+    return updatedFlags ;
+    }
+  }
+  
+
+
+
+
+
+
+
+
   public createChallenge(): { challange: string; message: string } {
     const challange = randomBytes(32).toString('base64');
     const message =
