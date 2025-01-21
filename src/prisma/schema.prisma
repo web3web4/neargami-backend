@@ -43,7 +43,7 @@ model User {
   image              String?
   game               Json?                @db.JsonB
   isAdmin            Boolean              @default(false)
-   flags             String               @default("{\"new_user\":true,\"first_request_approved_courses\":false}")
+   flags             Json               @default("{\"new_user\":true,\"first_request_approved_courses\":false}")
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]

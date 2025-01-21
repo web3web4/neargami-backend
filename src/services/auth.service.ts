@@ -60,7 +60,7 @@ export class AuthService {
       return null;
     }else{
     // Parse the current flags
-    let currentFlags: Flags = JSON.parse(user.flags);
+    let currentFlags: Flags = user.flags as Flags;
       // Check if it's the user's second login
     if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
       flagsToUpdate.new_user = false;
@@ -70,7 +70,7 @@ export class AuthService {
       // Save the updated flags back to the database
     await this.users.update({
       where: { address: userId },
-      data: { flags: JSON.stringify(updatedFlags) }
+      data: { flags: updatedFlags }
     });
     return updatedFlags ;
     }
