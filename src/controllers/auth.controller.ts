@@ -70,6 +70,7 @@ export class AuthController {
   };
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const flags = await this.auth.manageFlagsForUser(req.body.accountId);
       const signUpUserData: User = await this.auth.validateAndCreateUser(req.body);
       const authenticate = await this.auth.createToken(signUpUserData.id);
       res.status(201).json({ data: { signUpUserData, authenticate }, message: 'signup' });
