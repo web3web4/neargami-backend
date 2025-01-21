@@ -75,17 +75,36 @@ async findAllLEcturesBySlugAuth(slug:string,user_id:string){
   
   }
   
+  public async getLastUserId(): Promise<number | null> {
+    const lastLecture = await this.lecture.findFirst({
+      orderBy: {
+        id: 'desc', // Sort by ID in descending order
+      },
+      select: {
+        id: true, // Select only the ID field
+      },
+    });
 
+    return lastLecture?.id + 1 || null; // Return the ID or null if no record exists
+  }
+  public async getUserId(id: number): Promise<number | null> {
+    const lecture = await this.lecture.findUnique({
+      where: { id },
+    });
+
+    return lecture?.id || null; // Return the ID or null if no record exists
+  }
 
 
   ////
-  async create(userId: string, course_id: number, createLectureDto: CreateLectureDto): Promise<Lecture> {
+  async create(userId: string, course_id: number, createLectureDto: CreateLectureDto,slug:string): Promise<Lecture> {
     const course = await this.course.findOne(course_id);
     if (course.teacher_user_id !== userId) {
       throw new HttpException(403, 'Forbidden');
     }
-    return this.lecture.create({ data: { course_id, ...createLectureDto } });
+    return this.lecture.create({ data: { course_id, ...createLectureDto,slug } });
   }
+
   async checkLectureStart(user_id:string,lecture_id:number):Promise<any>{
 
 const check:UserLectureMapping=await this.prisma.userLectureMapping.findFirst({where:{user_id,lecture_id}})
@@ -142,6 +161,8 @@ public async findAll_LecturesByCourseId(course_id: number): Promise<any> {
         },
       },
       question: true, // Include questions for each lecture
+    }, orderBy: {
+      order: 'asc', // Specify the order field and direction ('asc' for ascending or 'desc' for descending)
     },
   });
 
@@ -380,7 +401,7 @@ public async findAll( course_id: number): Promise<any> {
     return lecture;
   }
 
-  async update(id: number, course_id: number, userId: string, data: UpdateLectureDto): Promise<Lecture> {
+  async update(id: number, course_id: number, userId: string, data: UpdateLectureDto,slug:string): Promise<Lecture> {
     const course = await this.course.findOne(course_id);
     if (course.teacher_user_id !== userId) {
       throw new HttpException(403, 'Forbidden');
@@ -392,7 +413,7 @@ public async findAll( course_id: number): Promise<any> {
     }
     return this.lecture.update({
       where: { id },
-      data,
+      data:{...data,slug},
     });
   }
   async updateOrders(course_id: number, userId: string, data: UpdateLectureOrderArrayDto): Promise<Lecture[]> {

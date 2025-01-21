@@ -79,16 +79,31 @@ next(error);
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   };
+  public stringToSlug = async (title: string) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 
-
+    const uniqueSuffix = await this.getLastId(); // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
+  public getLastId = async () => {
+    const id = await this.lectureService.getLastUserId();
+    return id;
+  };
  
 
   public create = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const createLectureDto: CreateLectureDto = req.body;
+    const sluge = await this.stringToSlug(createLectureDto.title);
     const { courseId } = req.params;
     const { id } = req.user;
     try {
-      const lecture = await this.lectureService.create(id, +courseId, createLectureDto);
+      const lecture = await this.lectureService.create(id, +courseId, createLectureDto,sluge);
       res.status(201).send({ data: lecture, message: 'created' });
     } catch (error) {
       next(error);
@@ -179,13 +194,30 @@ public findAll = async (req: Request, res: Response, next: NextFunction): Promis
       next(error);
     }
   };
+  public getId = async (uid: number) => {
+    const id = await this.lectureService.getUserId(uid);
+    return id;
+  };
+  public stringToSlugById = async (title: string, id: number) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 
+    const uniqueSuffix = await this.getId(id); // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
   public update = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id, courseId } = req.params;
     const userId = req.user.id;
     const data: UpdateLectureDto = req.body;
+    
+   const slug = await this.stringToSlugById(data.title, +id);
     try {
-      const lecture = await this.lectureService.update(+id, +courseId, userId, data);
+      const lecture = await this.lectureService.update(+id, +courseId, userId, data,slug);
       res.status(200).send({ data: lecture, message: 'updated' });
     } catch (error) {
       next(error);
@@ -195,6 +227,7 @@ public findAll = async (req: Request, res: Response, next: NextFunction): Promis
     const { courseId } = req.params;
     const userId = req.user.id;
     const data: UpdateLectureOrderArrayDto = req.body;
+    
     try {
       const lectures = await this.lectureService.updateOrders(+courseId, userId, data);
       res.status(200).send({ data: lectures, message: 'updated' });
