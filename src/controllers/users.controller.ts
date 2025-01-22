@@ -106,6 +106,38 @@ export class UserController {
       next(error);
     }
   };
+////////////////////////////////////////////////////////////////////////////////////////////
+public checkUsernameAvailability = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).json({ message: 'Username is required' });
+      return;
+    }
+
+    const isAvailable = await this.user.isUsernameAvailable(username);
+
+    if (isAvailable) {
+      res.status(200).json({ available: true, message: 'Username is available' });
+    } else {
+      res.status(200).json({ available: false, message: 'Username is already taken' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+//////////////////////////////////////////////////////////////////////////////////
+async  stringToUsername(username: string): Promise<string> {
+  const processedUsername = username
+    .toLowerCase() // Convert to lowercase
+    .trim() // Trim whitespace from both ends
+    .replace(/[^a-z0-9_]/g, '') // Remove invalid characters except underscores
+    .replace(/_+/g, '_') // Replace multiple underscores with a single underscore
+    .replace(/^_+|_+$/g, ''); // Remove leading and trailing underscores
+
+  return processedUsername;
+}
 
   public updateUser = async (req: RequestWithUser, res: Response): Promise<void> => {
     const id: string = req.params.id;
@@ -114,7 +146,11 @@ export class UserController {
     if (user.id !== id) {
       res.status(401).json({ message: 'Unauthorized' });
     }
+    req.body.username=await this.stringToUsername(req.body.username);
+    const isAvailable = await this.user.isUsernameAvailable(req.body.username);
+    if(!isAvailable){ res.status(200).json({ available: false, message: 'Username is already taken' });}else
     try {
+      
       const user = await this.user.update(id, data);
       res.status(200).json(user);
     } catch (error) {
@@ -191,6 +227,35 @@ export class UserController {
       const { page } = req.query;
       const users = await this.user.leaderBoard(+page || 1);
       res.status(200).json({ data: users, message: 'found' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  public generateUsernamesForOldUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Call the service to generate usernames for users without a username
+      const updatedUsers = await this.user.assignUsernamesToOldUsers();
+      
+      res.status(200).json({ data: updatedUsers, message: 'Usernames generated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  ////////////////////////////////
+  public getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { username } = req.params; // Extract the username from the request parameters
+  
+      // Call the service layer to fetch the user
+      const user = await this.user.findUserByUsername(username);
+  
+      if (!user) {
+        res.status(404).json({ message: `User with username "${username}" not found` });
+        return;
+      }
+  
+      res.status(200).json({ data: user, message: 'User fetched successfully' });
     } catch (error) {
       next(error);
     }

@@ -149,6 +149,69 @@ export class UserService {
     });
     return users;
   }
+  ///////////////////////////////////////////////////////////////
+  public async assignUsernamesToOldUsers(): Promise<any[]> {
+    // Fetch users without a username
+    const usersWithoutUsername = await this.prismaUser.findMany({
+      where: { username: null }, // Identify users without a username
+    });
+  
+    // If no such users exist, return early
+    if (!usersWithoutUsername.length) {
+      return [];
+    }
+  
+    // Generate and update usernames for these users
+    const updatedUsers = [];
+    for (const user of usersWithoutUsername) {
+      const newUsername = await this.generateUniqueUsername();
+      const updatedUser = await this.prismaUser.update({
+        where: { id: user.id },
+        data: { username: newUsername },
+      });
+      updatedUsers.push(updatedUser);
+    }
+  
+    return updatedUsers;
+  }
+  
+  // Generate unique username
+  private async generateUniqueUsername(): Promise<string> {
+    let unique = false;
+    let username = '';
+  
+    while (!unique) {
+      username = `user_${Math.random().toString(36).substring(2, 10)}`;
+      const existingUser = await this.prismaUser.findUnique({ where: { username } });
+      if (!existingUser) {
+        unique = true;
+      }
+    }
+  
+    return username;
+  }
+ //////////////get users by username 
+ public async findUserByUsername(username: string): Promise<any | null> {
+  // Query the database to find the user by username
+  const user = await this.prismaUser.findUnique({
+    where: { username },
+  });
+
+  return user;
+}
+public async isUsernameAvailable(username: string): Promise<boolean> {
+  const user = await this.prisma.user.findUnique({
+    where: { username },
+  });
+
+  return !user; // Returns true if user is not found (available)
+}
+
+
+
+
+
+
 }
 
 // const linkedin = userData.linkedin;

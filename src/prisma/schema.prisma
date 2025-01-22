@@ -44,6 +44,7 @@ model User {
   game               Json?                @db.JsonB
   isAdmin            Boolean              @default(false)
    flags             Json               @default("{\"new_user\":true,\"first_request_approved_courses\":false}")
+   username           String?             @unique @db.VarChar(255) 
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]

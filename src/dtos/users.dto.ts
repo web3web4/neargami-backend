@@ -67,4 +67,8 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   public image?: string;
+  @IsString()
+  @MinLength(4)
+  @IsNotEmpty()
+  public username: string;
 }
