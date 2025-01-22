@@ -76,9 +76,28 @@ export class AuthService {
     }
   }
   
+ async  generateUniqueUsername(): Promise<string> {
+  const maxAttempts = 10; // To limit retries
+  let attempts = 0;
 
+  while (attempts < maxAttempts) {
+    attempts++;
 
+    // Generate a random username
+    const randomUsername = `user${Math.floor(100000 + Math.random() * 900000)}`; // Example: "user123456"
 
+    // Check if the username is unique
+    const existingUser = await this.users.findUnique({
+      where: { username: randomUsername },
+    });
+
+    if (!existingUser) {
+      return randomUsername; // Return the unique username
+    }
+  }
+
+  throw new Error("Unable to generate a unique username after multiple attempts.");
+}
 
 
 
@@ -147,19 +166,35 @@ export class AuthService {
     const challangelog = await this.challangelog.findMany({});
     return challangelog;
   }
-  public async validateAndCreateUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID) {
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  public async validateAndCreateUser(
+    { accountId, publicKey, signature, challenge, message },
+    networkId = NETWORK_ID,
+    username?: string
+  ) {
     await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
-
+  
     await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
-
+  
     const user = await this.users.upsert({
       where: { address: accountId },
-      //TODO: check saving challenge field
-      create: { address: accountId, message, signature, phone: challenge },
-      update: { message, signature },
+      create: {
+        address: accountId,
+        message,
+        signature,
+        phone: challenge,
+        username: username || `user_${Date.now()}`, // Fallback username if not provided
+      },
+      update: {
+        message,
+        signature,
+        ...(username && { username }), // Update only if a username is provided
+      },
     });
+  
     return user;
   }
+  
 
   // Aux method
   private async fetch_all_user_keys({ accountId }, networkId) {
