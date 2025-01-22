@@ -193,14 +193,14 @@ export class UserService {
  //////////////get users by username 
  public async findUserByUsername(username: string): Promise<any | null> {
   // Query the database to find the user by username
-  const user = await this.prismaUser.findUnique({
+  const user = await this.prismaUser.findFirst({
     where: { username },
   });
 
   return user;
 }
 public async isUsernameAvailable(username: string): Promise<boolean> {
-  const user = await this.prisma.user.findUnique({
+  const user = await this.prisma.user.findFirst({
     where: { username },
   });
 
