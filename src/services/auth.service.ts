@@ -87,7 +87,7 @@ export class AuthService {
     const randomUsername = `user${Math.floor(100000 + Math.random() * 900000)}`; // Example: "user123456"
 
     // Check if the username is unique
-    const existingUser = await this.users.findUnique({
+    const existingUser = await this.users.findFirst({
       where: { username: randomUsername },
     });
 
