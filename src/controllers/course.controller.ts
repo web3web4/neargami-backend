@@ -76,6 +76,16 @@ export class CourseController {
       next(error);
     }
   };
+  public findAllCoursesWithAuth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const {id}=req.user;
+    try {
+      const courses: Course[] = await this.courseService.findAllWithAuth(id);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
   public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;

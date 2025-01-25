@@ -1,4 +1,4 @@
-import { PrismaClient, Course, User } from '@prisma/client';
+import { PrismaClient, Course, User, Prisma } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import Container, { Service } from 'typedi';
 import { HttpException } from '../exceptions/HttpException';
@@ -153,6 +153,26 @@ return AllUsers;
 
   public async findAll(): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
+    return AllCourses;
+  }
+  public async findAllWithAuth(id:string): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { flags: true },
+    });
+    
+    if (user?.flags && typeof user.flags === "object" && !Array.isArray(user.flags)) {
+      const updatedFlags = {
+        ...(user.flags as Record<string, unknown>), // Explicitly cast as an object
+        first_request_approved_courses: true, // Update only this field
+      };
+    
+      const changeFetchCoursesFlag = await this.prisma.user.update({
+        data: { flags: updatedFlags },
+        where: { id },
+      })
+    }
     return AllCourses;
   }
   public async findOneCourse(id: number): Promise<Course> {
