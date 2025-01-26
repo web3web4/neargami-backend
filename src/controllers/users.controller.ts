@@ -19,7 +19,17 @@ export class UserController {
       next(error);
     }
   };
+  public getAdminUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page } = req.query;
 
+      const findAllUsersData: IUser[] = await this.user.findAllAdminUser(+page || 1);
+
+      res.status(200).json({ data: findAllUsersData, message: 'findAll Admins' });
+    } catch (error) {
+      next(error);
+    }
+  };
   public claimNgcs = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const user = req.user;
     const { ngcs } = req.body;
@@ -107,16 +117,16 @@ export class UserController {
     }
   };
 ////////////////////////////////////////////////////////////////////////////////////////////
-public checkUsernameAvailability = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+public checkUsernameAvailability = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { username } = req.params;
-
+    const {id}=req.user;
     if (!username) {
       res.status(400).json({ message: 'Username is required' });
       return;
     }
 
-    const isAvailable = await this.user.isUsernameAvailable(username);
+    const isAvailable = await this.user.isUsernameAvailable(username,id);
 
     if (isAvailable) {
       res.status(200).json({ available: true, message: 'Username is available' });
@@ -147,7 +157,7 @@ async  stringToUsername(username: string): Promise<string> {
       res.status(401).json({ message: 'Unauthorized' });
     }
     req.body.username=await this.stringToUsername(req.body.username);
-    const isAvailable = await this.user.isUsernameAvailable(req.body.username);
+    const isAvailable = await this.user.isUsernameAvailable(req.body.username,user.id);
     if(!isAvailable){ res.status(200).json({ available: false, message: 'Username is already taken' });}else
     try {
       

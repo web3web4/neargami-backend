@@ -56,6 +56,15 @@ export class UserService {
     });
     return allUsers;
   }
+  public async findAllAdminUser(page: number): Promise<any> {
+    const allUsers = await this.prismaUser.findMany({
+      omit: { message: true, signature: true },
+      skip: (page - 1) * 20,
+      take: 20,where:{isAdmin:true}
+    });
+    return allUsers;
+  }
+
 
 
   public async editFlags(id: string, key: string, value: Prisma.JsonValue) {
@@ -221,9 +230,9 @@ export class UserService {
 
   return user;
 }
-public async isUsernameAvailable(username: string): Promise<boolean> {
+public async isUsernameAvailable(username: string,id:string): Promise<boolean> {
   const user = await this.prisma.user.findFirst({
-    where: { username },
+    where: { username,AND:{NOT:{id}}}
   });
 
   return !user; // Returns true if user is not found (available)
