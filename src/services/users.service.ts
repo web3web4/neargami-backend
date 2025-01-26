@@ -1,4 +1,4 @@
-import { Claims, PrismaClient, User } from '@prisma/client';
+import { Claims, Prisma, PrismaClient, User } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { CreateUserDto, UpdateUserDto } from '../dtos/users.dto';
 import { IUser } from '../interfaces/user.interface';
@@ -56,6 +56,28 @@ export class UserService {
     });
     return allUsers;
   }
+
+
+  public async editFlags(id: string, key: string, value: Prisma.JsonValue) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { flags: true },
+    });
+  
+    if (!user?.flags) {
+      throw new Error("User not found or flags not set");
+    }
+  
+    const updatedFlags: Prisma.JsonObject = {
+      ...(user.flags as Prisma.JsonObject), // Type assertion for JsonObject
+      [key]: value, // Dynamically set the key and value
+    };
+    return this.prisma.user.update({
+      where: { id },
+      data: { flags: updatedFlags },
+    });
+  }
+
   public async findOneById(uid: string): Promise<any> {
     if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
     const user = await this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });

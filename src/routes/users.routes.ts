@@ -15,6 +15,7 @@ export class UserRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.post(`${this.path}/editFlag`,AuthMiddleware,this.user.editFlags);
     this.router.post(`${this.path}/username`,this.user.generateUsernamesForOldUsers);
     this.router.get(`${this.path}/username/:username`, this.user.getUserByUsername);
     this.router.get(`${this.path}/checkUsername/:username`, this.user.checkUsernameAvailability);
