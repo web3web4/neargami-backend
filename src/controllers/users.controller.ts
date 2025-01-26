@@ -200,6 +200,23 @@ async  stringToUsername(username: string): Promise<string> {
     }
   };
 
+  public editFlags = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    
+    const { id } = req.user; // Assuming `AuthMiddleware` adds `user` to the request
+    const { key, value } = req.body;
+  
+    if (!key || value === undefined) {
+       res.status(400).json({ message: "Key and value are required" });
+    }
+    
+    try {
+      const user = await this.user.editFlags(id, key,value);
+
+      res.status(200).json({ data: user, message: 'flag updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
   public updateGame = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { game, pointsUsed } = req.body;
     const { id } = req.params;
