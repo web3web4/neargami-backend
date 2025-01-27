@@ -8,30 +8,22 @@ import { Course } from '@prisma/client';
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   public courseService = Container.get(CourseService);
- 
 
-  public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> =>{
-      try{
-      const{id}=req.params;
-      const AllCourses=await this.courseService.getAllUsersStartingCourse(+id);
+  public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const AllCourses = await this.courseService.getAllUsersStartingCourse(+id);
       res.status(200).json({ data: AllCourses, message: 'All Users witch starting with this course' });
-      } catch (error) {
-            next(error);
-      }
+    } catch (error) {
+      next(error);
     }
+  };
 
-
-
-
-
-
- 
   public makeAllCoursesHaveSlug = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const AllCourses = await this.courseService.updateForAllSlug();
       res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
     } catch (error) {
- 
       next(error);
     }
   };
@@ -77,7 +69,7 @@ export class CourseController {
     }
   };
   public findAllCoursesWithAuth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    const {id}=req.user;
+    const { id } = req.user;
     try {
       const courses: Course[] = await this.courseService.findAllWithAuth(id);
 
@@ -242,7 +234,7 @@ export class CourseController {
     const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
     const sluge = await this.stringToSlugById(courseinfo.title, +id);
     try {
-      const course: Course = await this.courseService.updateStatus(+id, user, publish_status, publish_status_reson, sluge);
+      const course: Course = await this.courseService.updateStatus(+id, user.isAdmin, publish_status, publish_status_reson, sluge);
 
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
@@ -256,6 +248,25 @@ export class CourseController {
       const findOneCourseData: Course = await this.courseService.delete(+id, userId);
 
       res.status(200).send({ data: findOneCourseData, message: 'delete One' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { query } = req.query;
+      const searchResult = await this.courseService.search(query as string);
+      res.status(200).send({ data: searchResult, message: 'search' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getKeywords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const keywords = await this.courseService.getKeywords();
+      res.status(200).send({ data: keywords, message: 'keywords' });
     } catch (error) {
       next(error);
     }

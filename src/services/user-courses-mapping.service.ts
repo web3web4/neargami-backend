@@ -66,6 +66,22 @@ export class UserCoursesMappingService {
     return result;
   }
 
+  async findCourseUsers(courseId: number, finished: boolean): Promise<UserCoursesMapping[]> {
+    return await this.prisma.userCoursesMapping.findMany({
+      where: { AND: { course_id: courseId, end_time: finished ? { not: null } : null } },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            image: true,
+          },
+        },
+      },
+    });
+  }
+
   // async findOne(id: bigint): Promise<IUserCoursesMapping | null> {
   //   return this.prisma.userCoursesMapping.findUnique({ where: { id }, include: { user: true, course: true, userLecture: true } });
   // }

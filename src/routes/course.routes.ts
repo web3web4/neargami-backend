@@ -14,26 +14,28 @@ export class CourseRoute implements Routes {
   constructor() {
     this.initializeRoutes();
   }
-//
-//
-//
+  //
+  //
+  //
   private initializeRoutes() {
     this.router.get('/courses/users-start/:id', this.courseController.findUsersStartingCourse);
 
     this.router.get('/courses/slug', this.courseController.makeAllCoursesHaveSlug);
     this.router.get('/courses/page', this.courseController.findAllCoursesPage);
-    this.router.get('/courses/:slug', this.courseController.findCourseBySlug);
+    this.router.get('/courses/search', this.courseController.search);
     this.router.get('/courses', this.courseController.findAllCourses);
-    this.router.get('/courses/auth/all',AuthMiddleware, this.courseController.findAllCoursesWithAuth);
+    this.router.get('/courses/auth/all', AuthMiddleware, this.courseController.findAllCoursesWithAuth);
     this.router.get('/courses/teacher/:id', this.courseController.findTeacherCourses);
     this.router.get('/courses/status/:id', this.courseController.findCoursesByStatus);
     this.router.get('/courses/tag/:tag', this.courseController.findCoursesByTag);
     this.router.get('/courses/search/:phras', this.courseController.findCoursesByTextSearch);
     this.router.get('/courses/full-search/:phras', this.courseController.findCoursesBySubTextSearch);
-    this.router.post('/courses',AuthMiddleware, ValidationMiddleware(CreateCourseDto, false, false, true), this.courseController.createCourse);
-    this.router.get('/courses/id/:id', AuthMiddleware,this.courseController.findCourseById);
-    this.router.put('/courses/:id',AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true),  this.courseController.updateCourse);
-    this.router.put('/courses/status/:id',AuthMiddleware, this.courseController.updateCourseStatus);
+    this.router.post('/courses', AuthMiddleware, ValidationMiddleware(CreateCourseDto, false, false, true), this.courseController.createCourse);
+    this.router.get('/courses/id/:id', AuthMiddleware, this.courseController.findCourseById);
+    this.router.put('/courses/:id', AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true), this.courseController.updateCourse);
+    this.router.put('/courses/status/:id', AuthMiddleware, this.courseController.updateCourseStatus);
     this.router.delete('/courses/:id', AuthMiddleware, this.courseController.deleteCourse);
+    this.router.get('/courses/keywords', this.courseController.getKeywords);
+    this.router.get('/courses/:slug', this.courseController.findCourseBySlug);
   }
 }
