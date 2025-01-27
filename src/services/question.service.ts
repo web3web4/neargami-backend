@@ -4,6 +4,7 @@ import Container, { Service } from 'typedi';
 import { LectureService } from './lecture.service';
 import { HttpException } from '../exceptions/HttpException';
 import { PrismaService } from './prisma.service';
+import { exceptions } from 'winston';
 
 @Service()
 export class QuestionService {
@@ -33,6 +34,20 @@ export class QuestionService {
       },orderBy:{sequence:'asc'},
     });
   }
+///////
+async findQuestionsByLectureSlug( slug: string): Promise<Question[]> {
+  const lecture = await this.lecture.findAllLEcturesBySlug(slug);
+  if(!lecture?.id){throw new HttpException(400,"there is no lecture by this slug")}
+  await this.lecture.findOne(lecture.id, lecture.course_id);
+  return this.prisma.question.findMany({
+    where: { lecture_id:lecture.id },
+    include: {
+      lecture: { include: { course: { select: { logo: true } } } },
+      answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
+      
+    },orderBy:{sequence:'asc'},
+  });
+}
 
   async findOne(course_id: number, lecture_id: number, id: number): Promise<Question> {
     await this.lecture.findOne(lecture_id, course_id);
