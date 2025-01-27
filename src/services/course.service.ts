@@ -1,4 +1,4 @@
-import { PrismaClient, Course, User, Prisma } from '@prisma/client';
+import { PrismaClient, Course, User, Prisma, SearchQuery } from '@prisma/client';
 import { CreateCourseDto, UpdateCourseDto, Status } from '../dtos/course.dto';
 import Container, { Service } from 'typedi';
 import { HttpException } from '../exceptions/HttpException';
@@ -73,7 +73,7 @@ export class CourseService {
   private async logSearchQuery(query: string): Promise<void> {
     const keywords = query.split(/\s+/);
     const now = new Date();
-
+    console.log(keywords);
     for (const keyword of keywords) {
       try {
         await this.searchQuery.upsert({
@@ -84,14 +84,21 @@ export class CourseService {
           },
           create: {
             query: [query],
-            keyword: keyword.slice(0, 50),
+            keyword: keyword,
             timestamp: now,
           },
         });
       } catch (error) {
-        console.error('Error logging search query:', error);
+        throw new HttpException(500, 'Failed to log search query');
       }
     }
+    console.log('h');
+  }
+
+  public async getKeywords(): Promise<SearchQuery[]> {
+    const keywords = await this.searchQuery.findMany();
+
+    return keywords;
   }
 
   public async createNewCourse(teacher_user_id: string, data1: CreateCourseDto, sluge: string): Promise<Course> {
@@ -222,23 +229,23 @@ export class CourseService {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     return AllCourses;
   }
-  public async findAllWithAuth(id:string): Promise<Course[]> {
+  public async findAllWithAuth(id: string): Promise<Course[]> {
     const AllCourses: Course[] = await this.course.findMany({ include: { teacher: true } });
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: { flags: true },
     });
-    
-    if (user?.flags && typeof user.flags === "object" && !Array.isArray(user.flags)) {
+
+    if (user?.flags && typeof user.flags === 'object' && !Array.isArray(user.flags)) {
       const updatedFlags = {
         ...(user.flags as Record<string, unknown>), // Explicitly cast as an object
         first_request_approved_courses: true, // Update only this field
       };
-    
+
       const changeFetchCoursesFlag = await this.prisma.user.update({
         data: { flags: updatedFlags },
         where: { id },
-      })
+      });
     }
     return AllCourses;
   }

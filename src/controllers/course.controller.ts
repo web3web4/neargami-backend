@@ -69,7 +69,7 @@ export class CourseController {
     }
   };
   public findAllCoursesWithAuth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    const {id}=req.user;
+    const { id } = req.user;
     try {
       const courses: Course[] = await this.courseService.findAllWithAuth(id);
 
@@ -248,6 +248,25 @@ export class CourseController {
       const findOneCourseData: Course = await this.courseService.delete(+id, userId);
 
       res.status(200).send({ data: findOneCourseData, message: 'delete One' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { query } = req.query;
+      const searchResult = await this.courseService.search(query as string);
+      res.status(200).send({ data: searchResult, message: 'search' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getKeywords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const keywords = await this.courseService.getKeywords();
+      res.status(200).send({ data: keywords, message: 'keywords' });
     } catch (error) {
       next(error);
     }

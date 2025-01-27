@@ -17,7 +17,9 @@ export class PrismaService {
   public searchQuery: PrismaClient['searchQuery'];
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = new PrismaClient({
+      log: ['query'],
+    });
     this.user = this.prisma.user;
     this.challangelog = this.prisma.challangelog;
     this.answer = this.prisma.answer;
