@@ -60,23 +60,22 @@ export class UserService {
     const allUsers = await this.prismaUser.findMany({
       omit: { message: true, signature: true },
       skip: (page - 1) * 20,
-      take: 20,where:{isAdmin:true}
+      take: 20,
+      where: { isAdmin: true },
     });
     return allUsers;
   }
-
-
 
   public async editFlags(id: string, key: string, value: Prisma.JsonValue) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: { flags: true },
     });
-  
+
     if (!user?.flags) {
-      throw new Error("User not found or flags not set");
+      throw new Error('User not found or flags not set');
     }
-  
+
     const updatedFlags: Prisma.JsonObject = {
       ...(user.flags as Prisma.JsonObject), // Type assertion for JsonObject
       [key]: value, // Dynamically set the key and value
@@ -186,12 +185,12 @@ export class UserService {
     const usersWithoutUsername = await this.prismaUser.findMany({
       where: { username: null }, // Identify users without a username
     });
-  
+
     // If no such users exist, return early
     if (!usersWithoutUsername.length) {
       return [];
     }
-  
+
     // Generate and update usernames for these users
     const updatedUsers = [];
     for (const user of usersWithoutUsername) {
@@ -202,15 +201,15 @@ export class UserService {
       });
       updatedUsers.push(updatedUser);
     }
-  
+
     return updatedUsers;
   }
-  
+
   // Generate unique username
   private async generateUniqueUsername(): Promise<string> {
     let unique = false;
     let username = '';
-  
+
     while (!unique) {
       username = `user_${Math.random().toString(36).substring(2, 10)}`;
       const existingUser = await this.prismaUser.findUnique({ where: { username } });
@@ -218,31 +217,25 @@ export class UserService {
         unique = true;
       }
     }
-  
+
     return username;
   }
- //////////////get users by username 
- public async findUserByUsername(username: string): Promise<any | null> {
-  // Query the database to find the user by username
-  const user = await this.prismaUser.findFirst({
-    where: { username },
-  });
+  //////////////get users by username
+  public async findUserByUsername(username: string): Promise<any | null> {
+    // Query the database to find the user by username
+    const user = await this.prismaUser.findFirst({
+      where: { username },
+    });
 
-  return user;
-}
-public async isUsernameAvailable(username: string,id:string): Promise<boolean> {
-  const user = await this.prisma.user.findFirst({
-    where: { username,AND:{NOT:{id}}}
-  });
+    return user;
+  }
+  public async isUsernameAvailable(username: string, id: string): Promise<boolean> {
+    const user = await this.prisma.user.findFirst({
+      where: { username, AND: { NOT: { id } } },
+    });
 
-  return !user; // Returns true if user is not found (available)
-}
-
-
-
-
-
-
+    return !user; // Returns true if user is not found (available)
+  }
 }
 
 // const linkedin = userData.linkedin;

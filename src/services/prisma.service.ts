@@ -14,6 +14,7 @@ export class PrismaService {
   public userLectureMapping: PrismaClient['userLectureMapping'];
   public claims: PrismaClient['claims'];
   public courseStatusLog: PrismaClient['courseStatusLog'];
+  public searchQuery: PrismaClient['searchQuery'];
 
   constructor() {
     this.prisma = new PrismaClient();
@@ -27,5 +28,6 @@ export class PrismaService {
     this.userLectureMapping = this.prisma.userLectureMapping;
     this.claims = this.prisma.claims;
     this.courseStatusLog = this.prisma.courseStatusLog;
+    this.searchQuery = this.prisma.searchQuery;
   }
 }

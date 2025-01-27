@@ -41,6 +41,17 @@ export class UserCoursesMappingController {
     }
   };
 
+  public findCourseUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { finished } = req.query;
+      const userCoursesMapping = await this.userCoursesMappingService.findCourseUsers(+id, finished === 'true');
+      res.status(200).json({ data: userCoursesMapping, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // public findOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   const { id } = req.params;
   //   try {

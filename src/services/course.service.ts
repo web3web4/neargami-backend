@@ -6,6 +6,7 @@ import { SUPER_ADMIN_PASS } from '../config';
 import { PrismaService } from './prisma.service';
 import { max } from 'class-validator';
 import { MailService } from './mail.service';
+import Fuse from 'fuse.js';
 @Service()
 export class CourseService {
   private prismaService = Container.get(PrismaService);
@@ -13,19 +14,85 @@ export class CourseService {
   private course = this.prismaService.course;
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
+  private searchQuery = this.prismaService.searchQuery;
 
- 
-public async getAllUsersStartingCourse(course_id:number ){
-const users= await this.prisma.userCoursesMapping.findMany({where :{course_id}});
-const AllUsers= await this.prisma.user.findMany({where:{id:{in:users.map((user)=>user.user_id)}}});
-return AllUsers;
+  public async getAllUsersStartingCourse(course_id: number) {
+    const users = await this.prisma.userCoursesMapping.findMany({ where: { course_id } });
+    const AllUsers = await this.prisma.user.findMany({ where: { id: { in: users.map(user => user.user_id) } } });
+    return AllUsers;
+  }
 
-
-
-
-}
- 
   // Output: A random UUID like 'e58d48b6-2e34-4c41-9f5d-3bb7b02d3c4e'
+
+  public async search(searchQuery: string): Promise<Course[]> {
+    const sanitizedQuery = searchQuery.toLowerCase().trim();
+    const courses = await this.course.findMany({
+      where: {
+        OR: [
+          {
+            title: { contains: sanitizedQuery, mode: 'insensitive' },
+          },
+          {
+            description: { contains: sanitizedQuery, mode: 'insensitive' },
+          },
+          {
+            lecture: {
+              some: {
+                OR: [
+                  { title: { contains: sanitizedQuery, mode: 'insensitive' } },
+                  { description: { contains: sanitizedQuery, mode: 'insensitive' } },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        lecture: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+          where: {
+            OR: [{ title: { contains: sanitizedQuery, mode: 'insensitive' } }, { description: { contains: sanitizedQuery, mode: 'insensitive' } }],
+          },
+        },
+      },
+    });
+    if (courses.length === 0) {
+      await this.logSearchQuery(sanitizedQuery);
+    }
+    return courses;
+  }
+
+  /**
+   * Logs the search query for analytics or future use.
+   * @param query - The sanitized query to log
+   */
+  private async logSearchQuery(query: string): Promise<void> {
+    const keywords = query.split(/\s+/);
+    const now = new Date();
+
+    for (const keyword of keywords) {
+      try {
+        await this.searchQuery.upsert({
+          where: { keyword },
+          update: {
+            query: { push: query },
+            timestamp: now,
+          },
+          create: {
+            query: [query],
+            keyword: keyword.slice(0, 50),
+            timestamp: now,
+          },
+        });
+      } catch (error) {
+        console.error('Error logging search query:', error);
+      }
+    }
+  }
 
   public async createNewCourse(teacher_user_id: string, data1: CreateCourseDto, sluge: string): Promise<Course> {
     return this.course.create({
@@ -216,7 +283,7 @@ return AllUsers;
     const course = await this.course.findUnique({ where: { id } });
     return course;
   }
- async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string,sluge:string): Promise<Course> {
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
       throw new HttpException(404, 'Course not found');
@@ -246,12 +313,9 @@ return AllUsers;
     // const sluge=this.stringToSlug(course.title,course.id);
     return this.course.update({
       where: { id },
-      data: { publish_status: publish_status,
-         slug:sluge
-       },
+      data: { publish_status: publish_status, slug: sluge },
     });
   }
-
 
   async stringToSlugById(title: string, id: number) {
     const baseSlug = title
@@ -262,7 +326,6 @@ return AllUsers;
       .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
       .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 
- 
     const uniqueSuffix = id; // Use timestamp for uniqueness
     return `${baseSlug}-${uniqueSuffix}`;
   }
@@ -284,7 +347,7 @@ return AllUsers;
     //const updatAll= await this.course.updateMany({data:AllCourses});
     return AllCourses;
   }
- 
+
   async delete(id: number, userId: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
