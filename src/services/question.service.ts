@@ -42,7 +42,7 @@ async findQuestionsByLectureSlug( slug: string): Promise<Question[]> {
   return this.prisma.question.findMany({
     where: { lecture_id:lecture.id },
     include: {
-      lecture: { include: { course: { select: { logo: true } } } },
+      lecture: { include: { course: { select: { logo: true,slug:true } } } },
       answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
       
     },orderBy:{sequence:'asc'},
