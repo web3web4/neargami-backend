@@ -35,7 +35,7 @@ export class App {
   constructor(routes: Routes[]) {
     this.app = express();
     this.env = NODE_ENV || 'development';
-    this.port = PORT || 3000;
+    // this.port = PORT || 3000;
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
@@ -44,14 +44,14 @@ export class App {
     this.initializeErrorHandling();
   }
 
-  public listen() {
-    this.app.listen(this.port, () => {
-      logger.info(`=================================`);
-      logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
-      logger.info(`=================================`);
-    });
-  }
+  // public listen() {
+  //   this.app.listen(this.port, () => {
+  //     logger.info(`=================================`);
+  //     logger.info(`======= ENV: ${this.env} =======`);
+  //     logger.info(`🚀 App listening on the port ${this.port}`);
+  //     logger.info(`=================================`);
+  //   });
+  // }
 
   public getServer() {
     return this.app;
@@ -121,9 +121,9 @@ export class App {
   private initializeErrorHandling(): void {
     this.app.use(ErrorMiddleware);
     // Global handler for uncaught exceptions
-    process.on('uncaughtException', (err: Error): void => {
-      logger.error(`Uncaught Exception: ${err.message}`, { stack: err.stack });
-      process.exit(1); // Optionally exit the process
-    });
+    // process.on('uncaughtException', (err: Error): void => {
+    //   logger.error(`Uncaught Exception: ${err.message}`, { stack: err.stack });
+    //   process.exit(1); // Optionally exit the process
+    // });
   }
 }
