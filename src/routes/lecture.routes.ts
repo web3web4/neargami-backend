@@ -16,8 +16,8 @@ export class lectureRoute implements Routes {
   constructor() {
     this.initializeRoutes();
   }
-  upload = multer({ dest: 'uploads/' });
-  storage = multer.memoryStorage();
+   storage = multer.memoryStorage()
+   upload = multer({ storage: this.storage })
 
   private initializeRoutes() {
     this.router.get('/courses/lectures/slug/:slug', this.lectureController.findAllLecturesbySlug);
