@@ -66,9 +66,9 @@ export class UserCoursesMappingService {
     return result;
   }
 
-  async findCourseUsers(courseId: number, finished: boolean): Promise<UserCoursesMapping[]> {
+  async findCourseUsers(slug: string, finished: boolean): Promise<UserCoursesMapping[]> {
     return await this.prisma.userCoursesMapping.findMany({
-      where: { AND: { course_id: courseId, end_time: finished ? { not: null } : null } },
+      where: { AND: { course: { slug }, end_time: finished ? { not: null } : null } },
       include: {
         user: {
           select: {
@@ -76,6 +76,11 @@ export class UserCoursesMappingService {
             firstname: true,
             lastname: true,
             image: true,
+          },
+        },
+        course: {
+          select: {
+            slug: true,
           },
         },
       },
