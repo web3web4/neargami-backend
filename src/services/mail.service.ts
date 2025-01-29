@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
-import { EMAIL_NAME, EMAIL_PASSWORD } from '@/config';
+import { EMAIL_NAME, EMAIL_PASSWORD } from '../config';
 
 @Service()
 export class MailService {
