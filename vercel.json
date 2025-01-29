@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
   "buildCommand": "npm run prisma:migrate && npm run prisma:generate",
   "installCommand": "npm install",
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]

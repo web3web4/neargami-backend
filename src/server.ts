@@ -21,6 +21,6 @@ const app = new App([
   new ClaimsRoute(),
 ]);
 
-app.listen();
+// app.listen();
 
-export default app;
+export default app.getServer();
