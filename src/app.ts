@@ -113,7 +113,7 @@ export class App {
       winston.format.json(), // Log in JSON format for better structure
     ),
     transports: [
-      new winston.transports.File({ filename: 'error.log' }), // Log to error.log file
+      // new winston.transports.File({ filename: 'error.log' }), // Log to error.log file
       new winston.transports.Console({ format: winston.format.simple() }), // Also log to console
     ],
   });
