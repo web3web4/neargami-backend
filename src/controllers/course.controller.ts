@@ -224,6 +224,8 @@ export class CourseController {
       next(error);
     }
   };
+  ////////////////////////////////////////////////////////////////////////
+
   public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const user = req.user;
@@ -234,7 +236,27 @@ export class CourseController {
     const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
     const sluge = await this.stringToSlugById(courseinfo.title, +id);
     try {
-      const course: Course = await this.courseService.updateStatus(+id, user.isAdmin, publish_status, publish_status_reson, sluge);
+      const course: Course = await this.courseService.updateStatus(+id, user.isAdmin, publish_status, publish_status_reson,sluge);
+
+      res.status(200).send({ data: course, message: 'status updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // add prev status to log for admin users
+  public makeLogStatusForAdminUser = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const user = req.user;
+    // req.user.isAdmin;
+
+    const publish_status: Status = req.body.publish_status;
+    const publish_status_reson: string = req.body.publish_status_reson;
+    const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+    const sluge = await this.stringToSlugById(courseinfo.title, +id);
+    const prevStatus = courseinfo.publish_status;
+    try {
+      const course: Course = await this.courseService.updateLogStatusForAdmin(+id, user.isAdmin,user.id, publish_status, publish_status_reson, sluge,prevStatus);
 
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {

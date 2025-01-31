@@ -10,18 +10,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
   extensions = [pg_trgm]
 }
-model challangelog{
-  id                Int      @id @default(autoincrement())
-  accountId          String?               @db.VarChar(255) 
-  challange          String?               @db.VarChar(255) 
-  signature          String?               @db.VarChar(255)
 
-
+model challangelog {
+  id        Int     @id @default(autoincrement())
+  accountId String? @db.VarChar(255)
+  challange String? @db.VarChar(255)
+  signature String? @db.VarChar(255)
 }
+
 model User {
   id                 String               @id @default(uuid()) @db.Uuid
   firstname          String?              @db.VarChar(50)
@@ -44,13 +44,15 @@ model User {
   image              String?
   game               Json?                @db.JsonB
   isAdmin            Boolean              @default(false)
-   flags             Json               @default("{\"new_user\":true,\"first_request_approved_courses\":false}")
-   username           String?             @db.VarChar(255) 
+  flags              Json                 @default("{\"new_user\":true,\"first_request_approved_courses\":false}")
+  username           String?              @db.VarChar(255)
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   Course             Course[]
   Claims             Claims[]
+
+  courseStatusHistoryForAdmin courseStatusHistoryForAdmin[]
 }
 
 model Claims {
@@ -60,7 +62,7 @@ model Claims {
   user        User     @relation(fields: [user_id], references: [id])
   executed    Boolean  @default(false)
   created_at  DateTime @default(now())
-  updated_at  DateTime 
+  updated_at  DateTime
 }
 
 enum Status {
@@ -74,7 +76,7 @@ enum Status {
 model Course {
   id                 Int                  @id @default(autoincrement())
   title              String               @db.VarChar(150)
-  slug                String?              @db.VarChar(250) 
+  slug               String?              @db.VarChar(250)
   teacher_user_id    String               @db.Uuid
   publish_status     Status?
   name               String?
@@ -90,7 +92,8 @@ model Course {
   UserQuestionAnswer UserQuestionAnswer[]
   UserLectureMapping UserLectureMapping[]
 
-  CourseStatusLog CourseStatusLog[]
+  CourseStatusLog             CourseStatusLog[]
+  courseStatusHistoryForAdmin courseStatusHistoryForAdmin[]
 
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([description(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -134,7 +137,7 @@ model UserLectureMapping {
 model Lecture {
   id                 Int                  @id @default(autoincrement())
   title              String               @db.VarChar(150)
-  slug                String?              @db.VarChar(250) 
+  slug               String?              @db.VarChar(250)
   description        String               @db.Text
   video_path         String?              @db.VarChar(50)
   course_id          Int
@@ -173,8 +176,8 @@ model Answer {
 }
 
 model UserQuestionAnswer {
-  id          Int    @id @default(autoincrement())
-  student_id  String @db.Uuid
+  id          Int     @id @default(autoincrement())
+  student_id  String  @db.Uuid
   course_id   Int
   lecture_id  Int
   question_id Int
@@ -189,8 +192,19 @@ model UserQuestionAnswer {
 }
 
 model SearchQuery {
+  id        Int      @id @default(autoincrement())
+  query     String[]
+  keyword   String   @unique @db.VarChar(50)
+  timestamp DateTime @default(now())
+}
+
+model courseStatusHistoryForAdmin {
   id          Int      @id @default(autoincrement())
-  query       String[] 
-  keyword     String   @unique @db.VarChar(50)
-  timestamp   DateTime @default(now())
+  user_id     String   @db.Uuid
+  course_id   Int
+  prev_status Status?
+  new_status  Status
+  create_at   DateTime @db.Timestamp()
+  user        User     @relation(fields: [user_id], references: [id])
+  course      Course   @relation(fields: [course_id], references: [id])
 }
