@@ -194,3 +194,13 @@ model SearchQuery {
   keyword     String   @unique @db.VarChar(50)
   timestamp   DateTime @default(now())
 }
+model courseStatusHistoryForAdmin {
+  id          Int      @id @default(autoincrement())
+  user_id     String   @db.Uuid
+  course_id   Int
+  prev_status Status?
+  new_status  Status
+  create_at   DateTime @db.Timestamp()
+  user        User     @relation(fields: [user_id], references: [id])
+  course      Course   @relation(fields: [course_id], references: [id])
+}

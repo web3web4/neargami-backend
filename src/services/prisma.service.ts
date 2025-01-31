@@ -15,6 +15,7 @@ export class PrismaService {
   public claims: PrismaClient['claims'];
   public courseStatusLog: PrismaClient['courseStatusLog'];
   public searchQuery: PrismaClient['searchQuery'];
+  public courseStatusHistoryForAdmin: PrismaClient['courseStatusHistoryForAdmin'];
 
   constructor() {
     this.prisma = new PrismaClient({
