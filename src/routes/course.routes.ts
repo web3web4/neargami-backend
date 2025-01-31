@@ -34,6 +34,7 @@ export class CourseRoute implements Routes {
     this.router.get('/courses/id/:id', AuthMiddleware, this.courseController.findCourseById);
     this.router.put('/courses/:id', AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true), this.courseController.updateCourse);
     this.router.put('/courses/status/:id', AuthMiddleware, this.courseController.updateCourseStatus);
+    this.router.put('/courses/statusLog/:id', AuthMiddleware, this.courseController.makeLogStatusForAdminUser);
     this.router.delete('/courses/:id', AuthMiddleware, this.courseController.deleteCourse);
     this.router.get('/courses/keywords', this.courseController.getKeywords);
     this.router.get('/courses/:slug', this.courseController.findCourseBySlug);

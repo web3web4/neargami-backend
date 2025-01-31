@@ -290,6 +290,54 @@ export class CourseService {
     const course = await this.course.findUnique({ where: { id } });
     return course;
   }
+  //////////////////////////////////////
+
+    // update log status for admin user 
+    async updateLogStatusForAdmin(id: number, isAdmin: boolean,userId: string, publish_status: Status, publish_status_reson: string, sluge: string,prevStatus): Promise<Course> {
+      const course = await this.course.findUnique({ where: { id } })
+      if (!course) {
+        throw new HttpException(404, "Course not found")
+      }
+  
+      if (isAdmin == false) {
+        throw new HttpException(403, "this user is not admin to update status")
+      }
+      const changstatusdate = new Date()
+      //const coursestatuslogs = await this.coursestatuslog.findMany({ where: { course_id: id } });
+      //let maxdatestatuslog: Date = null;
+      // for (let i = 0; i < coursestatuslogs.length;i++){
+      //   if (coursestatuslogs[i].changeStatusDate > maxdatestatuslog) {
+      //     maxdatestatuslog = coursestatuslogs[i].changeStatusDate;
+      // }
+  
+      // }
+      const statuslog = await this.coursestatuslog.create({
+        data: {
+          changeStatusReson: publish_status_reson,
+          last_publish_status: course.publish_status,
+          current_publish_status: publish_status,
+          changeStatusDate: changstatusdate,
+          course_id: course.id,
+        },
+      })
+      //insert prev_status in table (courseStatusHistoryForAdmin)
+      const logStatusForAdmin = await this.courseStatusLogForAdmin.create({
+        data:{
+          user_id: userId,
+          course_id: id,
+          prev_status:prevStatus,
+          new_status:publish_status,
+          create_at: new Date(Date.now()),
+         },
+      })
+      // const sluge=this.stringToSlug(course.title,course.id);
+      return this.course.update({
+        where: { id },
+        data: { publish_status: publish_status, slug: sluge },
+      })
+    }
+  
+  //////////////////////////////
   async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
     if (!course) {
