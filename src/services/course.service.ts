@@ -303,14 +303,7 @@ export class CourseService {
         throw new HttpException(403, "this user is not admin to update status")
       }
       const changstatusdate = new Date()
-      //const coursestatuslogs = await this.coursestatuslog.findMany({ where: { course_id: id } });
-      //let maxdatestatuslog: Date = null;
-      // for (let i = 0; i < coursestatuslogs.length;i++){
-      //   if (coursestatuslogs[i].changeStatusDate > maxdatestatuslog) {
-      //     maxdatestatuslog = coursestatuslogs[i].changeStatusDate;
-      // }
-  
-      // }
+
       const statuslog = await this.coursestatuslog.create({
         data: {
           changeStatusReson: publish_status_reson,
@@ -321,7 +314,7 @@ export class CourseService {
         },
       })
       //insert prev_status in table (courseStatusHistoryForAdmin)
-      const logStatusForAdmin = await this.courseStatusLogForAdmin.create({
+      const logStatusForAdmin = await this.prisma.courseStatusHistoryForAdmin.create({
         data:{
           user_id: userId,
           course_id: id,
@@ -348,14 +341,7 @@ export class CourseService {
       throw new HttpException(403, 'this user is not admin to update status');
     }
     const changstatusdate = new Date();
-    //const coursestatuslogs = await this.coursestatuslog.findMany({ where: { course_id: id } });
-    //let maxdatestatuslog: Date = null;
-    // for (let i = 0; i < coursestatuslogs.length;i++){
-    //   if (coursestatuslogs[i].changeStatusDate > maxdatestatuslog) {
-    //     maxdatestatuslog = coursestatuslogs[i].changeStatusDate;
-    // }
-
-    // }
+ 
     const statuslog = await this.coursestatuslog.create({
       data: {
         changeStatusReson: publish_status_reson,
