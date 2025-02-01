@@ -51,6 +51,7 @@ model User {
   UserQuestionAnswer UserQuestionAnswer[]
   Course             Course[]
   Claims             Claims[]
+  courseStatusHistoryForAdmin  courseStatusHistoryForAdmin[]
 }
 
 model Claims {
@@ -89,6 +90,7 @@ model Course {
   userCourses        UserCoursesMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   UserLectureMapping UserLectureMapping[]
+ courseStatusHistoryForAdmin  courseStatusHistoryForAdmin[]
 
   CourseStatusLog CourseStatusLog[]
 

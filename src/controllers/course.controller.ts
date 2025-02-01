@@ -255,7 +255,7 @@ export class CourseController {
       try {
         const course: Course = await this.courseService.updateLogStatusForAdmin(+id, user.isAdmin,user.id, publish_status, publish_status_reson, sluge,prevStatus);
   
-        res.status(200).send({ data: course, message: 'status updated' });
+        res.status(200).send({ data: course, message: 'status updated and logged ' });
       } catch (error) {
         next(error);
       }
