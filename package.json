@@ -42,7 +42,7 @@
   },
   "scripts": {
     "start": "node dist/app.js",
-    "vercel-build": "npm cache clean --force && npm run build  && npm run prisma:migrate  ",
+    "vercel-build": "npm cache clean --force && npm run build && prisma migrate deploy && npm run prisma:migrate  ",
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
     "build:tsc": "tsc && tsc-alias",
