@@ -42,6 +42,8 @@
   },
   "scripts": {
     "start": "node dist/app.js",
+      "postinstall": "prisma generate",
+
     "vercel-build": "npm cache clean --force && npm run build && prisma migrate deploy && npm run prisma:migrate  ",
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
