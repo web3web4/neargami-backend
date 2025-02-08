@@ -8,12 +8,8 @@ import { PrismaService } from './prisma.service';
 import ImageKit from 'imagekit';
 import fs from 'fs';
 import { count } from 'console';
-
-// const imagekit = new ImageKit({
-//   publicKey: 'public_UwYz1I2ID7IZOXNoogcH+wJvwn0=',
-//   privateKey: 'private_msO5wyd+ECoSS/Ua4K5kL+NCzOc=',
-//   urlEndpoint: 'https://ik.imagekit.io/lybbxavs0',
-// });
+//import { Express } from 'express';
+import multer from 'multer';
 const imagekit = new ImageKit({
   publicKey: process.env.IMAGEKIT_PUBLIC_KEY || '',
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
@@ -21,10 +17,22 @@ const imagekit = new ImageKit({
 });
 @Service()
 export class LectureService {
+  [x: string]: any;
   private prismaService = Container.get(PrismaService);
   private lecture = this.prismaService.lecture;
   private course = Container.get(CourseService);
   private prisma = this.prismaService.prisma;
+ 
+
+  constructor() {
+    this.imageKit = new ImageKit({
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY || '',
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || ''
+    });
+
+  }
+
 ////////
 async stringToSlugById(title:string,id:number){
   const baseSlug = title
@@ -110,7 +118,10 @@ async findAllLEcturesBySlugAuth(slug:string,user_id:string){
 const check:UserLectureMapping=await this.prisma.userLectureMapping.findFirst({where:{user_id,lecture_id}})
 return check;
   }
-  async uploadImageToImageKit(filePath: string, fileName: string): Promise<string> {
+
+
+
+  async uploadImageToImageKitDisk(filePath: string, fileName: string): Promise<string>{
     try {
       const response = await imagekit.upload({
         file: fs.createReadStream(filePath), // Read the file
@@ -122,6 +133,23 @@ return check;
       throw error;
     }
   }
+  // Upload image from buffer
+  async uploadImageToImageKitBuffer(fileBuffer: Buffer, fileName: string): Promise<any> {
+    if (!this.imageKit) {
+      throw new Error('ImageKit client is not initialized');
+    }
+    try {
+      const result = await this.imageKit.upload({
+        file: fileBuffer,
+        fileName: fileName,
+      });
+      return result; // Return the upload result
+    } catch (error) {
+      console.error('Error uploading image to ImageKit:', error);
+      throw error; 
+    }
+  }
+
 async findUniqueCourseBySlug(slug:string):Promise<any>{
 return await this.prismaService.course.findFirst({where:{slug}});
 //await this.prisma.lecture.findMany({include:{course:{}}})

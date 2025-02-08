@@ -13,17 +13,32 @@ export class lectureRoute implements Routes {
   public router = Router();
   public lectureController = Container.get(LectureController);
 
+//  diskStorage = multer.diskStorage({
+//   destination: 'uploads/',
+//   filename: (req, file, cb) => {
+//     cb(null, `${Date.now()}-${file.originalname}`);
+//   },
+// });
+//  uploadDisk = multer({ storage: this.diskStorage });
+
+// Memory storage (for buffer-based uploads)
+ uploadMemory = multer({ storage: multer.memoryStorage() });
+
   constructor() {
     this.initializeRoutes();
   }
-   storage = multer.memoryStorage()
-   upload = multer({ storage: this.storage })
 
   private initializeRoutes() {
+    //this.router.post('/upload/disk', this.uploadDisk.single('file'), this.lectureController.uploadImage);
+this.router.post('/upload/buffer', this.uploadMemory.single('file'), this.lectureController.uploadImageBuffer);
+
+
+
+
     this.router.get('/courses/lectures/slug/:slug', this.lectureController.findAllLecturesbySlug);
     this.router.get('/courses/lectures/slugAuth/:slug',AuthMiddleware, this.lectureController.findAllLecturesbySlugAuth);
     this.router.get('/courses/lectures/slug', this.lectureController.makeSlugeToAllLectures);
-    this.router.post('/upload', this.upload.single('file'), this.lectureController.uploadImage);
+   
     this.router.get('/course/:courseId/lectures', this.lectureController.findAll);
     this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlugWithoutAuth);
     this.router.get('/course/IdAuth/:courseId/lectures',AuthMiddleware, this.lectureController.findAllWithIdAuth);
