@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Container, { Service } from 'typedi';
-import { LogsService } from '@/services/logs.service';
+import { LogsService } from '../services/logs.service';
 
 @Service() // Add this decorator to register CourseController
 export class LogController {
