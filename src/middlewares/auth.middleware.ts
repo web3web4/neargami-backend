@@ -23,7 +23,7 @@ export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: 
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
 
       const users = new PrismaClient().user;
-      const findUser = await users.findUnique({ where: { id } });
+      const findUser = await users.findUnique({ where: { id, blocked: false } });
 
       if (findUser) {
         req.user = findUser;

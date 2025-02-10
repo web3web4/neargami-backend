@@ -38,17 +38,18 @@ export class UserService {
   }
 
   public async getNgcs(id: string): Promise<number> {
-    const user = await this.prismaUser.findFirst({ where: { id }, select: { ngc: true } });
+    const user = await this.prismaUser.findFirst({ where: { id, blocked: false }, select: { ngc: true } });
     return user.ngc;
   }
 
   public async getTopPoints(id: string): Promise<number> {
-    const user = await this.prismaUser.findFirst({ where: { id }, select: { top_points: true } });
+    const user = await this.prismaUser.findFirst({ where: { id, blocked: false }, select: { top_points: true } });
     return user.top_points;
   }
 
   public async findAllUser(page: number): Promise<any> {
     const allUsers = await this.prismaUser.findMany({
+      where: { blocked: false },
       omit: { message: true, signature: true },
       orderBy: { top_points: 'desc' },
       skip: (page - 1) * 20,
@@ -88,7 +89,7 @@ export class UserService {
 
   public async findOneById(uid: string): Promise<any> {
     if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
-    const user = await this.prismaUser.findUnique({ where: { id: uid }, include: { userCourses: true } });
+    const user = await this.prismaUser.findUnique({ where: { id: uid, blocked: false }, include: { userCourses: true } });
     if (!user) throw new HttpException(404, "User doesn't exist");
     const claimsSum = await this.prisma.claims.aggregate({
       _sum: { ngc_claimed: true },
@@ -100,7 +101,7 @@ export class UserService {
 
   public async getUserGame(id: string): Promise<any> {
     if (!this.isValidUUID(id)) throw new HttpException(400, 'Invalid UUID');
-    const game = this.prismaUser.findUnique({ where: { id }, select: { id: true, ngc: true, game: true } });
+    const game = this.prismaUser.findUnique({ where: { id, blocked: false }, select: { id: true, ngc: true, game: true } });
     if (!game) throw new HttpException(404, "User doesn't exist");
     return game;
   }
@@ -113,12 +114,12 @@ export class UserService {
   }
 
   async findByAddress(address1: string): Promise<IUser | null> {
-    return this.prismaUser.findUnique({ where: { address: `${address1}` }, include: { userCourses: true } });
+    return this.prismaUser.findUnique({ where: { address: `${address1}`, blocked: false }, include: { userCourses: true } });
   }
 
   async update(uid: string, data: UpdateUserDto): Promise<IUser> {
     return await this.prismaUser.update({
-      where: { id: uid },
+      where: { id: uid, blocked: false },
       data,
     });
   }
@@ -127,7 +128,7 @@ export class UserService {
       throw new HttpException(403, 'Forbidden');
     }
     return await this.prismaUser.update({
-      where: { id: uid },
+      where: { id: uid, blocked: false },
       data: { isAdmin: true },
     });
   }
@@ -137,7 +138,7 @@ export class UserService {
       throw new HttpException(403, 'Forbidden');
     }
     return await this.prismaUser.update({
-      where: { id: uid },
+      where: { id: uid, blocked: false },
       data: { isAdmin: false },
     });
   }
@@ -166,6 +167,7 @@ export class UserService {
 
   async leaderBoard(page: number): Promise<any> {
     const users = await this.prismaUser.findMany({
+      where: { blocked: false },
       orderBy: { top_points: 'desc' },
       select: {
         firstname: true,
@@ -212,7 +214,7 @@ export class UserService {
 
     while (!unique) {
       username = `user_${Math.random().toString(36).substring(2, 10)}`;
-      const existingUser = await this.prismaUser.findUnique({ where: { username } });
+      const existingUser = await this.prismaUser.findFirst({ where: { username } });
       if (!existingUser) {
         unique = true;
       }
@@ -224,7 +226,7 @@ export class UserService {
   public async findUserByUsername(username: string): Promise<any | null> {
     // Query the database to find the user by username
     const user = await this.prismaUser.findFirst({
-      where: { username },
+      where: { username, blocked: false },
     });
 
     return user;
