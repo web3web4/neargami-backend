@@ -6,7 +6,7 @@ export class LogsService {
   private prismaService = Container.get(PrismaService);
   private logs = this.prismaService.log;
 
-  public getLogs(): Promise<Log[]> {
-    return this.logs.findMany();
+  public async getLogs(): Promise<Log[]> {
+    return await this.logs.findMany();
   }
 }

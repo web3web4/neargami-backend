@@ -8,8 +8,8 @@ export class LogController {
 
   public getLogs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.logsService.getLogs;
-      res.status(201).json({ message: 'foundAll' });
+      const data = await this.logsService.getLogs();
+      res.status(201).json({ message: 'foundAll', data });
     } catch (error) {
       console.log(error);
       next(error);

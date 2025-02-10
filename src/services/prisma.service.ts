@@ -19,9 +19,7 @@ export class PrismaService {
   public log: PrismaClient['log'];
 
   constructor() {
-    this.prisma = new PrismaClient({
-      log: ['query'],
-    });
+    this.prisma = new PrismaClient();
     this.user = this.prisma.user;
     this.challangelog = this.prisma.challangelog;
     this.answer = this.prisma.answer;

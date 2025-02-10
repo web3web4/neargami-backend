@@ -14,6 +14,6 @@ export class LogsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get('/logs/', AuthMiddleware, this.logsController.getLogs);
+    this.router.get('/logs/', this.logsController.getLogs);
   }
 }
