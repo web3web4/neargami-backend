@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Service, Container } from 'typedi';
 import { Routes } from '../interfaces/routes.interface';
 import { AuthMiddleware } from '../middlewares/auth.middleware';
-import { LogController } from '@/controllers/logs.controller';
+import { LogController } from '../controllers/logs.controller';
 
 @Service() // Register this as a service to ensure DI works across the app
 export class LogsRoute implements Routes {
