@@ -53,55 +53,51 @@ export class AuthService {
   private users = this.prismaService.user;
   private challangelog = this.prismaService.challangelog;
 
-  async  manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {
+  async manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {
     // Fetch the user
-    const user = await this.users.findUnique({ where: { address:userId } });
+    const user = await this.users.findUnique({ where: { address: userId } });
     if (!user) {
       return null;
-    }else{
-    // Parse the current flags
-    let currentFlags: Flags = user.flags as Flags;
+    } else {
+      // Parse the current flags
+      let currentFlags: Flags = user.flags as Flags;
       // Check if it's the user's second login
-    if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
-      flagsToUpdate.new_user = false;
-    }
-    // Update the flags
-    const updatedFlags = { ...currentFlags, ...flagsToUpdate };
+      if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
+        flagsToUpdate.new_user = false;
+      }
+      // Update the flags
+      const updatedFlags = { ...currentFlags, ...flagsToUpdate };
       // Save the updated flags back to the database
-    await this.users.update({
-      where: { address: userId },
-      data: { flags: updatedFlags }
-    });
-    return updatedFlags ;
-    }
-  }
-  
- async  generateUniqueUsername(): Promise<string> {
-  const maxAttempts = 10; // To limit retries
-  let attempts = 0;
-
-  while (attempts < maxAttempts) {
-    attempts++;
-
-    // Generate a random username
-    const randomUsername = `user${Math.floor(100000 + Math.random() * 900000)}`; // Example: "user123456"
-
-    // Check if the username is unique
-    const existingUser = await this.users.findFirst({
-      where: { username: randomUsername },
-    });
-
-    if (!existingUser) {
-      return randomUsername; // Return the unique username
+      await this.users.update({
+        where: { address: userId },
+        data: { flags: updatedFlags },
+      });
+      return updatedFlags;
     }
   }
 
-  throw new Error("Unable to generate a unique username after multiple attempts.");
-}
+  async generateUniqueUsername(): Promise<string> {
+    const maxAttempts = 10; // To limit retries
+    let attempts = 0;
 
+    while (attempts < maxAttempts) {
+      attempts++;
 
+      // Generate a random username
+      const randomUsername = `user${Math.floor(100000 + Math.random() * 900000)}`; // Example: "user123456"
 
+      // Check if the username is unique
+      const existingUser = await this.users.findFirst({
+        where: { username: randomUsername },
+      });
 
+      if (!existingUser) {
+        return randomUsername; // Return the unique username
+      }
+    }
+
+    throw new Error('Unable to generate a unique username after multiple attempts.');
+  }
 
   public createChallenge(): { challange: string; message: string } {
     const challange = randomBytes(32).toString('base64');
@@ -166,16 +162,26 @@ export class AuthService {
     const challangelog = await this.challangelog.findMany({});
     return challangelog;
   }
+  public async blockUser(uid: string) {
+    const user = await this.users.findUnique({ where: { id: uid } });
+    if (!user) throw new HttpException(404, "User doesn't exist");
+    return await this.users.update({ where: { id: uid }, data: { blocked: true } });
+  }
   /////////////////////////////////////////////////////////////////////////////////////////////////
-  public async validateAndCreateUser(
-    { accountId, publicKey, signature, challenge, message },
-    networkId = NETWORK_ID,
-    username?: string
-  ) {
+  public async validateAndCreateUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID, username?: string) {
+    const existingUser = await this.users.findUnique({
+      where: { address: accountId },
+      select: { blocked: true }, // Only fetch the 'blocked' field
+    });
+
+    // If the user exists and is blocked, return null (or handle accordingly)
+    if (existingUser && existingUser.blocked) {
+      throw new HttpException(403, 'User is blocked'); // Or throw an error, or handle it in a way that suits your application
+    }
     await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
-  
+
     await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
-  
+
     const user = await this.users.upsert({
       where: { address: accountId },
       create: {
@@ -191,10 +197,9 @@ export class AuthService {
         ...(username && { username }), // Update only if a username is provided
       },
     });
-  
+
     return user;
   }
-  
 
   // Aux method
   private async fetch_all_user_keys({ accountId }, networkId) {
@@ -236,10 +241,10 @@ export class AuthService {
     // - The key used to sign belongs to the user and is a Full Access Key
     // - The object signed contains the right message and domain
     let full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey }, networkId);
-    if(process.env.PLATFORM=="staging"){
-      full_key_of_user=true;
+    if (process.env.PLATFORM == 'staging') {
+      full_key_of_user = true;
     }
-   
+
     console.log('isAuthenticationValid(...) -> Does the public key belongs to the user?', full_key_of_user);
 
     const storedChallenge = await this.returnSameChallenge(accountId);
@@ -248,16 +253,16 @@ export class AuthService {
       nonce: storedChallenge.challange,
       recipient: accountId,
     };
-    let valid_signature=false;
-    const platform=process.env.PLATFORM;
+    let valid_signature = false;
+    const platform = process.env.PLATFORM;
     console.log(platform);
-    if(platform=="staging"){valid_signature=true;}else{
-
+    if (platform == 'staging') {
+      valid_signature = true;
+    } else {
       valid_signature = this.verifySignature({ publicKey, signature }, originalMessageObject);
       console.log('isAuthenticationValid(...) -> Is the Signature Valid?', valid_signature);
-  
     }
-   
+
     if (!(valid_signature && full_key_of_user)) {
       throw new HttpException(400, 'Authentication Failed');
     }
