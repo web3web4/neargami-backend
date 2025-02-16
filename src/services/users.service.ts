@@ -92,8 +92,10 @@ export class UserService {
     });
   }
 
-  public async findOneById(username: string): Promise<any> {
-    const user = await this.prismaUser.findFirst({ where: { username, blocked: false }, include: { userCourses: true } });
+  public async findOneById(uid: string): Promise<any> {
+    if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
+
+    const user = await this.prismaUser.findUnique({ where: { id: uid, blocked: false }, include: { userCourses: true } });
     if (!user) throw new HttpException(404, "User doesn't exist");
     const claimsSum = await this.prisma.claims.aggregate({
       _sum: { ngc_claimed: true },

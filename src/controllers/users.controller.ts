@@ -61,9 +61,9 @@ export class UserController {
   };
 
   public findOneUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { username } = req.params;
+    const { uid } = req.params;
     try {
-      const userone = await this.user.findOneById(username);
+      const userone = await this.user.findOneById(uid);
 
       res.status(200).json({ data: userone, message: 'find one user' });
     } catch (error) {
