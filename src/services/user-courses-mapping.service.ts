@@ -76,6 +76,7 @@ export class UserCoursesMappingService {
             firstname: true,
             lastname: true,
             image: true,
+            username: true,
           },
         },
         course: {

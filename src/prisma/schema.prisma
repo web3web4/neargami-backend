@@ -42,11 +42,12 @@ model User {
   slug               String?              @db.VarChar(50)
   createdAt          DateTime?            @db.Timestamp()
   image              String?
+  gameScreenshot     String?
   game               Json?                @db.JsonB
   isAdmin            Boolean              @default(false)
   blocked            Boolean              @default(false)
-   flags             Json               @default("{\"new_user\":true,\"first_request_approved_courses\":false,\"email_notification\":false}")
-   username           String?             @db.VarChar(255) 
+  flags              Json               @default("{\"new_user\":true,\"first_request_approved_courses\":false,\"email_notification\":false}")
+  username           String?             @db.VarChar(255) 
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
