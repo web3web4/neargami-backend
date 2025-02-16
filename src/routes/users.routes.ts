@@ -28,7 +28,7 @@ export class UserRoute implements Routes {
     this.router.get(`${this.path}/game/:username`, this.user.getGame);
     this.router.put(`${this.path}/game/save-screen`, AuthMiddleware, this.user.saveGameScreenshot);
     this.router.get('/users/:uid', this.user.findOneUserById);
-    this.router.put(`${this.path}/game/:id`, AuthMiddleware, this.user.updateGame);
+    this.router.put(`${this.path}/game/:username`, AuthMiddleware, this.user.updateGame);
     this.router.put(`${this.path}/:id`, AuthMiddleware, ValidationMiddleware(UpdateUserDto, false, true, true), this.user.updateUser);
     this.router.put(`${this.path}/addAdmin/:id`, AuthMiddleware, this.user.makeUserAddmin);
     this.router.put(`${this.path}/removeAdmin/:id`, AuthMiddleware, this.user.makeAdminUser);

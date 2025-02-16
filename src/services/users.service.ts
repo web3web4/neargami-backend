@@ -167,14 +167,14 @@ export class UserService {
     return deleteUserData;
   }
 
-  async updateGame(id: string, userId: string, game: Record<string, any>, pointsUsed: number): Promise<User> {
-    const user = await this.findOneById(id);
-    if (user.id !== userId) throw new HttpException(403, 'Forbidden');
+  async updateGame(username: string, userId: string, game: Record<string, any>, pointsUsed: number): Promise<User> {
+    const user = await this.findOneById(userId);
+    if (user.username !== username) throw new HttpException(403, 'Forbidden');
     if (pointsUsed < 0) throw new HttpException(400, 'Bad Reqeust');
     if (user.ngc - pointsUsed < 0) throw new HttpException(400, 'Not enough points');
     const newScore = user.ngc - pointsUsed;
     return this.prismaUser.update({
-      where: { id },
+      where: { id: user.id },
       data: { game, ngc: newScore },
     });
   }

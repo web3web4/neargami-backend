@@ -222,10 +222,10 @@ export class UserController {
   };
   public updateGame = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { game, pointsUsed } = req.body;
-    const { id } = req.params;
+    const { username } = req.params;
     const { id: userId } = req.user;
     try {
-      const user = await this.user.updateGame(id, userId, game, pointsUsed);
+      const user = await this.user.updateGame(username, userId, game, pointsUsed);
 
       res.status(200).json({ data: user, message: 'updated' });
     } catch (error) {
