@@ -23,6 +23,6 @@ const app = new App([
   new LogsRoute(),
 ]);
 
-app.listen();
+// app.listen();
 
 export default app.getServer();
