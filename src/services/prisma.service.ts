@@ -1,10 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { Service } from 'typedi';
+import { pagination, paginate } from 'prisma-extension-pagination';
 
+type ExtendedPrismaClient = PrismaClient & ReturnType<typeof extendedPrismaClient>;
+
+const extendedPrismaClient = (prisma: PrismaClient) => prisma.$extends(pagination());
 @Service()
 export class PrismaService {
-  public prisma: PrismaClient;
-  public user: PrismaClient['user'];
+  public prisma: ExtendedPrismaClient;
+  public user: ExtendedPrismaClient['user'];
   public challangelog: PrismaClient['challangelog'];
   public course: PrismaClient['course'];
   public lecture: PrismaClient['lecture'];
@@ -19,7 +23,8 @@ export class PrismaService {
   public log: PrismaClient['log'];
 
   constructor() {
-    this.prisma = new PrismaClient();
+    const basePrisma = new PrismaClient();
+    this.prisma = extendedPrismaClient(basePrisma) as ExtendedPrismaClient;
     this.user = this.prisma.user;
     this.challangelog = this.prisma.challangelog;
     this.answer = this.prisma.answer;
