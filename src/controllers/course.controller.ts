@@ -3,12 +3,13 @@ import Container, { Service } from 'typedi';
 import { CourseService } from '../services/course.service';
 import { CreateCourseDto, Status, UpdateCourseDto } from '../dtos/course.dto';
 import { RequestWithUser } from '../interfaces/auth.interface';
-import { Course } from '@prisma/client';
+import { Course, Lecture, Question } from '@prisma/client';
+import { LectureService } from '@/services/lecture.service';
+import { CreateLectureDto } from '@/dtos/lecture.dto';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   public courseService = Container.get(CourseService);
-
   public findUsersStartingCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -172,6 +173,18 @@ export class CourseController {
     const uniqueSuffix = await this.getId(id); // Use timestamp for uniqueness
     return `${baseSlug}-${uniqueSuffix}`;
   };
+  public stringToSlugByIdforLectureVersion = async (title: string, id: number) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+
+    const uniqueSuffix =id; // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
   public stringToSlug = async (title: string) => {
     const baseSlug = title
       .toLowerCase() // Convert to lowercase
@@ -192,13 +205,84 @@ export class CourseController {
     // const teacher_user_id="a4aebc8f-d5c3-47f7-97f2-6fa0731975bc";
     try {
       const createdCourse: Course = await this.courseService.createNewCourse(teacher_user_id, data, sluge);
-
-      res.status(201).send({ data: createdCourse, message: 'created' });
+      if(createdCourse.parent_version_id==null){const correctCourse=await this.courseService.related_createNewCourse(createdCourse.id);
+        
+        res.status(201).send({ data: correctCourse, message: 'created' })
+      }else
+      {res.status(201).send({ data: createdCourse, message: 'created' });}
     } catch (error) {
       res.status(400).json({ error: error.message });
       next(error);
     }
   };
+
+
+
+  public createNewCourseVersion=async(req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  const {id}=req.params;
+  const {id:userId}=req.user;
+
+
+  const prevCourse=await this.courseService.findOneCourse(+id);
+  const lectures = prevCourse["lecture"] || []; // Ensure it's an array
+  const questions = lectures.flatMap(l => l.question || []); // Extract questions
+  const userLectures = lectures.flatMap(l => l.userLecture || []); // Extract userlectures
+  const answers=questions.flatMap(l=>l.answer||[]);
+  const userCourses=prevCourse["userCourses"];
+  const userQuestionAnswers=prevCourse["UserQuestionAnswer"];
+
+  const newcourse = { ...prevCourse }; // Clone previous course data
+  const courseSluge = await this.stringToSlug(newcourse.title);
+  //const lectureSlug= lectures.map((lecture)=>{})
+    try {
+    const newVersionCourse = await this.courseService.createNewVersion(+id,newcourse,userId,courseSluge)
+    const newLectureswithNewIds =await this.courseService.createLectureVersion(userId,+newVersionCourse.id,lectures);
+    const {createdQuestions,createdAnswers}=await this.courseService.creatnewLectureQuestion(questions,lectures,newLectureswithNewIds,answers);
+    const userLecture=await this.courseService.creatnewUserLecture(+newVersionCourse.id,userLectures,lectures,newLectureswithNewIds);
+   // const answersQuestions=await this.courseService.creatnewAnswersQuestion(answers,questions,lectureQuestions);
+    
+    newLectureswithNewIds.map(async(newLectureswithNewId)=>{
+    const slug=await this.stringToSlugByIdforLectureVersion(newLectureswithNewId.title,newLectureswithNewId.id);
+    const updatlectuers=await this.courseService.updateLecture(+newLectureswithNewId.id,slug);
+    
+    });
+   const newUserQuestionAnswers=await this.courseService.creatnewUserAnswersQuestion(+newcourse.id,userQuestionAnswers,
+    lectures,newLectureswithNewIds,questions,createdQuestions)
+    const newUserCourses=await this.courseService.creatnewUserCourse(+newVersionCourse.id,userCourses);
+      res.status(200).send({ data:newVersionCourse,newUserCourses,userLecture,
+        createdQuestions,createdAnswers,newUserQuestionAnswers,
+        
+         message: 'A new version created ' });
+    } catch (error) {
+      next(error);
+    }
+
+  }
+public getAllChangesBetweenVersions=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+const {id}=req.params;
+try{
+  const {lectures,questions,answers,userCourses,userAnsweres}=await this.courseService.getAllChangesById(+id);
+  res.status(200).send({data:lectures,questions,answers,userCourses,userAnsweres,message:'this is deferences '})
+}
+catch(error){next(error)}
+}
+
+
+
+  public  changeCourseStatusFromDraftToPending=async(req: RequestWithUser, res: Response, next: NextFunction):Promise<void>=>{
+    const {id}=req.params;
+    const {id:userId}=req.user;
+    try{
+
+const pendingCourse=await this.courseService.changeStatusFromDraftToPending(+id,userId);
+
+res.status(200).send({data:pendingCourse,message:'course is pending'});
+
+
+    }catch(error){next(error)}
+  }
+
+
   public findCourseById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -241,6 +325,7 @@ export class CourseController {
       next(error);
     }
   };
+
     // add prev status to log for admin users
     public makeLogStatusForAdminUser = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
       const { id } = req.params;
@@ -291,5 +376,5 @@ export class CourseController {
       next(error);
     }
   };
-  // ... Other methods as defined
+
 }

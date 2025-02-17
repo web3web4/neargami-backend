@@ -27,6 +27,7 @@ export class CreateCourseDto {
   @MaxLength(10)
   public difficulty?: string;
   public tag?: string;
+  
 }
 
 export class UpdateCourseDto {
