@@ -132,9 +132,18 @@ export class UserService {
   }
 
   async update(uid: string, data: UpdateUserDto): Promise<IUser> {
+    const { sendMail, ...updatedData } = data;
+    const user = await this.findOneById(uid);
+
     return await this.prismaUser.update({
       where: { id: uid, blocked: false },
-      data,
+      data: {
+        ...updatedData,
+        flags: {
+          ...user.flags,
+          sendMail,
+        },
+      },
     });
   }
   async userToAddmin(uid: string, pass: string): Promise<IUser> {
