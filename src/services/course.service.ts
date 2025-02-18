@@ -198,13 +198,13 @@ export class CourseService {
     });
     if (id === 'ALL') {
       AllCourses = await this.course.findMany({
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
+        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
       });
     } else {
       AllCourses = await this.course.findMany({
         where: { publish_status: id as Status },
 
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
+        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
       });
     }
     AllCourses = (AllCourses as any).map(course => ({
