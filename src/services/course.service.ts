@@ -758,48 +758,85 @@ return await this.prisma.question.findMany({where:{id}});
     const oldVersion = await this.course.findUnique({
       where: { id: courseId },
       include: {
-        lecture: { include: { question: { include: { answer: true, UserQuestionAnswer: true } }, userLecture: true } },
+        lecture: {
+          include: {
+            question: {
+              include: { answer: true, UserQuestionAnswer: true },
+            },
+            userLecture: true,
+          },
+        },
         userCourses: true,
       },
     });
   
-    // If the oldVersion is not found
+    // If no course is found
     if (!oldVersion) {
-      throw new Error('Old version not found for course');
+      throw new Error('Course not found for the given ID');
     }
   
-    // Function to compare updated_at and created_at
+    // Function to compare timestamps
     const compareTimestamps = (createdAt: Date, updatedAt: Date) => {
-      if (updatedAt > createdAt) {
-        return 'Updated';
-      } else if (updatedAt === createdAt) {
-        return 'Not Updated';
-      } else {
-        return 'Invalid';
-      }
+      if (updatedAt > createdAt) return 'Updated';
+      if (updatedAt === createdAt) return 'Not Updated';
+      return 'Invalid';
     };
   
-    // Process the lectures and compare timestamps
-    const lecturesWithStatus = oldVersion.lecture.map((lecture) => {
-      return {
-        ...lecture,
-        status: compareTimestamps(lecture.created_at, lecture.updated_at),
-        questions: lecture.question.map((question) => ({
-          ...question,
-          answers: question.answer.map((answer) => ({
-            ...answer,
-            status: compareTimestamps(answer.created_at, answer.updated_at),
-          })),
-        })),
-      };
-    });
+    // Deduplicate an array based on a key
+    const deduplicate = <T>(array: T[], key: keyof T): T[] =>
+      array.filter(
+        (item, index, self) =>
+          index === self.findIndex((t) => t[key] === item[key])
+      );
   
-    // Return the structured data
+    // Process lectures with deduplication
+    const lecturesWithStatus = oldVersion.lecture.map((lecture) => ({
+      id: lecture.id,
+      title: lecture.title,
+      slug: lecture.slug,
+      description: lecture.description,
+      video_path: lecture.video_path,
+      course_id: lecture.course_id,
+      pre_note: lecture.pre_note,
+      next_note: lecture.next_note,
+      order: lecture.order,
+      picture: lecture.picture,
+      created_at: lecture.created_at,
+      updated_at: lecture.updated_at,
+      status: compareTimestamps(lecture.created_at, lecture.updated_at),
+      // Process and deduplicate questions
+      questions: deduplicate(
+        lecture.question.map((question) => ({
+          id: question.id,
+          description: question.description,
+          lecture_id: question.lecture_id,
+          sequence: question.sequence,
+          score: question.score,
+          created_at: question.created_at,
+          updated_at: question.updated_at,
+          answers: deduplicate(
+            question.answer.map((answer) => ({
+              id: answer.id,
+              description: answer.description,
+              is_correct: answer.is_correct,
+              question_id: answer.question_id,
+              created_at: answer.created_at,
+              updated_at: answer.updated_at,
+              status: compareTimestamps(answer.created_at, answer.updated_at),
+            })),
+            'id'
+          ),
+        })),
+        'id'
+      ),
+    }));
+  
     return {
       lectures: lecturesWithStatus,
       message: 'This is differences',
     };
   }
+  
   
 
 ////////////////////////////////////////////////////////////////////////////////////////
