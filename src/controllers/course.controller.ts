@@ -261,7 +261,7 @@ export class CourseController {
 public getAllChangesBetweenVersions=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
 const {id}=req.params;
 try{
-  const {lectures,questions,answers,userCourses,userAnsweres}=await this.courseService.getAllChangesById(+id);
+  const {lectures,questions,answers,userCourses,userAnsweres}=await this.courseService.getAllChangesCompare(+id);
   res.status(200).send({data:lectures,questions,answers,userCourses,userAnsweres,message:'this is deferences '})
 }
 catch(error){next(error)}

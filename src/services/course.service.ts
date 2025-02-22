@@ -751,5 +751,126 @@ return await this.prisma.question.findMany({where:{id}});
       throw new HttpException(409, 'Cannot delete aproved courses');
     }
     return this.course.delete({ where: { id } });
+  } 
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // get all changes between same version 
+  public async getAllChangesCompare(courseId: number): Promise<any> {
+    const oldVersion = await this.course.findUnique({
+      where: { id: courseId },
+      include: {
+        lecture: { include: { question: { include: { answer: true, UserQuestionAnswer: true } }, userLecture: true } },
+        userCourses: true,
+      },
+    });
+  
+    // If the oldVersion is not found
+    if (!oldVersion) {
+      throw new Error('Old version not found for course');
+    }
+  
+    // Function to compare updated_at and created_at
+    const compareTimestamps = (createdAt: Date, updatedAt: Date) => {
+      if (updatedAt > createdAt) {
+        return 'Updated';
+      } else if (updatedAt === createdAt) {
+        return 'Not Updated';
+      } else {
+        return 'Invalid';
+      }
+    };
+  
+    // Process the lectures and compare timestamps
+    const lecturesWithStatus = oldVersion.lecture.map((lecture) => {
+      return {
+        ...lecture,
+        status: compareTimestamps(lecture.created_at, lecture.updated_at),
+        questions: lecture.question.map((question) => ({
+          ...question,
+          answers: question.answer.map((answer) => ({
+            ...answer,
+            status: compareTimestamps(answer.created_at, answer.updated_at),
+          })),
+        })),
+      };
+    });
+  
+    // Return the structured data
+    return {
+      lectures: lecturesWithStatus,
+      message: 'This is differences',
+    };
   }
+  
+
+////////////////////////////////////////////////////////////////////////////////////////
+  // compare all data between old and new verions without id and slug 
+  // public async getAllChangesByIdWithoutSlud(courseId: number): Promise<any> {
+  //   const oldVersion = await this.course.findUnique({
+  //     where: { id: courseId },
+  //     include: {
+  //       lecture: { include: { question: { include: { answer: true } }, userLecture: true } },
+  //       userCourses: true,
+  //       UserQuestionAnswer: true
+  //     }
+  //   });
+  
+  //   const pendingVersion = await this.course.findFirst({
+  //     where: { parent_version_id: courseId, publish_status: 'PENDING_REVIEW' },
+  //     include: {
+  //       lecture: { include: { question: { include: { answer: true } }, userLecture: true } },
+  //       userCourses: true,
+  //       UserQuestionAnswer: true
+  //     }
+  //   });
+  
+  //   if (!oldVersion || !pendingVersion) return { message: "No data found" };
+  
+  //   function compareEntities(oldData: any[], newData: any[]) {
+  //     // Identify added items (new data that doesn't exist in the old data)
+  //     const added = newData.filter(n => !oldData.some(o => o.id === n.id));
+  
+  //     // Identify deleted items (old data that doesn't exist in the new data)
+  //     const deleted = oldData.filter(o => !newData.some(n => n.id === o.id));
+  
+  //     // Identify updated items (items that exist in both but have changes)
+  //     const updated = newData
+  //       .filter(n => oldData.some(o => o.id === n.id))
+  //       .map(n => {
+  //         const old = oldData.find(o => o.id === n.id);
+  //         const differences = Object.keys(n).reduce((diff, key) => {
+  //           // Compare fields excluding 'id', 'slug', 'course_id', and any other static fields
+  //           if (key !== "id" && key !== "slug" && key !== "course_id" && n[key] !== old[key]) {
+  //             diff[key] = { old: old[key], new: n[key] };
+  //           }
+  //           return diff;
+  //         }, {});
+  
+  //         // Check if the 'updated_at' field has changed
+  //         if (n.updated_at && n.updated_at !== old.updated_at) {
+  //           differences['updated_at'] = { old: old.updated_at, new: n.updated_at };
+  //         }
+  
+  //         // Return the updated entity only if there are actual changes
+  //         return Object.keys(differences).length ? { id: n.id, differences } : null;
+  //       })
+  //       .filter(Boolean);  // Remove nulls from updated
+  
+  //     return { added, deleted, updated };
+  //   }
+  
+  //   return {
+  //     lectures: compareEntities(oldVersion.lecture, pendingVersion.lecture),
+  //     questions: compareEntities(
+  //       oldVersion.lecture.flatMap(l => l.question),
+  //       pendingVersion.lecture.flatMap(l => l.question)
+  //     ),
+  //     answers: compareEntities(
+  //       oldVersion.lecture.flatMap(l => l.question.flatMap(q => q.answer)),
+  //       pendingVersion.lecture.flatMap(l => l.question.flatMap(q => q.answer))
+  //     ),
+  //     userCourses: compareEntities(oldVersion.userCourses, pendingVersion.userCourses),
+  //     userAnswers: compareEntities(oldVersion.UserQuestionAnswer, pendingVersion.UserQuestionAnswer),
+  //     message: "This is differences"
+  //   };
+  // } 
 }
