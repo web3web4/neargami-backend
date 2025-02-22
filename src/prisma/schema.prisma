@@ -4,18 +4,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
   extensions = [pg_trgm]
 }
 
 model Challangelog {
-  id                Int      @id @default(autoincrement())
-  accountId         String?  @db.VarChar(255)
-  challange         String?  @db.VarChar(255)
-  signature         String?  @db.VarChar(255)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  id         Int       @id @default(autoincrement())
+  accountId  String?   @db.VarChar(255)
+  challange  String?   @db.VarChar(255)
+  signature  String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
 }
 
 model User {
@@ -42,8 +42,8 @@ model User {
   isAdmin            Boolean  @default(false)
   flags              Json     @default("{\"new_user\":true,\"first_request_approved_courses\":false,\"email_notification\":false}")
   username           String?  @db.VarChar(255)
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
+  created_at         DateTime? @db.Timestamp()
+  updated_at         DateTime? @db.Timestamp() @updatedAt
   userCourses        UserCoursesMapping[]
   userLecture        UserLectureMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
@@ -53,13 +53,13 @@ model User {
 }
 
 model Claims {
-  id          Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   ngc_claimed Int
-  user_id     String   @db.Uuid
-  user        User     @relation(fields: [user_id], references: [id])
-  executed    Boolean  @default(false)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  user_id    String   @db.Uuid
+  user       User     @relation(fields: [user_id], references: [id])
+  executed   Boolean  @default(false)
+  created_at DateTime? @db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
 }
 
 enum Status {
@@ -71,31 +71,31 @@ enum Status {
 }
 
 model Course {
-  id                Int       @id @default(autoincrement())
-  parent_version_id Int?
-  title             String    @db.VarChar(150)
-  slug              String?   @db.VarChar(250)
-  teacher_user_id   String    @db.Uuid
-  publish_status    Status?
-  name              String?
-  description       String?   @db.Text
-  difficulty        String?
-  video             String?
-  logo              String?
-  tag               String?   @db.Text
-  language          String    @default("english")
-  version           Float?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  lecture           Lecture[]
-  teacher           User      @relation(fields: [teacher_user_id], references: [id])
-  userCourses       UserCoursesMapping[]
+  id                 Int       @id @default(autoincrement())
+  parent_version_id  Int?
+  title              String    @db.VarChar(150)
+  slug               String?   @db.VarChar(250)
+  teacher_user_id    String    @db.Uuid
+  publish_status     Status?
+  name               String?
+  description        String?   @db.Text
+  difficulty         String?
+  video              String?
+  logo               String?
+  tag                String?   @db.Text
+  language           String    @default("english")
+  version            Float?
+  created_at         DateTime? @db.Timestamp()
+  updated_at         DateTime? @db.Timestamp() @updatedAt
+  lecture            Lecture[]
+  teacher            User      @relation(fields: [teacher_user_id], references: [id])
+  userCourses        UserCoursesMapping[]
   UserQuestionAnswer UserQuestionAnswer[]
   UserLectureMapping UserLectureMapping[]
   courseStatusHistoryForAdmin courseStatusHistoryForAdmin[]
-  CourseStatusLog   CourseStatusLog[]
-  course            Course?   @relation("courseHierarchy", fields: [parent_version_id], references: [id])
-  Course            Course[]  @relation("courseHierarchy")
+  CourseStatusLog    CourseStatusLog[]
+  course             Course?   @relation("courseHierarchy", fields: [parent_version_id], references: [id])
+  Course             Course[]  @relation("courseHierarchy")
 }
 
 model CourseStatusLog {
@@ -106,8 +106,8 @@ model CourseStatusLog {
   changeStatusReson      String?   @db.Text
   course_id              Int
   course                 Course    @relation(fields: [course_id], references: [id])
-  created_at             DateTime  @default(now())
-  updated_at             DateTime  @updatedAt
+  created_at             DateTime? @db.Timestamp()
+  updated_at             DateTime? @db.Timestamp() @updatedAt
 }
 
 model UserCoursesMapping {
@@ -116,8 +116,8 @@ model UserCoursesMapping {
   end_time   DateTime?
   user_id    String    @db.Uuid
   course_id  Int
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at DateTime? @db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
   user       User      @relation(fields: [user_id], references: [id])
   course     Course    @relation(fields: [course_id], references: [id])
 }
@@ -130,8 +130,8 @@ model UserLectureMapping {
   start_at   DateTime  @default(now())
   end_at     DateTime?
   score      Int       @default(0)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at DateTime? @db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
   course     Course    @relation(fields: [course_id], references: [id])
   user       User      @relation(fields: [user_id], references: [id])
   lecture    Lecture   @relation(fields: [lecture_id], references: [id])
@@ -148,8 +148,8 @@ model Lecture {
   next_note          String?   @db.Text
   order              Int       @default(1)
   picture            String?   @db.VarChar(60)
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+  created_at         DateTime? @db.Timestamp()
+  updated_at         DateTime? @db.Timestamp() @updatedAt
   course             Course    @relation(fields: [course_id], references: [id])
   question           Question[]
   userLecture        UserLectureMapping[]
@@ -162,8 +162,8 @@ model Question {
   lecture_id         Int
   sequence           Int?
   score              Int?      @default(10)
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+  created_at         DateTime? @db.Timestamp()
+  updated_at         DateTime? @db.Timestamp() @updatedAt
   lecture            Lecture   @relation(fields: [lecture_id], references: [id])
   answer             Answer[]
   UserQuestionAnswer UserQuestionAnswer[]
@@ -174,8 +174,8 @@ model Answer {
   description String    @db.VarChar(150)
   is_correct  Boolean
   question_id Int
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  created_at  DateTime? @db.Timestamp()
+  updated_at  DateTime? @db.Timestamp() @updatedAt
   question    Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
   UserQuestionAnswer UserQuestionAnswer[]
 }
@@ -188,8 +188,8 @@ model UserQuestionAnswer {
   question_id Int
   answer_id   Int
   is_correct  Boolean   @default(false)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  created_at  DateTime? @db.Timestamp()
+  updated_at  DateTime? @db.Timestamp() @updatedAt
   user        User      @relation(fields: [student_id], references: [id])
   course      Course    @relation(fields: [course_id], references: [id])
   lecture     Lecture   @relation(fields: [lecture_id], references: [id])
@@ -198,23 +198,23 @@ model UserQuestionAnswer {
 }
 
 model SearchQuery {
-  id          Int       @id @default(autoincrement())
-  query       String[]
-  keyword     String    @unique @db.VarChar(50)
-  timestamp   DateTime  @default(now())
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id         Int       @id @default(autoincrement())
+  query      String[]
+  keyword    String    @unique @db.VarChar(50)
+  timestamp  DateTime  @default(now())
+  created_at DateTime? @db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
 }
 
 model courseStatusHistoryForAdmin {
-  id          Int       @id @default(autoincrement())
-  user_id     String    @db.Uuid
-  course_id   Int
+  id         Int       @id @default(autoincrement())
+  user_id    String    @db.Uuid
+  course_id  Int
   prev_status Status?
   new_status  Status
-  create_at   DateTime  @db.Timestamp()
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  user        User      @relation(fields: [user_id], references: [id])
-  course      Course    @relation(fields: [course_id], references: [id])
+
+  created_at DateTime?@db.Timestamp()
+  updated_at DateTime? @db.Timestamp() @updatedAt
+  user       User      @relation(fields: [user_id], references: [id])
+  course     Course    @relation(fields: [course_id], references: [id])
 }
