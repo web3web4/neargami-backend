@@ -141,7 +141,7 @@ export class UserService {
         ...updatedData,
         flags: {
           ...user.flags,
-          sendMail,
+          email_notification: sendMail,
         },
       },
     });
