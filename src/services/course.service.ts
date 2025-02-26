@@ -18,6 +18,8 @@ export class CourseService {
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
   private searchQuery = this.prismaService.searchQuery;
+  public findLatestVersion = this.prismaService.course;
+  static findLatestVersion: any;
 
   public async getAllUsersStartingCourse(course_id: number) {
     const users = await this.prisma.userCoursesMapping.findMany({ where: { course_id } });
@@ -836,9 +838,98 @@ return await this.prisma.question.findMany({where:{id}});
       message: 'This is differences',
     };
   }
+  ///////////////////////////////////////////////////
+  // functions of versioning for student 
+  //////////////////////////////////////////////////
+  public findAllPageWithLatestVersion = async ({ offset, limit }: { offset: number; limit: number }): Promise<Course[]> => {
+    const latestVersions = await this.prisma.course.groupBy({
+      by: ['parent_version_id'],
+      _max: { version: true },
+    });
   
+    const latestVersionConditions = latestVersions.map(group => ({
+      parent_version_id: group.parent_version_id,
+      version: group._max?.version,
+    }));
   
+    return this.prisma.course.findMany({
+      where: {
+        OR: latestVersionConditions,
+      },
+      skip: offset,
+      take: limit,
+      include: {
+        teacher: true, // Include related teacher data if needed
+      },
+    });
+  };
+  public countLatestVersionCourses = async (): Promise<number> => {
+    const latestVersions = await this.prisma.course.groupBy({
+      by: ['parent_version_id'],
+      _max: { version: true },
+    });
+  
+    return latestVersions.length;
+  };
+// create new version with whats_new version 
+async createNewVersionWithWhatsNew(
+  id: number,
+  prevcourseversion: Course,
+  user_id: string,
+  slug: string,
+  whats_new?: string // Added optional parameter
+): Promise<Course> {
+  // Check if the user is the teacher of the course
+  if (prevcourseversion.teacher_user_id !== user_id) {
+    throw new HttpException(403, 'Forbidden');
+  }
 
+  // Get the latest version by selecting the highest version number
+  const latestVersion = await this.course.aggregate({
+    where: { parent_version_id: id, publish_status: 'APPROVED' },
+    _max: { version: true },
+  });
+
+  // Determine the new version number
+  let version = 1; // Default to version 1 if no previous versions exist
+  if (latestVersion._max.version !== null) {
+    version = latestVersion._max.version + 0.1;
+  }
+
+  // Destructure necessary fields from the previous course version
+  const {
+    description,
+    difficulty,
+    language,
+    logo,
+    name,
+    tag,
+    title,
+    id: parent_version_id,
+    teacher_user_id,
+  } = prevcourseversion;
+
+  // Create the new version with the `whats_new` field included
+  const newVersion = await this.course.create({
+    data: {
+      description,
+      difficulty,
+      language,
+      logo,
+      name,
+      tag,
+      title,
+      version,
+      publish_status: 'DRAFT',
+      parent_version_id,
+      slug,
+      teacher_user_id,
+      whats_new, // Include the `whats_new` field
+    },
+  });
+
+  return newVersion;
+}
 ////////////////////////////////////////////////////////////////////////////////////////
   // compare all data between old and new verions without id and slug 
   // public async getAllChangesByIdWithoutSlud(courseId: number): Promise<any> {
@@ -857,7 +948,6 @@ return await this.prisma.question.findMany({where:{id}});
   //       lecture: { include: { question: { include: { answer: true } }, userLecture: true } },
   //       userCourses: true,
   //       UserQuestionAnswer: true
-  //     }
   //   });
   
   //   if (!oldVersion || !pendingVersion) return { message: "No data found" };

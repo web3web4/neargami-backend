@@ -376,5 +376,163 @@ res.status(200).send({data:pendingCourse,message:'course is pending'});
       next(error);
     }
   };
+  //////////////////////////////////////////////////////////////////////////////////////////
+  // create new version of the course and add the whats_new field 
+  public createNewCourseVersionWithWhatsNew = async (
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const { id } = req.params; 
+    const { id: userId } = req.user; 
+    const { whats_new } = req.body;
+  
+    try {
+      const prevCourse = await this.courseService.findOneCourse(+id);
+      const lectures = prevCourse["lecture"] || []; // Ensure it's an array
+      const questions = lectures.flatMap((l) => l.question || []); // Extract questions
+      const userLectures = lectures.flatMap((l) => l.userLecture || []); // Extract userlectures
+      const answers = questions.flatMap((l) => l.answer || []); // Extract answers
+      const userCourses = prevCourse["userCourses"];
+      const userQuestionAnswers = prevCourse["UserQuestionAnswer"];
+  
+      // Clone the previous course data and add `whats_new`
+      const newcourse = { ...prevCourse, whats_new };
+  
+      const courseSluge = await this.stringToSlug(newcourse.title);
+  
+      // Create a new course version
+      const newVersionCourse = await this.courseService.createNewVersionWithWhatsNew(
+        +id,
+        newcourse,
+        userId,
+        courseSluge,
+        whats_new
+      );
+  
+      // Create new lecture versions
+      const newLectureswithNewIds = await this.courseService.createLectureVersion(
+        userId,
+        +newVersionCourse.id,
+        lectures
+      );
+  
+      const { createdQuestions, createdAnswers } =
+        await this.courseService.creatnewLectureQuestion(
+          questions,
+          lectures,
+          newLectureswithNewIds,
+          answers
+        );
+  
+      const userLecture = await this.courseService.creatnewUserLecture(
+        +newVersionCourse.id,
+        userLectures,
+        lectures,
+        newLectureswithNewIds
+      );
+  
+      // Update lecture slugs for the new version
+      newLectureswithNewIds.map(async (newLectureswithNewId) => {
+        const slug = await this.stringToSlugByIdforLectureVersion(
+          newLectureswithNewId.title,
+          newLectureswithNewId.id
+        );
+        await this.courseService.updateLecture(+newLectureswithNewId.id, slug);
+      });
+  
+      const newUserQuestionAnswers =
+        await this.courseService.creatnewUserAnswersQuestion(
+          +newcourse.id,
+          userQuestionAnswers,
+          lectures,
+          newLectureswithNewIds,
+          questions,
+          createdQuestions
+        );
+  
+      const newUserCourses = await this.courseService.creatnewUserCourse(
+        +newVersionCourse.id,
+        userCourses
+      );
+  
+      res.status(200).send({
+        data: newVersionCourse,
+        newUserCourses,
+        userLecture,
+        createdQuestions,
+        createdAnswers,
+        newUserQuestionAnswers,
+        message: "A new version created",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
+  
+
+  // update course status if was draft 
+  public updateCourseIfWasDraft = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<Response> => {
+    const { id } = req.params;
+    const userId = req.user.id;
+  
+    const data: UpdateCourseDto = req.body;
+  
+    try {
+      const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+  
+      if (courseinfo.publish_status !== 'DRAFT') {
+        return res.status(400).send({
+          message: 'Course can only be updated if its status is DRAFT',
+        });
+      }
+      const sluge = await this.stringToSlugById(courseinfo.title, +id);
+      const course: Course = await this.courseService.update(+id, userId, data, sluge);
+      res.status(200).send({ data: course, message: 'Course updated' });
+  
+    } catch (error) {
+      next(error);
+    }
+  };
+   /////////////////////////////////////////////////
+   // functions versioning for student 
+   ////////////////////////////////////////////////
+   public findAllCoursesPageForStudent = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page = 1, limit = 10 } = req.query; 
+      const pageNumber = Math.max(1, parseInt(page as string, 10)); 
+      const limitNumber = Math.max(1, parseInt(limit as string, 10)); 
+      const offset = (pageNumber - 1) * limitNumber;
+  
+      // Fetch courses with pagination for the latest version only
+      const courses: Course[] = await this.courseService.findAllPageWithLatestVersion({
+        offset,
+        limit: limitNumber,
+      });
+  
+      // Fetch total count of latest version courses
+      const totalCourses: number = await this.courseService.countLatestVersionCourses();
+      const totalPages = Math.ceil(totalCourses / limitNumber);
+      res.status(200).json({
+        data: courses,
+        meta: {
+          totalItems: totalCourses,
+          totalPages,
+          currentPage: pageNumber,
+          itemsPerPage: limitNumber,
+        },
+        message: 'findAll latest courses with pagination',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
+  
+  
+  
+  
+  
 
 }
