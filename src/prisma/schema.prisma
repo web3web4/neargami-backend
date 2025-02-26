@@ -39,6 +39,9 @@ model User {
   createdAt                   DateTime?                     @db.Timestamp()
   image                       String?
   game                        Json?                         @db.JsonB
+  gameScreenshot              String?
+  blocked                     Boolean                       @default(false)
+
   isAdmin                     Boolean                       @default(false)
   flags                       Json                          @default("{\"new_user\":true,\"first_request_approved_courses\":false,\"email_notification\":false}")
   username                    String?                       @db.VarChar(255)
