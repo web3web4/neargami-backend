@@ -24,6 +24,9 @@ export class CourseService {
     const AllUsers = await this.prisma.user.findMany({ where: { id: { in: users.map(user => user.user_id) } } });
     return AllUsers;
   }
+  public async getCourseStatusLog(courseSlug: string) {
+    const course = await this.course.findFirst({ where: { slug: courseSlug }, include: { CourseStatusLog: true } });
+  }
 
   // Output: A random UUID like 'e58d48b6-2e34-4c41-9f5d-3bb7b02d3c4e'
 
@@ -474,6 +477,18 @@ public findDifferences(oldData: any, newData: any) {
     const AllCourses: Course[] = await this.course.findMany({ where: { teacher_user_id: id }, include: { lecture: true, teacher: true } });
     return AllCourses;
   }
+  public async findAllTeacherCoursesByUserName(username: string): Promise<Course[]> {
+    const AllCourses: Course[] = await this.course.findMany({
+      where: {
+        teacher: {
+          username: username,
+        },
+      },
+      include: { lecture: true, teacher: true },
+    });
+    return AllCourses;
+  }
+
   public async findAllByTag(tag: string): Promise<Course[]> {
     const currentStatus = Status.APPROVED;
     const AllCourses: Course[] = await this.course.findMany({
@@ -531,13 +546,13 @@ public findDifferences(oldData: any, newData: any) {
     });
     if (id === 'ALL') {
       AllCourses = await this.course.findMany({
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
+        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
       });
     } else {
       AllCourses = await this.course.findMany({
         where: { publish_status: id as Status },
 
-        include: { CourseStatusLog: { select: { changeStatusReson: true } }, lecture: { include: { question: true } }, teacher: true },
+        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
       });
     }
     AllCourses = (AllCourses as any).map(course => ({
@@ -642,44 +657,52 @@ return await this.prisma.question.findMany({where:{id}});
   }
   //////////////////////////////////////
 
-    // update log status for admin user 
-    async updateLogStatusForAdmin(id: number, isAdmin: boolean,userId: string, publish_status: Status, publish_status_reson: string, sluge: string,prevStatus): Promise<Course> {
-      const course = await this.course.findUnique({ where: { id } })
-      if (!course) {
-        throw new HttpException(404, "Course not found")
-      }
-  
-      if (isAdmin == false) {
-        throw new HttpException(403, "this user is not admin to update status")
-      }
-      const changstatusdate = new Date()
-
-      const statuslog = await this.coursestatuslog.create({
-        data: {
-          changeStatusReson: publish_status_reson,
-          last_publish_status: course.publish_status,
-          current_publish_status: publish_status,
-          changeStatusDate: changstatusdate,
-          course_id: course.id,
-        },
-      })
-      //insert prev_status in table (courseStatusHistoryForAdmin)
-      const logStatusForAdmin = await this.prisma.courseStatusHistoryForAdmin.create({
-        data:{
-          user_id: userId,
-          course_id: id,
-          prev_status:prevStatus,
-          new_status:publish_status,
-          create_at: new Date(Date.now()),
-         },
-      })
-      // const sluge=this.stringToSlug(course.title,course.id);
-      return this.course.update({
-        where: { id },
-        data: { publish_status: publish_status, slug: sluge },
-      })
+  // update log status for admin user
+  async updateLogStatusForAdmin(
+    id: number,
+    isAdmin: boolean,
+    userId: string,
+    publish_status: Status,
+    publish_status_reson: string,
+    sluge: string,
+    prevStatus,
+  ): Promise<Course> {
+    const course = await this.course.findUnique({ where: { id } });
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
     }
-  
+
+    if (isAdmin == false) {
+      throw new HttpException(403, 'this user is not admin to update status');
+    }
+    const changstatusdate = new Date();
+
+    const statuslog = await this.coursestatuslog.create({
+      data: {
+        changeStatusReson: publish_status_reson,
+        last_publish_status: course.publish_status,
+        current_publish_status: publish_status,
+        changeStatusDate: changstatusdate,
+        course_id: course.id,
+      },
+    });
+    //insert prev_status in table (courseStatusHistoryForAdmin)
+    const logStatusForAdmin = await this.prisma.courseStatusHistoryForAdmin.create({
+      data: {
+        user_id: userId,
+        course_id: id,
+        prev_status: prevStatus,
+        new_status: publish_status,
+        create_at: new Date(Date.now()),
+      },
+    });
+    // const sluge=this.stringToSlug(course.title,course.id);
+    return this.course.update({
+      where: { id },
+      data: { publish_status: publish_status, slug: sluge },
+    });
+  }
+
   //////////////////////////////
   async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
@@ -691,7 +714,7 @@ return await this.prisma.question.findMany({where:{id}});
       throw new HttpException(403, 'this user is not admin to update status');
     }
     const changstatusdate = new Date();
- 
+
     const statuslog = await this.coursestatuslog.create({
       data: {
         changeStatusReson: publish_status_reson,

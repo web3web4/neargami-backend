@@ -89,6 +89,17 @@ export class CourseController {
       next(error);
     }
   };
+  public findTeacherCoursesByUserName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { username } = req.params;
+      const courses: Course[] = await this.courseService.findAllTeacherCoursesByUserName(username);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
