@@ -1,4 +1,4 @@
- generator client {
+generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["omitApi", "postgresqlExtensions"]
 }
@@ -19,46 +19,6 @@ model Challangelog {
 }
 
 model User {
-<<<<<<< HEAD
-  id                 String   @id @default(uuid()) @db.Uuid
-  firstname          String?  @db.VarChar(50)
-  lastname           String?  @db.VarChar(50)
-  email              String?  @db.VarChar(50)
-  address            String   @unique @db.VarChar(255)
-  signature          String   @db.VarChar(255)
-  message            String?  @db.VarChar(255)
-  country            String?  @db.VarChar(50)
-  phone              String?  @db.VarChar(50)
-  linkedin           String?  @db.VarChar(60)
-  discord            String?  @db.VarChar(60)
-  facebook           String?  @db.VarChar(60)
-  twitter            String?  @db.VarChar(60)
-  ngc                Int      @default(0)
-  top_points         Int      @default(0)
-  about              String?  @db.Text
-  slug               String?  @db.VarChar(50)
-  createdAt          DateTime? @db.Timestamp()
-  image              String?
- 
-  game               Json?    @db.JsonB
-  isAdmin            Boolean  @default(false)
-  flags              Json     @default("{\"new_user\":true,\"first_request_approved_courses\":false,\"email_notification\":false}")
-  username           String?  @db.VarChar(255)
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
- 
-  gameScreenshot     String?
- 
- 
-  blocked            Boolean              @default(false)
- 
- 
-  userCourses        UserCoursesMapping[]
-  userLecture        UserLectureMapping[]
-  UserQuestionAnswer UserQuestionAnswer[]
-  Course             Course[]
-  Claims             Claims[]
-=======
   id                          String                        @id @default(uuid()) @db.Uuid
   firstname                   String?                       @db.VarChar(50)
   lastname                    String?                       @db.VarChar(50)
@@ -89,7 +49,6 @@ model User {
   UserQuestionAnswer          UserQuestionAnswer[]
   Course                      Course[]
   Claims                      Claims[]
->>>>>>> 2e5abcd1c54a90a68e764df9756de8a055eae89f
   courseStatusHistoryForAdmin courseStatusHistoryForAdmin[]
 }
 
@@ -254,34 +213,9 @@ model courseStatusHistoryForAdmin {
   course_id   Int
   prev_status Status?
   new_status  Status
-<<<<<<< HEAD
- 
-  create_at   DateTime  @db.Timestamp()
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  user        User      @relation(fields: [user_id], references: [id])
-  course      Course    @relation(fields: [course_id], references: [id])
-} 
- 
-
-model Log {
-  id        Int      @id @default(autoincrement())
-  level     String   // error, warn, info, etc.
-  message   String
-  timestamp DateTime @default(now())
-  stack     String?
-  context   Json?    // Additional metadata
-  userId    Int?     // If you want to associate logs with users
-
-  @@index([level])
-  @@index([timestamp])
-}
- 
-=======
   create_at   DateTime @db.Timestamp()
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   user        User     @relation(fields: [user_id], references: [id])
   course      Course   @relation(fields: [course_id], references: [id])
 }
->>>>>>> 2e5abcd1c54a90a68e764df9756de8a055eae89f
