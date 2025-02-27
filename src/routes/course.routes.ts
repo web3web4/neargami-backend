@@ -48,5 +48,6 @@ export class CourseRoute implements Routes {
         ////////////////////////////////////////////////////////////////
         this.router.get('/courses/lastVersion/page', this.courseController.findAllCoursesPageForStudent);
         this.router.post('/courses/newversion/withwhatsnew/:id',AuthMiddleware,this.courseController.createNewCourseVersionWithWhatsNew);
+        this.router.get('/courses/versions/:id', AuthMiddleware, this.courseController.getAllCourseVersions);
   }
 }

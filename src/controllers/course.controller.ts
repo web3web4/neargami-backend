@@ -540,7 +540,16 @@ res.status(200).send({data:pendingCourse,message:'course is pending'});
     }
   };
   
-  
+        // get all verion of course specific
+        public getAllCourseVersions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+          try {
+            const { id } = req.params; // The ID of the original course
+            const courseVersions = await this.courseService.getAllVersions(+id);
+            res.status(200).send({ data: courseVersions, message: "All course versions retrieved successfully" });
+          } catch (error) {
+            next(error);
+          }
+        };
   
   
   
