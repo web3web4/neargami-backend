@@ -954,6 +954,9 @@ async createNewVersionWithWhatsNew(
   return newVersion;
 }
   // Retrieve the original course and all its versions
+
+
+  
 public async getAllVersions(courseId: number): Promise<Course[]> {
   const allVersions = await this.course.findMany({
     where: {
