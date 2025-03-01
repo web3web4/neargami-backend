@@ -7,5 +7,4 @@
 -- AlterTable
 ALTER TABLE "Course" ADD COLUMN     "whats_new" TEXT;
 
--- DropTable
-DROP TABLE "Log";
+ 
