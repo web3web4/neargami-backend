@@ -89,7 +89,6 @@ model Course {
   language                    String                        @default("english")
   version                     Float?
   whats_new                   String?                       @db.Text
-  isVersion                   Boolean                       @default(false)
   created_at                  DateTime                      @default(now())
   updated_at                  DateTime                      @updatedAt
   lecture                     Lecture[]
