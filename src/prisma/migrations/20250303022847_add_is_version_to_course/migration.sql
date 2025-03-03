@@ -6,6 +6,4 @@
 */
 -- AlterTable
 ALTER TABLE "Course" ADD COLUMN     "isVersion" BOOLEAN NOT NULL DEFAULT false;
-
--- DropTable
-DROP TABLE "Log";
+ 
