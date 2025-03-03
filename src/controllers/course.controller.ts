@@ -552,7 +552,5 @@ res.status(200).send({data:pendingCourse,message:'course is pending'});
         };
   
   
-  
-  
 
 }

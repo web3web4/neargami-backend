@@ -954,37 +954,43 @@ async createNewVersionWithWhatsNew(
   return newVersion;
 }
   // Retrieve the original course and all its versions
-public async getAllVersions(courseId: number): Promise<Course[]> {
-  const allVersions = await this.course.findMany({
-    where: {
-      OR: [
-        { id: courseId }, // Original course
-        { parent_version_id: courseId } // Versions of the course
-      ]
-    },
-    include: {
-      lecture: {
-        include: {
-          question: {
-            include: {
-              answer: true
-            }
-          },
-          userLecture: true
-        }
+  public async getAllVersions(courseId: number): Promise<any[]> {
+    const allVersions = await this.course.findMany({
+      where: {
+        OR: [
+          { id: courseId }, // Original course
+          { parent_version_id: courseId } // Versions of the course
+        ]
       },
-      userCourses: true,
-      UserQuestionAnswer: true,
-      courseStatusHistoryForAdmin: true,
-      teacher: true, // Fetch teacher (User model) details
-    },
-    orderBy: {
-      version: 'asc', // Optional: Sort by version number
-    }
-  });
-
-  return allVersions;
-}
+      include: {
+        lecture: {
+          include: {
+            question: {
+              include: {
+                answer: true
+              }
+            },
+            userLecture: true
+          }
+        },
+        userCourses: true,
+        UserQuestionAnswer: true,
+        courseStatusHistoryForAdmin: true,
+        teacher: true,
+      },
+      orderBy: {
+        version: 'asc', 
+      }
+    });
+  
+    const allVersionsWithIsVersion = allVersions.map(course => ({
+      ...course,
+      is_version: course.id !== courseId, // `false` if it's the original course, `true` otherwise
+    }));
+  
+    return allVersionsWithIsVersion;
+  }
+  
 ////////////////////////////////////////////////////////////////////////////////////////
   // compare all data between old and new verions without id and slug 
   // public async getAllChangesByIdWithoutSlud(courseId: number): Promise<any> {
