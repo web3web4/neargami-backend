@@ -985,6 +985,55 @@ public async getAllVersions(courseId: number): Promise<Course[]> {
 
   return allVersions;
 }
+// create version for course with is version 
+async createNewVersionWithIsVersion(
+  id: number,
+  prevcourseversion: Course,
+  user_id: string, slug:string,whats_new?:string
+): Promise<Course> {
+
+  // Check if the user is the teacher of the course
+  if (prevcourseversion.teacher_user_id !== user_id) {
+    throw new HttpException(403, 'Forbidden');
+  }
+
+  // Get the latest version by selecting the highest version number
+  const latestVersion = await this.course.aggregate({
+    where: { parent_version_id: id ,publish_status:'APPROVED'},
+    _max: { version: true },
+  });
+
+  // Determine the new version number
+  let version = 1; // Default to version 1 if no previous versions exist
+  if (latestVersion._max.version !== null) {
+    version = latestVersion._max.version + 0.1;
+  }
+  
+  const description=prevcourseversion.description;
+ const difficulty=prevcourseversion.difficulty;
+const language=prevcourseversion.language;
+ const logo=prevcourseversion.logo;
+ const name=prevcourseversion.name;
+ const tag=prevcourseversion.tag;
+ const title=prevcourseversion.title;
+const parent_version_id= prevcourseversion.id;
+const teacher_user_id=prevcourseversion.teacher_user_id;
+  // Create the new version
+  const newVersion = await this.course.create({
+    data: {
+      description,difficulty,language,logo,name,tag,title,
+      version,
+      publish_status: 'DRAFT',
+      parent_version_id,
+      slug,
+      teacher_user_id,
+      whats_new:whats_new,
+      isVersion:true,
+    }
+  });
+
+  return newVersion;
+}
 ////////////////////////////////////////////////////////////////////////////////////////
   // compare all data between old and new verions without id and slug 
   // public async getAllChangesByIdWithoutSlud(courseId: number): Promise<any> {

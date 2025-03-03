@@ -551,7 +551,50 @@ res.status(200).send({data:pendingCourse,message:'course is pending'});
           }
         };
   
-  
+    // create new version with is version 
+    public createNewCourseVersionWithIsVersion=async(req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+      const {id}=req.params;
+      const {id:userId}=req.user;
+      const { whats_new } = req.body;
+    
+    
+      const prevCourse=await this.courseService.findOneCourse(+id);
+      const lectures = prevCourse["lecture"] || []; // Ensure it's an array
+      const questions = lectures.flatMap(l => l.question || []); // Extract questions
+      const userLectures = lectures.flatMap(l => l.userLecture || []); // Extract userlectures
+      const answers=questions.flatMap(l=>l.answer||[]);
+      const userCourses=prevCourse["userCourses"];
+      const userQuestionAnswers=prevCourse["UserQuestionAnswer"];
+    
+        // Clone the previous course data and add `whats_new`
+        const newcourse = { ...prevCourse, whats_new };
+      const courseSluge = await this.stringToSlug(newcourse.title);
+      //const lectureSlug= lectures.map((lecture)=>{})
+        try {
+        const newVersionCourse = await this.courseService.createNewVersionWithIsVersion(+id,newcourse,userId,courseSluge,whats_new)
+        const newLectureswithNewIds =await this.courseService.createLectureVersion(userId,+newVersionCourse.id,lectures);
+        const {createdQuestions,createdAnswers}=await this.courseService.creatnewLectureQuestion(questions,lectures,newLectureswithNewIds,answers);
+        const userLecture=await this.courseService.creatnewUserLecture(+newVersionCourse.id,userLectures,lectures,newLectureswithNewIds);
+       // const answersQuestions=await this.courseService.creatnewAnswersQuestion(answers,questions,lectureQuestions);
+        
+        newLectureswithNewIds.map(async(newLectureswithNewId)=>{
+        const slug=await this.stringToSlugByIdforLectureVersion(newLectureswithNewId.title,newLectureswithNewId.id);
+        const updatlectuers=await this.courseService.updateLecture(+newLectureswithNewId.id,slug);
+        
+        });
+       const newUserQuestionAnswers=await this.courseService.creatnewUserAnswersQuestion(+newcourse.id,userQuestionAnswers,
+        lectures,newLectureswithNewIds,questions,createdQuestions)
+        const newUserCourses=await this.courseService.creatnewUserCourse(+newVersionCourse.id,userCourses);
+          res.status(200).send({ data:newVersionCourse,newUserCourses,userLecture,
+            createdQuestions,createdAnswers,newUserQuestionAnswers,
+            
+             message: 'A new version created ' });
+        } catch (error) {
+          next(error);
+        }
+    
+      }
+    
   
   
 
