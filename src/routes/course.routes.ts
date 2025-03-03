@@ -42,14 +42,12 @@ export class CourseRoute implements Routes {
     this.router.get('/courses/keywords', this.courseController.getKeywords);
     this.router.get('/courses/:slug', this.courseController.findCourseBySlug);
     this.router.post('/courses/newVersion/:id',AuthMiddleware,this.courseController.createNewCourseVersion)
-    this.router.put('/courses/isDraft/:id', AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true), this.courseController.updateCourseIfWasDraft);
+    this.router.put('/courses/isdraft/:id', AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true), this.courseController.updateCourseIfWasDraft);
         /////////////////////////////////////////////////////////////////
         // the versioning api for student 
         ////////////////////////////////////////////////////////////////
         this.router.get('/courses/lastVersion/page', this.courseController.findAllCoursesPageForStudent);
         this.router.post('/courses/newversion/withwhatsnew/:id',AuthMiddleware,this.courseController.createNewCourseVersionWithWhatsNew);
         this.router.get('/courses/versions/:id', AuthMiddleware, this.courseController.getAllCourseVersions);
-        // create version of course with isVersion 
-        this.router.post('/courses/newversion/isversion/:id',AuthMiddleware,this.courseController.createNewCourseVersionWithIsVersion);
   }
 }
