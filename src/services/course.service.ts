@@ -992,14 +992,10 @@ async createNewVersionWithWhatsNew(
   }
   // find all courses was finished by student (name)
   public async findAllCompletedCoursesByStudentName(studentName: string): Promise<{ student: User; completedCourses: Course[] }> {
-    const [firstname, lastname] = studentName.split(' ');
-  
     // Find the student by their name and include related data
     const student = await this.prisma.user.findFirst({
-      where: {
-        firstname,
-        lastname,
-      }});
+      where: { username:studentName, blocked:false},
+    });
   
     if (!student) {
       throw new Error(`Student with name "${studentName}" not found`);

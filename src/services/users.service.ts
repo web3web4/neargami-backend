@@ -1,4 +1,4 @@
-import { Claims, Prisma, PrismaClient, User } from '@prisma/client';
+import { Claims, Course, Prisma, PrismaClient, User } from '@prisma/client';
 import Container, { Service } from 'typedi';
 import { CreateUserDto, UpdateUserDto } from '../dtos/users.dto';
 import { IUser } from '../interfaces/user.interface';
@@ -251,8 +251,34 @@ export class UserService {
     const user = await this.prismaUser.findFirst({
       where: { username, blocked: false },
     });
+    if (!user) {
+      throw new Error(`User with name "${username}" not found`);
+    }
+    // Query completed courses for the student and include all related data
+        const completedCourses: Course[] = await this.prisma.course.findMany({
+          where: {
+            userCourses: {
+              some: {
+                user_id: user.id,
+                end_time: { not: null }, // Ensure courses are completed
+              },
+            },
+          },
+          include: {
+            lecture: true, // Include lectures related to the course
+            teacher: true, // Include the teacher of the course
+            userCourses: true, // Include user-course mappings
+            UserQuestionAnswer: {
+              include: {
+                question: true, // Include related questions
+                answer: true, // Include related answers
+              },
+            },
+            CourseStatusLog: true, // Include course status logs
+          },
+        });
 
-    return user;
+    return {user ,completedCourses};
   }
   public async isUsernameAvailable(username: string, id: string): Promise<boolean> {
     const user = await this.prisma.user.findFirst({
