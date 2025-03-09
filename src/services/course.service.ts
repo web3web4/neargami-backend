@@ -991,17 +991,15 @@ async createNewVersionWithWhatsNew(
     return allVersionsWithIsVersion;
   }
   // find all courses was finished by student (name)
-  public async findAllCompletedCoursesByStudentName(studentName: string): Promise<Course[]> {
-    // Split the name to handle first and last name separately
+  public async findAllCompletedCoursesByStudentName(studentName: string): Promise<{ student: User; completedCourses: Course[] }> {
     const [firstname, lastname] = studentName.split(' ');
   
-    // Find the student by their name using the Prisma client
+    // Find the student by their name and include related data
     const student = await this.prisma.user.findFirst({
       where: {
         firstname,
         lastname,
-      },
-    });
+      }});
   
     if (!student) {
       throw new Error(`Student with name "${studentName}" not found`);
@@ -1013,25 +1011,29 @@ async createNewVersionWithWhatsNew(
         userCourses: {
           some: {
             user_id: student.id,
-            end_time: { not: null }, 
+            end_time: { not: null }, // Ensure courses are completed
           },
         },
       },
       include: {
-        lecture: true,
-        teacher: true,        
-        userCourses: true,    
-        UserQuestionAnswer: { 
+        lecture: true, // Include lectures related to the course
+        teacher: true, // Include the teacher of the course
+        userCourses: true, // Include user-course mappings
+        UserQuestionAnswer: {
           include: {
-            question: true, 
-            answer: true, 
+            question: true, // Include related questions
+            answer: true, // Include related answers
           },
         },
-        CourseStatusLog: true, 
+        CourseStatusLog: true, // Include course status logs
       },
     });
   
-    return completedCourses;
+    // Return the student info along with completed courses
+    return {
+      student,
+      completedCourses,
+    };
   }
   
   
