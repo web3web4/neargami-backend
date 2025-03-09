@@ -990,6 +990,52 @@ async createNewVersionWithWhatsNew(
   
     return allVersionsWithIsVersion;
   }
+  // find all courses was finished by student (name)
+  public async findAllCompletedCoursesByStudentName(studentName: string): Promise<Course[]> {
+    // Split the name to handle first and last name separately
+    const [firstname, lastname] = studentName.split(' ');
+  
+    // Find the student by their name using the Prisma client
+    const student = await this.prisma.user.findFirst({
+      where: {
+        firstname,
+        lastname,
+      },
+    });
+  
+    if (!student) {
+      throw new Error(`Student with name "${studentName}" not found`);
+    }
+  
+    // Query completed courses for the student and include all related data
+    const completedCourses: Course[] = await this.prisma.course.findMany({
+      where: {
+        userCourses: {
+          some: {
+            user_id: student.id,
+            end_time: { not: null }, 
+          },
+        },
+      },
+      include: {
+        lecture: true,
+        teacher: true,        
+        userCourses: true,    
+        UserQuestionAnswer: { 
+          include: {
+            question: true, 
+            answer: true, 
+          },
+        },
+        CourseStatusLog: true, 
+      },
+    });
+  
+    return completedCourses;
+  }
+  
+  
+  
   
 ////////////////////////////////////////////////////////////////////////////////////////
   // compare all data between old and new verions without id and slug 

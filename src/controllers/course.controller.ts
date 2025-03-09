@@ -550,6 +550,18 @@ res.status(200).send({data:pendingCourse,message:'course is pending'});
             next(error);
           }
         };
+        // find all courses was finished by student (name)
+        public findCompletedCoursesByStudentName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+          try {
+            const { name } = req.params; // Retrieve the student's name from the request parameters
+            const courses: Course[] = await this.courseService.findAllCompletedCoursesByStudentName(name);
+        
+            res.status(200).json({ data: courses, message: 'Completed courses retrieved successfully' });
+          } catch (error) {
+            next(error);
+          }
+        };
+        
   
   
 
