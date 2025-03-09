@@ -49,5 +49,6 @@ export class CourseRoute implements Routes {
         this.router.get('/courses/lastVersion/page', this.courseController.findAllCoursesPageForStudent);
         this.router.post('/courses/newversion/withwhatsnew/:id',AuthMiddleware,this.courseController.createNewCourseVersionWithWhatsNew);
         this.router.get('/courses/versions/:id', AuthMiddleware, this.courseController.getAllCourseVersions);
+        this.router.get('/courses/student/name/completed/:name', this.courseController.findCompletedCoursesByStudentName);// find all courses was finished by student (name)
   }
 }
