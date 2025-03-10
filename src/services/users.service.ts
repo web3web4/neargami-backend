@@ -278,7 +278,7 @@ export class UserService {
           },
         });
 
-    return {user ,completedCourses};
+    return {...user ,completedCourses};
   }
   public async isUsernameAvailable(username: string, id: string): Promise<boolean> {
     const user = await this.prisma.user.findFirst({
