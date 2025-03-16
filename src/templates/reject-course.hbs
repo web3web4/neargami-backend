@@ -1,0 +1,132 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Rejection Notification</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        background: #f4f4f4;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        box-sizing: border-box;
+        background: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 1s ease-in;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .header {
+        background: linear-gradient(90deg, #0072ff 0%, #00c6ff 100%);
+        color: #fff;
+        text-align: center;
+        padding: 40px 0;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+      }
+      .logo {
+        max-width: 100px;
+        margin-bottom: 10px;
+        animation: logoScale 0.5s ease-in-out;
+      }
+      @keyframes logoScale {
+        0% {
+          transform: scale(0.8);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .content p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .rejected-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: #fde2e2; 
+        color: #c92d2d;      
+        border: 1px solid #f5c2c2;
+        border-radius: 4px;
+        font-weight: 700;
+      }
+
+      .cta-button {
+        display: inline-block;
+        padding: 15px 25px;
+        background-color: #0072ff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img 
+          src="cid:mylogo" 
+          alt="Gimfid Learning Platform Logo" 
+          class="logo" 
+        />
+        <h1>Course Rejection Notice</h1>
+      </div>
+
+      <div class="content">
+        <p>
+          We regret to inform you that your course submission has been
+        </p>
+        <p>
+                  <span class="rejected-badge">REJECTED</span>
+        </p>
+        <p>
+          Our review team determined it does not meet our current requirements
+          or guidelines. We encourage you to review our course creation policies
+          and make the necessary updates. You may resubmit your course once the
+          issues are addressed.
+        </p>
+        <a href="{{actionUrl}}" class="cta-button">View Guidelines</a>
+        <p>
+          If you have further questions or additional assistance, our
+          support team is here to help.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>© 2025 Neargami. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
