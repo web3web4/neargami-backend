@@ -41,14 +41,19 @@ export class CourseRoute implements Routes {
     this.router.delete('/courses/:id', AuthMiddleware, this.courseController.deleteCourse);
     this.router.get('/courses/keywords', this.courseController.getKeywords);
     this.router.get('/courses/:slug', this.courseController.findCourseBySlug);
-    this.router.post('/courses/newVersion/:id',AuthMiddleware,this.courseController.createNewCourseVersion)
-    this.router.put('/courses/isdraft/:id', AuthMiddleware, ValidationMiddleware(UpdateCourseDto, false, true, true), this.courseController.updateCourseIfWasDraft);
-        /////////////////////////////////////////////////////////////////
-        // the versioning api for student 
-        ////////////////////////////////////////////////////////////////
-        this.router.get('/courses/lastVersion/page', this.courseController.findAllCoursesPageForStudent);
-        this.router.post('/courses/newversion/withwhatsnew/:id',AuthMiddleware,this.courseController.createNewCourseVersionWithWhatsNew);
-        this.router.get('/courses/versions/:id', AuthMiddleware, this.courseController.getAllCourseVersions);
-        this.router.get('/courses/student/name/completed/:name', this.courseController.findCompletedCoursesByStudentName);// find all courses was finished by student (name)
+    this.router.post('/courses/newVersion/:id', AuthMiddleware, this.courseController.createNewCourseVersion);
+    this.router.put(
+      '/courses/isdraft/:id',
+      AuthMiddleware,
+      ValidationMiddleware(UpdateCourseDto, false, true, true),
+      this.courseController.updateCourseIfWasDraft,
+    );
+    /////////////////////////////////////////////////////////////////
+    // the versioning api for student
+    ////////////////////////////////////////////////////////////////
+    this.router.get('/courses/lastVersion/page', this.courseController.findAllCoursesPageForStudent);
+    this.router.post('/courses/newversion/withwhatsnew/:id', AuthMiddleware, this.courseController.createNewCourseVersionWithWhatsNew);
+    this.router.get('/courses/versions/:id', AuthMiddleware, this.courseController.getAllCourseVersions);
+    this.router.get('/courses/student/name/completed/:name', this.courseController.findCompletedCoursesByStudentName); // find all courses was finished by student (name)
   }
 }

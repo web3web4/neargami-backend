@@ -7,7 +7,7 @@ import { sha256 } from 'js-sha256';
 import { DataStoredInToken, TokenData } from '../interfaces/auth.interface';
 import { SECRET_KEY } from '../config';
 import { sign } from 'jsonwebtoken';
-import { challangelog, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserDto } from '../dtos/users.dto';
 import { PrismaService } from './prisma.service';
 import { HttpException } from '../exceptions/HttpException';
@@ -60,7 +60,7 @@ export class AuthService {
       return null;
     } else {
       // Parse the current flags
-      let currentFlags: Flags = user.flags as Flags;
+      const currentFlags: Flags = user.flags as Flags;
       // Check if it's the user's second login
       if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
         flagsToUpdate.new_user = false;
@@ -279,7 +279,7 @@ export class AuthService {
       const to_sign = Uint8Array.from(sha256.array(borsh_payload));
 
       // Reconstruct the signature from the parameter given in the URL
-      let real_signature = Buffer.from(signature, 'base64');
+      const real_signature = Buffer.from(signature, 'base64');
 
       // Use the public Key to verify that the private-counterpart signed the message
       const myPK = nearApiJsUtils.PublicKey.from(publicKey);
