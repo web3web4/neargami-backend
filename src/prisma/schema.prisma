@@ -222,3 +222,16 @@ model courseStatusHistoryForAdmin {
   user        User     @relation(fields: [user_id], references: [id])
   course      Course   @relation(fields: [course_id], references: [id])
 }
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  level     String   // error, warn, info, etc.
+  message   String
+  timestamp DateTime @default(now())
+  stack     String?
+  context   Json?    // Additional metadata
+  userId    Int?     // If you want to associate logs with users
+
+  @@index([level])
+  @@index([timestamp])
+}

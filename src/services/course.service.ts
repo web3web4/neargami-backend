@@ -16,7 +16,7 @@ import Container, { Service } from 'typedi';
 import { HttpException } from '../exceptions/HttpException';
 import { SUPER_ADMIN_PASS } from '../config';
 import { PrismaService } from './prisma.service';
-import { max } from 'class-validator';
+import { equals, max } from 'class-validator';
 import { MailService } from './mail.service';
 import Fuse from 'fuse.js';
 import { version } from 'os';
@@ -473,7 +473,16 @@ export class CourseService {
 
   //////////
   public async changeStatusFromDraftToPending(id: number, user_id: string): Promise<Course> {
-    const course = await this.course.findUnique({ where: { id } });
+    const course = await this.course.findUnique({
+      where: { id },
+      include: {
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
@@ -483,7 +492,12 @@ export class CourseService {
       throw new HttpException(403, 'Forbidden');
     }
 
-    return await this.course.update({ where: { id }, data: { publish_status: 'PENDING_REVIEW' } });
+    const data = await this.course.update({ where: { id }, data: { publish_status: 'PENDING_REVIEW' } });
+    await this.mailService.sendEmail(course.teacher.email, 'Course In Review Notification', 'pending-course', {
+      title: course.name,
+      actionUrl: 'https://neargami.com',
+    });
+    return data;
   }
   public async getLastUserId(): Promise<number | null> {
     const lastCourse = await this.course.findFirst({
@@ -743,7 +757,16 @@ export class CourseService {
 
   //////////////////////////////
   async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
-    const course = await this.course.findUnique({ where: { id } });
+    const course = await this.course.findUnique({
+      where: { id },
+      include: {
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
@@ -763,10 +786,23 @@ export class CourseService {
       },
     });
     // const sluge=this.stringToSlug(course.title,course.id);
-    return this.course.update({
+    const data = this.course.update({
       where: { id },
       data: { publish_status: publish_status, slug: sluge },
     });
+    if (publish_status === Status.REJECTED) {
+      this.mailService.sendEmail(course.teacher.email, 'Course In Reject Notification', 'reject-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
+    } else {
+      this.mailService.sendEmail(course.teacher.email, 'Course In Accepte Notification', 'approve-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
+    }
+
+    return data;
   }
 
   async stringToSlugById(title: string, id: number) {
