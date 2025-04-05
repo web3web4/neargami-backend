@@ -65,10 +65,69 @@
 
 // export { logger, stream };
 
+// import winston from 'winston';
+
+// // Define log format
+// const logFormat = winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`);
+
+// const logger = winston.createLogger({
+//   format: winston.format.combine(
+//     winston.format.timestamp({
+//       format: 'YYYY-MM-DD HH:mm:ss',
+//     }),
+//     logFormat,
+//   ),
+//   transports: [
+//     // Console transport for all levels
+//     new winston.transports.Console({
+//       level: 'debug',
+//       format: winston.format.combine(winston.format.splat(), winston.format.colorize()),
+//     }),
+//   ],
+// });
+
+// const stream = {
+//   write: (message: string) => {
+//     logger.info(message.substring(0, message.lastIndexOf('\n')));
+//   },
+// };
+
+// export { logger, stream };
+
 import winston from 'winston';
+import Transport from 'winston-transport';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // Define log format
 const logFormat = winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`);
+
+// Custom transport for saving logs to the database
+class DatabaseTransport extends Transport {
+  constructor(opts?: Transport.TransportStreamOptions) {
+    super(opts);
+  }
+
+  async log(info: any, callback: () => void) {
+    if (info.level === 'error') {
+      try {
+        await prisma.log.create({
+          data: {
+            level: info.level,
+            message: info.message,
+            stack: info.stack, // Capture error stack
+            context: info.context, // Additional metadata
+            userId: info.userId, // Associated user ID
+          },
+        });
+      } catch (err) {
+        console.error('Failed to save log to database:', err);
+      }
+    }
+    callback();
+  }
+}
 
 const logger = winston.createLogger({
   format: winston.format.combine(
@@ -78,11 +137,11 @@ const logger = winston.createLogger({
     logFormat,
   ),
   transports: [
-    // Console transport for all levels
     new winston.transports.Console({
       level: 'debug',
       format: winston.format.combine(winston.format.splat(), winston.format.colorize()),
     }),
+    new DatabaseTransport(),
   ],
 });
 

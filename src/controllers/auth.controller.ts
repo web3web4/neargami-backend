@@ -73,20 +73,30 @@ export class AuthController {
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const flags = await this.auth.manageFlagsForUser(req.body.accountId);
-  
+
       // Generate a username only for the first signup
       const username = flags === null ? await this.auth.generateUniqueUsername() : undefined;
-  
+
       const signUpUserData: User = await this.auth.validateAndCreateUser(req.body, undefined, username);
-  
+
       const authenticate = await this.auth.createToken(signUpUserData.id);
-  
+
       res.status(201).json({ data: { signUpUserData, authenticate }, message: 'signup' });
     } catch (error) {
       next(error);
     }
   };
-  
+
+  public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.body;
+      const blockUserData: User = await this.auth.blockUser(id);
+      res.status(200).json({ data: blockUserData, message: 'block' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   try {
   //     const userData: User = req.body;
