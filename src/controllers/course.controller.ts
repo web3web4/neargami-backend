@@ -19,6 +19,25 @@ export class CourseController {
       next(error);
     }
   };
+ // find all courses was started by student except mine 
+ public findStudentStartedCoursesExceptMine = async (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.user;
+    const courses = await this.courseService.getAllStudentStartedCoursesExceptMine(id);
+    res
+      .status(200)
+      .json({
+        data: courses,
+        message: 'All courses that students have started, excluding your own as teacher.'
+      });
+  } catch (error) {
+    next(error);
+  }
+};
 
   public makeAllCoursesHaveSlug = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {

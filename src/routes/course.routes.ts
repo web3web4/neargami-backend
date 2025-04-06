@@ -19,8 +19,12 @@ export class CourseRoute implements Routes {
   //
   private initializeRoutes() {
     this.router.get('/courses/changes/:id', this.courseController.getAllChangesBetweenVersions);
-    this.router.get('/courses/users-start/:id', this.courseController.findUsersStartingCourse);
-
+    this.router.get('/courses/users-start/:id',this.courseController.findUsersStartingCourse);
+    this.router.get(
+      '/courses/students-started',AuthMiddleware,
+      this.courseController.findStudentStartedCoursesExceptMine
+    );
+    
     this.router.get('/courses/slug', this.courseController.makeAllCoursesHaveSlug);
     this.router.get('/courses/page', this.courseController.findAllCoursesPage);
     this.router.get('/courses/search', this.courseController.search);

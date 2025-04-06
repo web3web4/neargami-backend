@@ -38,6 +38,24 @@ export class CourseService {
     const AllUsers = await this.prisma.user.findMany({ where: { id: { in: users.map(user => user.user_id) } } });
     return AllUsers;
   }
+  // find all courses was started by student except mine 
+  public async getAllStudentStartedCoursesExceptMine(teacherId: string) {
+    const startedCourses = await this.prisma.userCoursesMapping.findMany({
+      distinct: ['course_id'],
+      select: { course_id: true },
+    });
+    
+    const courseIds = startedCourses.map(mapping => mapping.course_id);
+    const courses = await this.prisma.course.findMany({
+      where: {
+        id: { in: courseIds },
+        teacher_user_id: { not: teacherId }
+      }
+    });
+  
+    return courses;
+  }
+  
   public async getCourseStatusLog(courseSlug: string) {
     const course = await this.course.findFirst({ where: { slug: courseSlug }, include: { CourseStatusLog: true } });
   }
