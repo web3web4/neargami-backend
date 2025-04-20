@@ -33,29 +33,24 @@ export class CourseService {
   public findLatestVersion = this.prismaService.course;
   static findLatestVersion: any;
 
-  public async getAllUsersStartingCourse(course_id: number) {
-    const users = await this.prisma.userCoursesMapping.findMany({ where: { course_id } });
-    const AllUsers = await this.prisma.user.findMany({ where: { id: { in: users.map(user => user.user_id) } } });
-    return AllUsers;
-  }
-  // find all courses was started by student except mine 
+  // find all courses was started by student except mine
   public async getAllStudentStartedCoursesExceptMine(teacherId: string) {
     const startedCourses = await this.prisma.userCoursesMapping.findMany({
       distinct: ['course_id'],
       select: { course_id: true },
     });
-    
+
     const courseIds = startedCourses.map(mapping => mapping.course_id);
     const courses = await this.prisma.course.findMany({
       where: {
         id: { in: courseIds },
-        teacher_user_id: { not: teacherId }
-      }
+        teacher_user_id: { not: teacherId },
+      },
     });
-  
+
     return courses;
   }
-  
+
   public async getCourseStatusLog(courseSlug: string) {
     const course = await this.course.findFirst({ where: { slug: courseSlug }, include: { CourseStatusLog: true } });
   }
@@ -490,33 +485,7 @@ export class CourseService {
   }
 
   //////////
-  public async changeStatusFromDraftToPending(id: number, user_id: string): Promise<Course> {
-    const course = await this.course.findUnique({
-      where: { id },
-      include: {
-        teacher: {
-          select: {
-            email: true,
-          },
-        },
-      },
-    });
-    if (!course) {
-      throw new HttpException(404, 'Course not found');
-    }
 
-    // Check if the user is the teacher of the course
-    if (course.teacher_user_id !== user_id) {
-      throw new HttpException(403, 'Forbidden');
-    }
-
-    const data = await this.course.update({ where: { id }, data: { publish_status: 'PENDING_REVIEW' } });
-    await this.mailService.sendEmail(course.teacher.email, 'Course In Review Notification', 'pending-course', {
-      title: course.name,
-      actionUrl: 'https://neargami.com',
-    });
-    return data;
-  }
   public async getLastUserId(): Promise<number | null> {
     const lastCourse = await this.course.findFirst({
       orderBy: {
@@ -561,21 +530,6 @@ export class CourseService {
     const AllCourses: Course[] = await this.course.findMany({
       where: {
         AND: [{ publish_status: currentStatus }, { tag: tag }],
-      },
-      include: { lecture: true, teacher: true },
-    });
-    return AllCourses;
-  }
-  public async findAllByTextSearch(phras: string): Promise<Course[]> {
-    const currentStatus = Status.APPROVED;
-    const AllCourses: Course[] = await this.course.findMany({
-      where: {
-        AND: [
-          { publish_status: currentStatus }, // Only include courses with 'APPROVED' status
-          {
-            OR: [{ title: { equals: phras } }, { name: { equals: phras } }, { tag: phras }],
-          },
-        ],
       },
       include: { lecture: true, teacher: true },
     });
@@ -728,50 +682,6 @@ export class CourseService {
   //////////////////////////////////////
 
   // update log status for admin user
-  async updateLogStatusForAdmin(
-    id: number,
-    isAdmin: boolean,
-    userId: string,
-    publish_status: Status,
-    publish_status_reson: string,
-    sluge: string,
-    prevStatus,
-  ): Promise<Course> {
-    const course = await this.course.findUnique({ where: { id } });
-    if (!course) {
-      throw new HttpException(404, 'Course not found');
-    }
-
-    if (isAdmin == false) {
-      throw new HttpException(403, 'this user is not admin to update status');
-    }
-    const changstatusdate = new Date();
-
-    const statuslog = await this.coursestatuslog.create({
-      data: {
-        changeStatusReson: publish_status_reson,
-        last_publish_status: course.publish_status,
-        current_publish_status: publish_status,
-        changeStatusDate: changstatusdate,
-        course_id: course.id,
-      },
-    });
-    //insert prev_status in table (courseStatusHistoryForAdmin)
-    const logStatusForAdmin = await this.prisma.courseStatusHistoryForAdmin.create({
-      data: {
-        user_id: userId,
-        course_id: id,
-        prev_status: prevStatus,
-        new_status: publish_status,
-        create_at: new Date(Date.now()),
-      },
-    });
-    // const sluge=this.stringToSlug(course.title,course.id);
-    return this.course.update({
-      where: { id },
-      data: { publish_status: publish_status, slug: sluge },
-    });
-  }
 
   //////////////////////////////
   async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
@@ -868,87 +778,6 @@ export class CourseService {
     return this.course.delete({ where: { id } });
   }
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // get all changes between same version
-  public async getAllChangesCompare(courseId: number): Promise<any> {
-    const oldVersion = await this.course.findUnique({
-      where: { id: courseId },
-      include: {
-        lecture: {
-          include: {
-            question: {
-              include: { answer: true, UserQuestionAnswer: true },
-            },
-            userLecture: true,
-          },
-        },
-        userCourses: true,
-      },
-    });
-
-    // If no course is found
-    if (!oldVersion) {
-      throw new Error('Course not found for the given ID');
-    }
-
-    // Function to compare timestamps
-    const compareTimestamps = (createdAt: Date, updatedAt: Date) => {
-      if (updatedAt > createdAt) return 'Updated';
-      if (updatedAt === createdAt) return 'Not Updated';
-      return 'Invalid';
-    };
-
-    // Deduplicate an array based on a key
-    const deduplicate = <T>(array: T[], key: keyof T): T[] =>
-      array.filter((item, index, self) => index === self.findIndex(t => t[key] === item[key]));
-
-    // Process lectures with deduplication
-    const lecturesWithStatus = oldVersion.lecture.map(lecture => ({
-      id: lecture.id,
-      title: lecture.title,
-      slug: lecture.slug,
-      description: lecture.description,
-      video_path: lecture.video_path,
-      course_id: lecture.course_id,
-      pre_note: lecture.pre_note,
-      next_note: lecture.next_note,
-      order: lecture.order,
-      picture: lecture.picture,
-      created_at: lecture.created_at,
-      updated_at: lecture.updated_at,
-      status: compareTimestamps(lecture.created_at, lecture.updated_at),
-      // Process and deduplicate questions
-      questions: deduplicate(
-        lecture.question.map(question => ({
-          id: question.id,
-          description: question.description,
-          lecture_id: question.lecture_id,
-          sequence: question.sequence,
-          score: question.score,
-          created_at: question.created_at,
-          updated_at: question.updated_at,
-          answers: deduplicate(
-            question.answer.map(answer => ({
-              id: answer.id,
-              description: answer.description,
-              is_correct: answer.is_correct,
-              question_id: answer.question_id,
-              created_at: answer.created_at,
-              updated_at: answer.updated_at,
-              status: compareTimestamps(answer.created_at, answer.updated_at),
-            })),
-            'id',
-          ),
-        })),
-        'id',
-      ),
-    }));
-
-    return {
-      lectures: lecturesWithStatus,
-      message: 'This is differences',
-    };
-  }
-  ///////////////////////////////////////////////////
   // functions of versioning for student
   //////////////////////////////////////////////////
   public findAllPageWithLatestVersion = async ({ offset, limit }: { offset: number; limit: number }): Promise<Course[]> => {
