@@ -178,7 +178,7 @@ export class AuthService {
     if (existingUser && existingUser.blocked) {
       throw new HttpException(403, 'User is blocked'); // Or throw an error, or handle it in a way that suits your application
     }
-    // await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
+    await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
 
     await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
 
