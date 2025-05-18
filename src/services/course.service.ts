@@ -718,17 +718,17 @@ export class CourseService {
       where: { id },
       data: { publish_status: publish_status, slug: sluge },
     });
-    if (publish_status === Status.REJECTED) {
-      this.mailService.sendEmail(course.teacher.email, 'Course In Reject Notification', 'reject-course', {
-        title: course.name,
-        actionUrl: 'https://neargami.com',
-      });
-    } else {
-      this.mailService.sendEmail(course.teacher.email, 'Course In Accepte Notification', 'approve-course', {
-        title: course.name,
-        actionUrl: 'https://neargami.com',
-      });
-    }
+    // if (publish_status === Status.REJECTED) {
+    //   this.mailService.sendEmail(course.teacher.email, 'Course In Reject Notification', 'reject-course', {
+    //     title: course.name,
+    //     actionUrl: 'https://neargami.com',
+    //   });
+    // } else {
+    //   this.mailService.sendEmail(course.teacher.email, 'Course In Accepte Notification', 'approve-course', {
+    //     title: course.name,
+    //     actionUrl: 'https://neargami.com',
+    //   });
+    // }
 
     return data;
   }
