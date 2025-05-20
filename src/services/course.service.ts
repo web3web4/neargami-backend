@@ -556,8 +556,35 @@ export class CourseService {
     return AllCourses;
   }
 
-  public async findAllCoursesByStatus(id: string): Promise<any> {
-    let AllCourses: Course[];
+  // public async findAllCoursesByStatus(id: string): Promise<any> {
+  //   let AllCourses: Course[];
+  //   const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+  //     by: ['course_id'],
+  //     _count: {
+  //       start_time: true,
+  //       end_time: true,
+  //     },
+  //   });
+  //   if (id === 'ALL') {
+  //     AllCourses = await this.course.findMany({
+  //       include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
+  //     });
+  //   } else {
+  //     AllCourses = await this.course.findMany({
+  //       where: { publish_status: id as Status },
+
+  //       include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
+  //     });
+  //   }
+  //   AllCourses = (AllCourses as any).map(course => ({
+  //     ...course,
+  //     counts: userCoursesCounts.find(c => c.course_id === course.id),
+  //     total_score: course.lecture.reduce((total, lecture) => total + lecture.question.length * 10, 0),
+  //   }));
+  //   return AllCourses;
+  // }
+
+  public async findAllCoursesByStatusLastestVersion(id: string): Promise<any[]> {
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
       _count: {
@@ -565,24 +592,51 @@ export class CourseService {
         end_time: true,
       },
     });
+    let allVersions: Course[] = [];
+    const includeOpts = {
+      CourseStatusLog: true,
+      lecture: { include: { question: true } },
+      teacher: true,
+    } as const;
+  
     if (id === 'ALL') {
-      AllCourses = await this.course.findMany({
-        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
-      });
+      allVersions = await this.course.findMany({ include: includeOpts });
     } else {
-      AllCourses = await this.course.findMany({
+      allVersions = await this.course.findMany({
         where: { publish_status: id as Status },
-
-        include: { CourseStatusLog: true, lecture: { include: { question: true } }, teacher: true },
+        include: includeOpts,
       });
     }
-    AllCourses = (AllCourses as any).map(course => ({
-      ...course,
-      counts: userCoursesCounts.find(c => c.course_id === course.id),
-      total_score: course.lecture.reduce((total, lecture) => total + lecture.question.length * 10, 0),
-    }));
-    return AllCourses;
+    const latestMap = new Map<number, Course>();
+  
+    for (const c of allVersions) {
+      const groupId = c.parent_version_id ?? c.id;
+  
+      const existing = latestMap.get(groupId);
+      if (!existing) {
+        latestMap.set(groupId, c);
+      } else if (c.created_at > existing.created_at) {
+        latestMap.set(groupId, c);
+      }
+    }
+    const result = Array.from(latestMap.values()).map(course => {
+      const counts = userCoursesCounts.find(u => u.course_id === course.id) || { _count: { start_time: 0, end_time: 0 } };
+      const total_score = (course as any).lecture.reduce(
+        (sum: number, lec: any) => sum + lec.question.length * 10,
+        0
+      );
+  
+      return {
+        ...course,
+        counts,
+        total_score,
+        is_version: course.parent_version_id !== course.id
+      };
+    });
+  
+    return result;
   }
+  
   public async findAllPage({ offset, limit }: { offset: number; limit: number }): Promise<Course[]> {
     const paginatedCourses: Course[] = await this.course.findMany({
       skip: offset, // Skip the specified number of records
