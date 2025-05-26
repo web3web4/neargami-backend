@@ -255,30 +255,30 @@ export class UserService {
       throw new Error(`User with name "${username}" not found`);
     }
     // Query completed courses for the student and include all related data
-        const completedCourses: Course[] = await this.prisma.course.findMany({
-          where: {
-            userCourses: {
-              some: {
-                user_id: user.id,
-                end_time: { not: null }, // Ensure courses are completed
-              },
-            },
+    const completedCourses: Course[] = await this.prisma.course.findMany({
+      where: {
+        userCourses: {
+          some: {
+            user_id: user.id,
+            end_time: { not: null }, // Ensure courses are completed
           },
+        },
+      },
+      include: {
+        lecture: true, // Include lectures related to the course
+        teacher: true, // Include the teacher of the course
+        userCourses: true, // Include user-course mappings
+        UserQuestionAnswer: {
           include: {
-            lecture: true, // Include lectures related to the course
-            teacher: true, // Include the teacher of the course
-            userCourses: true, // Include user-course mappings
-            UserQuestionAnswer: {
-              include: {
-                question: true, // Include related questions
-                answer: true, // Include related answers
-              },
-            },
-            CourseStatusLog: true, // Include course status logs
+            question: true, // Include related questions
+            answer: true, // Include related answers
           },
-        });
+        },
+        CourseStatusLog: true, // Include course status logs
+      },
+    });
 
-    return {...user ,completedCourses};
+    return { ...user, completedCourses };
   }
   public async isUsernameAvailable(username: string, id: string): Promise<boolean> {
     const user = await this.prisma.user.findFirst({

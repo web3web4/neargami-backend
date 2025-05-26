@@ -1,25 +1,25 @@
 {
-    "keep": {
-        "days": false,
-        "amount": 30
+  "keep": {
+    "days": false,
+    "amount": 30
+  },
+  "auditLog": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\.5d593fe1004adb0a151abffdaab07de11398f61b-audit.json",
+  "files": [
+    {
+      "date": 1728222689542,
+      "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-06.log",
+      "hash": "1d608bc8fdf0ae9f0f29e50ca60b2073b1b7c89c0c013b93bbf348e6522984b8"
     },
-    "auditLog": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\.5d593fe1004adb0a151abffdaab07de11398f61b-audit.json",
-    "files": [
-        {
-            "date": 1728222689542,
-            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-06.log",
-            "hash": "1d608bc8fdf0ae9f0f29e50ca60b2073b1b7c89c0c013b93bbf348e6522984b8"
-        },
-        {
-            "date": 1728287937484,
-            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-07.log",
-            "hash": "6f547670a09929e9898b96249f0387171cfd8d21bffe0f683b8941024312b4e2"
-        },
-        {
-            "date": 1728376240339,
-            "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-08.log",
-            "hash": "9882c88ad51ff0fa54b0061da37a57aa9adfc1559da43cc4e967eeba1557df78"
-        }
-    ],
-    "hashType": "sha256"
+    {
+      "date": 1728287937484,
+      "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-07.log",
+      "hash": "6f547670a09929e9898b96249f0387171cfd8d21bffe0f683b8941024312b4e2"
+    },
+    {
+      "date": 1728376240339,
+      "name": "C:\\Users\\MOSTFA\\Desktop\\gitLap\\gamfi_near_backend\\src\\utils\\logs\\debug\\2024-10-08.log",
+      "hash": "9882c88ad51ff0fa54b0061da37a57aa9adfc1559da43cc4e967eeba1557df78"
+    }
+  ],
+  "hashType": "sha256"
 }

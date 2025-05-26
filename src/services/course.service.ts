@@ -556,6 +556,99 @@ export class CourseService {
     return AllCourses;
   }
 
+  //   return AllCourses;
+  // }
+
+  // Finds all courses by status, returning only the latest version of each course.
+  public async findAllCoursesByStatusLastestVersion(id: string): Promise<any[]> {
+    // Aggregate counts of users who started and ended each course.
+    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'], // Group by course ID.
+      _count: {
+        // Count occurrences.
+        start_time: true, // Count users who started the course.
+        end_time: true, // Count users who finished the course.
+      },
+    });
+
+    let allVersions: Course[] = []; // Initialize an array to store all versions of courses.
+    // Define options for including related data in the query.
+    const includeOpts = {
+      CourseStatusLog: true, // Include course status logs.
+      lecture: { include: { question: true } }, // Include lectures and their questions.
+      teacher: true, // Include teacher information.
+    } as const;
+    // Check if the requested ID is 'ALL'.
+    if (id === 'ALL') {
+      // If 'ALL', fetch all courses with included options.
+      allVersions = await this.course.findMany({ include: includeOpts });
+    } else {
+      // Otherwise, fetch courses matching the specified status ID with included options.
+      allVersions = await this.course.findMany({
+        where: { publish_status: id as Status }, // Filter by publish status.
+        include: includeOpts, // Include related data.
+      });
+    }
+
+    // Create a map to store the latest version of each course, keyed by parent_version_id or id.
+    // Alternative approach: Sort all versions to easily pick the latest for each group.
+    // Create a mutable copy for sorting as .sort() modifies the array in place.
+    const sortedVersions = [...allVersions].sort((a, b) => {
+      // Determine group IDs for comparison.
+      // Assumes parent_version_id and id are numbers or consistently comparable for map keys and sorting.
+      const groupIdA = a.parent_version_id ?? a.id;
+      const groupIdB = b.parent_version_id ?? b.id;
+
+      // If group IDs are different, sort by group ID. This keeps versions of the same course contiguous.
+      // The specific order of disparate groups (e.g., group 1 vs group 2) doesn't affect picking the latest *within* a group,
+      // but sorting them (e.g., numerically) makes the sortedVersions list more predictable.
+      if (groupIdA !== groupIdB) {
+        // Assuming groupIdA and groupIdB are numbers. Adjust if they are other types.
+        return groupIdA - groupIdB; // Ascending order of group IDs.
+      }
+
+      // If group IDs are the same, sort by created_at in descending order (latest first).
+      // It's crucial that created_at are comparable (e.g., Date objects or numeric timestamps).
+      // Using new Date().getTime() for robustness in case created_at is a string representation or needs conversion.
+      const timeA = new Date(a.created_at).getTime();
+      const timeB = new Date(b.created_at).getTime();
+      return timeB - timeA; // Descending: latest versions come first.
+    });
+
+    // Create a map to store the latest version found for each course group.
+    const latestMap = new Map<number, Course>();
+    // Iterate over the sorted versions.
+    for (const course of sortedVersions) {
+      const groupId = course.parent_version_id ?? course.id;
+      // Since the versions are sorted with the latest for each group appearing first in sortedVersions,
+      // we add to the map only if this groupId hasn't been encountered and added yet.
+      if (!latestMap.has(groupId)) {
+        latestMap.set(groupId, course);
+      }
+    }
+
+    // Convert the map values (latest versions) to an array and map over them.
+    const result = Array.from(latestMap.values()).map(course => {
+      // Find the user counts for the current course, or default to zero counts.
+      const counts = userCoursesCounts.find(u => u.course_id === course.id) || { _count: { start_time: 0, end_time: 0 } };
+      // Calculate the total score for the course by summing scores of all questions in its lectures.
+      const total_score = (course as any).lecture.reduce(
+        (sum: number, lec: any) => sum + lec.question.length * 10, // Each question is worth 10 points.
+        0, // Initial sum is 0.
+      );
+
+      // Return an object with course details, counts, total score, and version status.
+      return {
+        ...course, // Spread all properties of the course.
+        counts, // Include user counts.
+        total_score, // Include total score.
+        is_version: course.parent_version_id !== course.id, // True if it's a version of another course.
+      };
+    });
+    // Return the array of processed latest course versions.
+    return result;
+  }
+
   public async findAllCoursesByStatus(id: string): Promise<any> {
     let AllCourses: Course[];
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({

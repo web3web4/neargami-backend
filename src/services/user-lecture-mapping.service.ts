@@ -12,27 +12,23 @@ export class UserLectureMappingService {
   private lecture = Container.get(LectureService);
   private lecturePrisma = this.prismaService.lecture;
   private userCourseService = Container.get(UserCoursesMappingService);
-async registerNow (user_id:string,lecture_id:number):Promise<UserLectureMapping>{
+  async registerNow(user_id: string, lecture_id: number): Promise<UserLectureMapping> {
+    const lecture = await this.prisma.lecture.findFirst({ where: { id: lecture_id }, include: { course: true } });
 
-  const lecture = await this.prisma.lecture.findFirst({where:{id:lecture_id},include:{course:true}});
-  
-  if (lecture.course.teacher_user_id === user_id) {
-    throw new HttpException(409, 'You are the teacher of this course');
-  }
-  const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id,course_id:lecture.course_id } } });
-  if (!userCoures) {
-    
-    const userCoursesMapping=await this.prisma.userCoursesMapping.create({ data: { user_id ,course_id:lecture.course_id} });
-   
-  }
-  const userLecture = await this.prisma.userLectureMapping.findFirst({ where: { AND: { user_id, lecture_id } } });
-  if (userLecture) {
-    throw new HttpException(409, 'Lecture allready registered');
-  }
+    if (lecture.course.teacher_user_id === user_id) {
+      throw new HttpException(409, 'You are the teacher of this course');
+    }
+    const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id: lecture.course_id } } });
+    if (!userCoures) {
+      const userCoursesMapping = await this.prisma.userCoursesMapping.create({ data: { user_id, course_id: lecture.course_id } });
+    }
+    const userLecture = await this.prisma.userLectureMapping.findFirst({ where: { AND: { user_id, lecture_id } } });
+    if (userLecture) {
+      throw new HttpException(409, 'Lecture allready registered');
+    }
 
-  return await this.prisma.userLectureMapping.create({ data: { user_id, lecture_id ,course_id:lecture.course_id}, include: { lecture: true } });
-}
-
+    return await this.prisma.userLectureMapping.create({ data: { user_id, lecture_id, course_id: lecture.course_id }, include: { lecture: true } });
+  }
 
   async register(user_id: string, course_id: number, lecture_id: number): Promise<UserLectureMapping> {
     const lecture = await this.lecture.findOne(lecture_id, course_id);
@@ -41,9 +37,7 @@ async registerNow (user_id:string,lecture_id:number):Promise<UserLectureMapping>
     }
     const userCoures = await this.prisma.userCoursesMapping.findFirst({ where: { AND: { user_id, course_id } } });
     if (!userCoures) {
-      
-      const userCoursesMapping=await this.prisma.userCoursesMapping.create({ data: { user_id, course_id } });
-     
+      const userCoursesMapping = await this.prisma.userCoursesMapping.create({ data: { user_id, course_id } });
     }
     const userLecture = await this.prisma.userLectureMapping.findFirst({ where: { AND: { user_id, lecture_id, course_id } } });
     if (userLecture) {

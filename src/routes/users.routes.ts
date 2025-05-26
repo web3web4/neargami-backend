@@ -20,7 +20,7 @@ export class UserRoute implements Routes {
     this.router.get(`${this.path}/username/:username`, this.user.getUserByUsername);
     this.router.get(`${this.path}/checkUsername/:username`, AuthMiddleware, this.user.checkUsernameAvailability);
     this.router.get(`${this.path}`, this.user.getUsers);
-    this.router.get(`${this.path}/admin`,AuthMiddleware,this.user.getAdminUsers);
+    this.router.get(`${this.path}/admin`, AuthMiddleware, this.user.getAdminUsers);
     this.router.post(`${this.path}/ngcs`, AuthMiddleware, this.user.claimNgcs);
     this.router.get(`${this.path}/ngcs`, AuthMiddleware, this.user.getNgcs);
     this.router.get(`${this.path}/top-points`, AuthMiddleware, this.user.getTopPoints);
