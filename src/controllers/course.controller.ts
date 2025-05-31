@@ -90,7 +90,7 @@ export class CourseController {
     try {
       const { id } = req.params;
 
-      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
+      const courses: Course[] = await this.courseService.findAllCoursesByStatusLastestVersion(id as Status);
       res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
       next(error);

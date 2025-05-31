@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container, Inject, Service } from 'typedi';
 import { AuthService } from '../services/auth.service';
-import { User, challangelog } from '@prisma/client';
+import { User, Challangelog } from '@prisma/client';
 import Jwt from 'jsonwebtoken';
 import { Public } from '@prisma/client/runtime/library';
 @Service()
