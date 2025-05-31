@@ -13,28 +13,16 @@ export class SitemapService {
   public async generateSitemap(): Promise<string> {
     const urls: string[] = [];
 
-    // Add static pages
+    // Add only the main site URL
     urls.push(this.createUrlEntry(this.baseUrl, new Date(), 'daily', '1.0'));
-    urls.push(this.createUrlEntry(`${this.baseUrl}/courses`, new Date(), 'daily', '0.9'));
-    urls.push(this.createUrlEntry(`${this.baseUrl}/teachers`, new Date(), 'weekly', '0.8'));
-    urls.push(this.createUrlEntry(`${this.baseUrl}/about`, new Date(), 'monthly', '0.7'));
-    urls.push(this.createUrlEntry(`${this.baseUrl}/contact`, new Date(), 'monthly', '0.6'));
 
-    // Add approved courses
-    const courseUrls = await this.getCoursesUrls();
-    urls.push(...courseUrls);
+    // Add course details URLs
+    const courseDetailsUrls = await this.getCourseDetailsUrls();
+    urls.push(...courseDetailsUrls);
 
-    // Add lectures
-    const lectureUrls = await this.getLecturesUrls();
-    urls.push(...lectureUrls);
-
-    // Add teachers
-    const teacherUrls = await this.getTeachersUrls();
-    urls.push(...teacherUrls);
-
-    // Add course versions
-    const versionUrls = await this.getCourseVersionsUrls();
-    urls.push(...versionUrls);
+    // Add quiz URLs
+    const quizUrls = await this.getQuizUrls();
+    urls.push(...quizUrls);
 
     return this.wrapInSitemapXml(urls);
   }
@@ -148,6 +136,78 @@ export class SitemapService {
   }
 
   /**
+   * Get URLs for course details pages
+   */
+  private async getCourseDetailsUrls(): Promise<string[]> {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        publish_status: 'APPROVED',
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        updated_at: true,
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
+    });
+
+    return courses.map(course => {
+      // Use the slug for the URL or create a slug from the title if not available
+      const urlSlug = course.slug || this.createSlugFromTitle(course.title);
+      return this.createUrlEntry(`${this.baseUrl}/course-details/${urlSlug}`, course.updated_at, 'weekly', '0.8');
+    });
+  }
+
+  /**
+   * Get URLs for quiz pages
+   */
+  private async getQuizUrls(): Promise<string[]> {
+    // First, get lectures with their course IDs
+    const lectures = await this.prisma.lecture.findMany({
+      where: {
+        course: {
+          publish_status: 'APPROVED',
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        updated_at: true,
+        course_id: true,
+        course: {
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
+    });
+
+    return lectures.map(lecture => {
+      // Create a slug from the lecture title if not available
+      const titleSlug = lecture.slug || this.createSlugFromTitle(lecture.title);
+      return this.createUrlEntry(`${this.baseUrl}/quiz/${lecture.course.id}/${lecture.id}/${titleSlug}`, lecture.updated_at, 'weekly', '0.7');
+    });
+  }
+
+  /**
+   * Create a slug from a title (helper function)
+   */
+  private createSlugFromTitle(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-'); // Remove consecutive hyphens
+  }
+
+  /**
    * Create a single URL entry for sitemap
    */
   private createUrlEntry(url: string, lastmod: Date, changefreq: string, priority: string): string {
@@ -197,12 +257,10 @@ export class SitemapService {
   public async getSitemapStats(): Promise<{
     totalUrls: number;
     courses: number;
-    lectures: number;
-    teachers: number;
-    versions: number;
+    quizzes: number;
     lastGenerated: Date;
   }> {
-    const [coursesCount, lecturesCount, teachersCount, versionsCount] = await Promise.all([
+    const [coursesCount, lecturesCount] = await Promise.all([
       this.prisma.course.count({
         where: {
           publish_status: 'APPROVED',
@@ -217,35 +275,15 @@ export class SitemapService {
           slug: { not: null },
         },
       }),
-      this.prisma.user.count({
-        where: {
-          Course: {
-            some: {
-              publish_status: 'APPROVED',
-            },
-          },
-          blocked: false,
-          username: { not: null },
-        },
-      }),
-      this.prisma.course.count({
-        where: {
-          publish_status: 'APPROVED',
-          parent_version_id: { not: null },
-          slug: { not: null },
-        },
-      }),
     ]);
 
-    const staticPages = 5; // Home, courses, teachers, about, contact
-    const totalUrls = staticPages + coursesCount + lecturesCount + teachersCount + versionsCount;
+    const staticPages = 1; // Only home page
+    const totalUrls = staticPages + coursesCount + lecturesCount;
 
     return {
       totalUrls,
       courses: coursesCount,
-      lectures: lecturesCount,
-      teachers: teachersCount,
-      versions: versionsCount,
+      quizzes: lecturesCount,
       lastGenerated: new Date(),
     };
   }
