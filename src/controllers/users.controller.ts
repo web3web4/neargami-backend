@@ -255,8 +255,7 @@ export class UserController {
 
   public leaderBoard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { page } = req.query;
-      const users = await this.user.leaderBoard(+page || 1);
+      const users = await this.user.leaderBoard();
       res.status(200).json({ data: users, message: 'found' });
     } catch (error) {
       next(error);
