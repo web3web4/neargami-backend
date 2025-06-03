@@ -188,9 +188,9 @@ export class UserService {
     });
   }
 
-  async leaderBoard(page: number): Promise<any> {
+  async leaderBoard(): Promise<any> {
     const users = await this.prismaUser.findMany({
-      where: { blocked: false, gameScreenshot: { not: null } },
+      where: { blocked: false },
       orderBy: { top_points: 'desc' },
       select: {
         firstname: true,
@@ -199,8 +199,7 @@ export class UserService {
         ngc: true,
         top_points: true,
       },
-      skip: (page - 1) * 10,
-      take: 10,
+      take: 100,
     });
     return users;
   }
