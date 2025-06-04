@@ -19,3 +19,8 @@ export interface RequestWithUser extends Request {
 export interface RequestWithFile extends Request {
   file: multer.File;
 }
+
+export interface AuthStrategy {
+  validate(data: any): Promise<boolean>;
+  createUser(data: any): Promise<any>;
+}

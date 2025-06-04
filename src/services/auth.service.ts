@@ -11,6 +11,7 @@ import { User } from '@prisma/client';
 import { CreateUserDto } from '../dtos/users.dto';
 import { PrismaService } from './prisma.service';
 import { HttpException } from '../exceptions/HttpException';
+import { TelegramStrategy } from './telegram.strategy';
 
 const NETWORK_ID = process.env.NETWORK_ID ?? 'testnet';
 
@@ -52,6 +53,42 @@ export class AuthService {
   private prismaService = Container.get(PrismaService);
   private users = this.prismaService.user;
   private challangelog = this.prismaService.challangelog;
+  private telegramStrategy = Container.get(TelegramStrategy);
+
+  public async validateAndCreateUserWithTelegram(telegramData: any): Promise<User> {
+    // Validate Telegram data
+    const isValid = await this.telegramStrategy.validate(telegramData);
+    if (!isValid) {
+      throw new HttpException(401, 'Invalid Telegram authentication data');
+    }
+
+    // Get user data from Telegram
+    const telegramUser = await this.telegramStrategy.createUser(telegramData);
+
+    // Check if user exists
+    const existingUser = await this.users.findFirst({
+      where: { telegramId: telegramUser.telegramId },
+    });
+
+    if (existingUser) {
+      return existingUser;
+    }
+
+    // Create new user
+    const username = await this.generateUniqueUsername();
+    const user = await this.users.create({
+      data: {
+        username,
+        telegramId: telegramUser.telegramId,
+        firstname: telegramUser.firstName,
+        lastname: telegramUser.lastName,
+        photoUrl: telegramUser.photoUrl,
+        flags: { new_user: true },
+      },
+    });
+
+    return user;
+  }
 
   async manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {
     // Fetch the user

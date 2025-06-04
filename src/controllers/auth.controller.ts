@@ -97,6 +97,20 @@ export class AuthController {
     }
   };
 
+  public authenticateWithTelegram = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await this.auth.validateAndCreateUserWithTelegram(req.body);
+      const token = this.auth.createToken(user.id);
+
+      res.status(200).json({
+        data: { user, token },
+        message: 'Telegram authentication successful',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   try {
   //     const userData: User = req.body;
