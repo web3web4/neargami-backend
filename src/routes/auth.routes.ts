@@ -24,6 +24,7 @@ export class AuthRoute implements Routes {
     this.router.get(`${this.path}challengelog`, this.auth.getAllChallangeLog);
     this.router.post(`${this.path}signup`, this.auth.createUser);
     this.router.post(`${this.path}block`, this.auth.blockUser);
+    this.router.post(`${this.path}telegram`, this.auth.authenticateWithTelegram);
     // this.router.post(`${this.path}login`, ValidationMiddleware(CreateUserDto), this.auth.logIn);
     // this.router.post(`${this.path}logout`, AuthMiddleware, this.auth.logOut);
   }
