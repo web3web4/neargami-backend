@@ -14,7 +14,7 @@ export class UserCoursesMapping implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get('/user-courses/', AuthMiddleware, this.userCoursesMappingController.findAll);
+    this.router.get('/user-courses', AuthMiddleware, this.userCoursesMappingController.findAll);
     this.router.post('/user-courses/start/:id', AuthMiddleware, this.userCoursesMappingController.register);
     this.router.put('/user-courses/finish/:id', AuthMiddleware, this.userCoursesMappingController.finsih);
     this.router.get('/user-courses/:slug', this.userCoursesMappingController.findCourseUsers);
