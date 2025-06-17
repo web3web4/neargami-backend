@@ -250,34 +250,95 @@ export class UserService {
     const user = await this.prismaUser.findFirst({
       where: { username, blocked: false },
     });
+  
     if (!user) {
       throw new Error(`User with name "${username}" not found`);
     }
+  
     // Query completed courses for the student and include all related data
-    const completedCourses: Course[] = await this.prisma.course.findMany({
+    const completedCourses = await this.prisma.course.findMany({
       where: {
         userCourses: {
           some: {
             user_id: user.id,
-            end_time: { not: null }, // Ensure courses are completed
+            end_time: { not: null },
+          },
+        },
+        lecture: {
+          every: {
+            userLecture: {
+              some: {
+                user_id: user.id,
+                end_at: { not: null },
+              },
+            },
           },
         },
       },
       include: {
-        lecture: true, // Include lectures related to the course
-        teacher: true, // Include the teacher of the course
-        userCourses: true, // Include user-course mappings
+        lecture: {
+          include: { question: true }, // need question count per lecture for total_score
+        },
+        teacher: true,
+        userCourses: true,
         UserQuestionAnswer: {
           include: {
-            question: true, // Include related questions
-            answer: true, // Include related answers
+            question: true,
+            answer: true,
           },
         },
-        CourseStatusLog: true, // Include course status logs
+        CourseStatusLog: true,
       },
     });
-
-    return { ...user, completedCourses };
+  
+    // 2️ Count students per completed course
+    const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      where: {
+        course_id: { in: completedCourses.map(c => c.id) },
+      },
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
+    });
+  
+    // 3️ Merge counts + total_score + is_version into each course
+    const completedWithCounts = completedCourses.map(course => {
+      // lookup or default counts entry
+      const countsEntry =
+        countsByCourse.find(c => c.course_id === course.id) || {
+          course_id: course.id,
+          _count: { start_time: 0, end_time: 0 },
+        };
+  
+      // compute total_score: 10 points per question in all lectures
+      const total_score = course.lecture.reduce(
+        (sum, lec) => sum + lec.question.length * 10,
+        0,
+      );
+  
+      // determine if this record is a version of another course
+      const is_version = course.parent_version_id !== course.id;
+  
+      return {
+        ...course,
+        counts: {
+          course_id: countsEntry.course_id,
+          _count: {
+            start_time: countsEntry._count.start_time,
+            end_time: countsEntry._count.end_time,
+          },
+        },
+        total_score,
+        is_version,
+      };
+    });
+  
+    return {
+      ...user,
+      completedCourses: completedWithCounts,
+    };
   }
   public async isUsernameAvailable(username: string, id: string): Promise<boolean> {
     const user = await this.prisma.user.findFirst({
