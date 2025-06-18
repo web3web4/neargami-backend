@@ -30,7 +30,69 @@ export class QuestionService {
         lecture: { include: { course: { select: { logo: true } } } },
         answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
       },
+      orderBy: { sequence: 'asc' },
     });
+  }
+  ///////
+  async findQuestionsByLectureSlug(slug: string): Promise<Question[]> {
+    const lecture = await this.lecture.findAllLEcturesBySlug(slug);
+    if (!lecture) {
+      throw new HttpException(400, 'there is no lecture by this slug');
+    }
+    await this.lecture.findOne(lecture.id, lecture.course_id);
+
+    // Get the questions for the current lecture
+    const questions = await this.prisma.question.findMany({
+      where: { lecture_id: lecture.id },
+      include: {
+        lecture: { include: { course: { select: { logo: true, slug: true, parent_version_id: true } } } },
+        answer: { omit: { is_correct: true }, include: { UserQuestionAnswer: true } },
+      },
+      orderBy: { sequence: 'asc' },
+    });
+
+    // If the course has a parent version and there are questions with null sequence
+    if (lecture.course_id && questions.some(q => q.sequence === null)) {
+      // Get the course to check if it has a parent version
+      const course = await this.prisma.course.findUnique({
+        where: { id: lecture.course_id },
+        select: { parent_version_id: true },
+      });
+
+      // If this course has a parent version
+      if (course && course.parent_version_id && course.parent_version_id !== lecture.course_id) {
+        // Find the corresponding lecture in the parent course
+        const parentLecture = await this.prisma.lecture.findFirst({
+          where: {
+            course_id: course.parent_version_id,
+            title: lecture.title, // Assuming lectures with same title correspond between versions
+          },
+        });
+
+        if (parentLecture) {
+          // Get questions from the parent lecture
+          const parentQuestions = await this.prisma.question.findMany({
+            where: { lecture_id: parentLecture.id },
+            orderBy: { sequence: 'asc' },
+          });
+
+          // Map parent questions to current questions based on description similarity
+          for (const question of questions) {
+            if (question.sequence === null) {
+              // Find matching question in parent by description
+              const matchingParentQuestion = parentQuestions.find(pq => pq.description === question.description);
+
+              if (matchingParentQuestion && matchingParentQuestion.sequence) {
+                // Update the sequence in memory (not in database)
+                question.sequence = matchingParentQuestion.sequence;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return questions;
   }
 
   async findOne(course_id: number, lecture_id: number, id: number): Promise<Question> {

@@ -15,14 +15,20 @@ export class UserRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.post(`${this.path}/editFlag`, AuthMiddleware, this.user.editFlags);
+    this.router.post(`${this.path}/username`, this.user.generateUsernamesForOldUsers);
+    this.router.get(`${this.path}/username/:username`, this.user.getUserByUsername);
+    this.router.get(`${this.path}/checkUsername/:username`, AuthMiddleware, this.user.checkUsernameAvailability);
     this.router.get(`${this.path}`, this.user.getUsers);
+    this.router.get(`${this.path}/admin`, AuthMiddleware, this.user.getAdminUsers);
     this.router.post(`${this.path}/ngcs`, AuthMiddleware, this.user.claimNgcs);
     this.router.get(`${this.path}/ngcs`, AuthMiddleware, this.user.getNgcs);
     this.router.get(`${this.path}/top-points`, AuthMiddleware, this.user.getTopPoints);
     this.router.get(`${this.path}/leaderboard`, this.user.leaderBoard);
-    this.router.get(`${this.path}/game/:id`, this.user.getGame);
-    this.router.get('/users/:id', this.user.findOneUserById);
-    this.router.put(`${this.path}/game/:id`, AuthMiddleware, this.user.updateGame);
+    this.router.get(`${this.path}/game/:username`, this.user.getGame);
+    this.router.put(`${this.path}/game/save-screen`, AuthMiddleware, this.user.saveGameScreenshot);
+    this.router.get('/users/:uid', this.user.findOneUserById);
+    this.router.put(`${this.path}/game/:username`, AuthMiddleware, this.user.updateGame);
     this.router.put(`${this.path}/:id`, AuthMiddleware, ValidationMiddleware(UpdateUserDto, false, true, true), this.user.updateUser);
     this.router.put(`${this.path}/addAdmin/:id`, AuthMiddleware, this.user.makeUserAddmin);
     this.router.put(`${this.path}/removeAdmin/:id`, AuthMiddleware, this.user.makeAdminUser);

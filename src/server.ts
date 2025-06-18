@@ -8,6 +8,8 @@ import { UserCoursesMapping } from './routes/user-courses-mapping.routes';
 import { UserLecturesMapping } from './routes/user-lecture-mapping.routes';
 import { AuthRoute } from './routes/auth.routes';
 import { ClaimsRoute } from './routes/claims.routes';
+import { LogsRoute } from './routes/log.routes';
+import { SitemapRoute } from './routes/sitemap.routes';
 ValidateEnv();
 
 const app = new App([
@@ -19,8 +21,10 @@ const app = new App([
   new UserLecturesMapping(),
   new AuthRoute(),
   new ClaimsRoute(),
+  new LogsRoute(),
+  new SitemapRoute(),
 ]);
 
 app.listen();
 
-export default app;
+export default app.getServer();

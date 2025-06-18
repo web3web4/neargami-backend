@@ -22,7 +22,8 @@ export class QuestionRoute implements Routes {
       ValidationMiddleware(CreateQuestionDto, false, true, true),
       this.questionController.create,
     );
-    this.router.get('/course/:courseId/lecture/:lectureId/questions', AuthMiddleware, this.questionController.findAll);
+    this.router.get('/course/:courseId/lecture/:lectureId/questions', this.questionController.findAll);
+    this.router.get('/course/lecture/questions/slug/:slug', this.questionController.findQuestionsByLectureSlug);
     this.router.get('/course/:courseId/lecture/:lectureId/questions/:id', AuthMiddleware, this.questionController.findOne);
     this.router.put(
       '/course/:courseId/lecture/:lectureId/questions/:id',

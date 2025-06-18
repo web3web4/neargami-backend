@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container, Inject, Service } from 'typedi';
 import { AuthService } from '../services/auth.service';
-import { User, challangelog } from '@prisma/client';
+import { User, Challangelog } from '@prisma/client';
 import Jwt from 'jsonwebtoken';
+import { Public } from '@prisma/client/runtime/library';
 @Service()
 export class AuthController {
   constructor(@Inject(() => AuthService) private auth: AuthService) {
@@ -68,11 +69,43 @@ export class AuthController {
       next(error);
     }
   };
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const signUpUserData: User = await this.auth.validateAndCreateUser(req.body);
+      const flags = await this.auth.manageFlagsForUser(req.body.accountId);
+
+      // Generate a username only for the first signup
+      const username = flags === null ? await this.auth.generateUniqueUsername() : undefined;
+
+      const signUpUserData: User = await this.auth.validateAndCreateUser(req.body, undefined, username);
+
       const authenticate = await this.auth.createToken(signUpUserData.id);
+
       res.status(201).json({ data: { signUpUserData, authenticate }, message: 'signup' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.body;
+      const blockUserData: User = await this.auth.blockUser(id);
+      res.status(200).json({ data: blockUserData, message: 'block' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public authenticateWithTelegram = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await this.auth.validateAndCreateUserWithTelegram(req.body);
+      const token = this.auth.createToken(user.id);
+
+      res.status(200).json({
+        data: { user, token },
+        message: 'Telegram authentication successful',
+      });
     } catch (error) {
       next(error);
     }

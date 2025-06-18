@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsUUID, IsNumber, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateUserDto {
   public firstname?: string;
@@ -67,4 +67,10 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   public image?: string;
+  @IsString()
+  @MinLength(4)
+  @IsNotEmpty()
+  public username: string;
+  @IsBoolean()
+  public sendMail: string;
 }

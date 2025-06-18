@@ -7,10 +7,11 @@ import { sha256 } from 'js-sha256';
 import { DataStoredInToken, TokenData } from '../interfaces/auth.interface';
 import { SECRET_KEY } from '../config';
 import { sign } from 'jsonwebtoken';
-import { challangelog, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserDto } from '../dtos/users.dto';
 import { PrismaService } from './prisma.service';
 import { HttpException } from '../exceptions/HttpException';
+import { TelegramStrategy } from './telegram.strategy';
 
 const NETWORK_ID = process.env.NETWORK_ID ?? 'testnet';
 
@@ -42,12 +43,99 @@ const payloadSchema = {
     callbackUrl: { option: 'string' },
   },
 };
-
+interface Flags {
+  new_user: boolean;
+  first_request_approved_courses: boolean;
+  [key: string]: boolean;
+}
 @Service()
 export class AuthService {
   private prismaService = Container.get(PrismaService);
   private users = this.prismaService.user;
   private challangelog = this.prismaService.challangelog;
+  private telegramStrategy = Container.get(TelegramStrategy);
+
+  public async validateAndCreateUserWithTelegram(telegramData: any): Promise<User> {
+    // Validate Telegram data
+    const isValid = await this.telegramStrategy.validate(telegramData);
+    if (!isValid) {
+      throw new HttpException(401, 'Invalid Telegram authentication data');
+    }
+
+    // Get user data from Telegram
+    const telegramUser = await this.telegramStrategy.createUser(telegramData);
+
+    // Check if user exists
+    const existingUser = await this.users.findFirst({
+      where: { telegramId: telegramUser.telegramId },
+    });
+
+    if (existingUser) {
+      return existingUser;
+    }
+
+    // Create new user
+    const username = await this.generateUniqueUsername();
+    const user = await this.users.create({
+      data: {
+        username,
+        telegramId: telegramUser.telegramId,
+        firstname: telegramUser.firstName,
+        lastname: telegramUser.lastName,
+        photoUrl: telegramUser.photoUrl,
+        flags: { new_user: true },
+      },
+    });
+
+    return user;
+  }
+
+  async manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {
+    // Fetch the user
+    const user = await this.users.findUnique({ where: { address: userId } });
+    if (!user) {
+      return null;
+    } else {
+      // Parse the current flags
+      const currentFlags: Flags = user.flags as Flags;
+      // Check if it's the user's second login
+      if (currentFlags.new_user && !flagsToUpdate.hasOwnProperty('new_user')) {
+        flagsToUpdate.new_user = false;
+      }
+      // Update the flags
+      const updatedFlags = { ...currentFlags, ...flagsToUpdate };
+      // Save the updated flags back to the database
+      await this.users.update({
+        where: { address: userId },
+        data: { flags: updatedFlags },
+      });
+      return updatedFlags;
+    }
+  }
+
+  async generateUniqueUsername(): Promise<string> {
+    const maxAttempts = 10; // To limit retries
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+
+      // Generate a random username
+      const randomUsername = `user${Math.floor(100000 + Math.random() * 900000)}`; // Example: "user123456"
+
+      // Check if the username is unique
+      const existingUser = await this.users.findFirst({
+        where: { username: randomUsername },
+      });
+
+      if (!existingUser) {
+        return randomUsername; // Return the unique username
+      }
+    }
+
+    throw new Error('Unable to generate a unique username after multiple attempts.');
+  }
+
   public createChallenge(): { challange: string; message: string } {
     const challange = randomBytes(32).toString('base64');
     const message =
@@ -111,17 +199,42 @@ export class AuthService {
     const challangelog = await this.challangelog.findMany({});
     return challangelog;
   }
-  public async validateAndCreateUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID) {
+  public async blockUser(uid: string) {
+    const user = await this.users.findUnique({ where: { id: uid } });
+    if (!user) throw new HttpException(404, "User doesn't exist");
+    return await this.users.update({ where: { id: uid }, data: { blocked: true } });
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  public async validateAndCreateUser({ accountId, publicKey, signature, challenge, message }, networkId = NETWORK_ID, username?: string) {
+    const existingUser = await this.users.findUnique({
+      where: { address: accountId },
+      select: { blocked: true }, // Only fetch the 'blocked' field
+    });
+
+    // If the user exists and is blocked, return null (or handle accordingly)
+    if (existingUser && existingUser.blocked) {
+      throw new HttpException(403, 'User is blocked'); // Or throw an error, or handle it in a way that suits your application
+    }
     await this.ensureAuthentication({ accountId, publicKey, signature }, networkId);
 
     await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
 
     const user = await this.users.upsert({
       where: { address: accountId },
-      //TODO: check saving challenge field
-      create: { address: accountId, message, signature, phone: challenge },
-      update: { message, signature },
+      create: {
+        address: accountId,
+        message,
+        signature,
+        phone: challenge,
+        username: username || `user_${Date.now()}`, // Fallback username if not provided
+      },
+      update: {
+        message,
+        signature,
+        ...(username && { username }), // Update only if a username is provided
+      },
     });
+
     return user;
   }
 
@@ -164,7 +277,11 @@ export class AuthService {
     // A user is correctly authenticated if:
     // - The key used to sign belongs to the user and is a Full Access Key
     // - The object signed contains the right message and domain
-    const full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey }, networkId);
+    let full_key_of_user = await this.verifyFullKeyBelongsToUser({ accountId, publicKey }, networkId);
+    if (process.env.PLATFORM == 'staging') {
+      full_key_of_user = true;
+    }
+
     console.log('isAuthenticationValid(...) -> Does the public key belongs to the user?', full_key_of_user);
 
     const storedChallenge = await this.returnSameChallenge(accountId);
@@ -173,8 +290,15 @@ export class AuthService {
       nonce: storedChallenge.challange,
       recipient: accountId,
     };
-    const valid_signature = this.verifySignature({ publicKey, signature }, originalMessageObject);
-    console.log('isAuthenticationValid(...) -> Is the Signature Valid?', valid_signature);
+    let valid_signature = false;
+    const platform = process.env.PLATFORM;
+    console.log(platform);
+    if (platform == 'staging') {
+      valid_signature = true;
+    } else {
+      valid_signature = this.verifySignature({ publicKey, signature }, originalMessageObject);
+      console.log('isAuthenticationValid(...) -> Is the Signature Valid?', valid_signature);
+    }
 
     if (!(valid_signature && full_key_of_user)) {
       throw new HttpException(400, 'Authentication Failed');
@@ -192,7 +316,7 @@ export class AuthService {
       const to_sign = Uint8Array.from(sha256.array(borsh_payload));
 
       // Reconstruct the signature from the parameter given in the URL
-      let real_signature = Buffer.from(signature, 'base64');
+      const real_signature = Buffer.from(signature, 'base64');
 
       // Use the public Key to verify that the private-counterpart signed the message
       const myPK = nearApiJsUtils.PublicKey.from(publicKey);

@@ -7,22 +7,38 @@ import { ValidationMiddleware } from '../middlewares/validation.middleware';
 import { CreateLectureDto, UpdateLectureDto, UpdateLectureOrderArrayDto } from '../dtos/lecture.dto';
 import multer from 'multer';
 
-
 @Service() // Register this as a service to ensure DI works across the app
 export class lectureRoute implements Routes {
   public router = Router();
   public lectureController = Container.get(LectureController);
 
+  //  diskStorage = multer.diskStorage({
+  //   destination: 'uploads/',
+  //   filename: (req, file, cb) => {
+  //     cb(null, `${Date.now()}-${file.originalname}`);
+  //   },
+  // });
+  //  uploadDisk = multer({ storage: this.diskStorage });
+
+  // Memory storage (for buffer-based uploads)
+  uploadMemory = multer({ storage: multer.memoryStorage() });
+
   constructor() {
     this.initializeRoutes();
   }
-  upload = multer({ dest: 'uploads/' });
-  storage = multer.memoryStorage();
 
   private initializeRoutes() {
-    this.router.post('/upload', this.upload.single('file'), this.lectureController.uploadImage);
+    this.router.post('/upload/buffer', this.uploadMemory.single('file'), this.lectureController.uploadImageBuffer);
+
+    this.router.get('/courses/lectures/slug/:slug', this.lectureController.findAllLecturesbySlug);
+    this.router.get('/courses/lectures/slugAuth/:slug', AuthMiddleware, this.lectureController.findAllLecturesbySlugAuth);
+    this.router.get('/courses/lectures/slug', this.lectureController.makeSlugeToAllLectures);
 
     this.router.get('/course/:courseId/lectures', this.lectureController.findAll);
+    this.router.get('/course/slug/:slug/lectures', this.lectureController.findAllByCourseSlugWithoutAuth);
+    this.router.get('/course/IdAuth/:courseId/lectures', AuthMiddleware, this.lectureController.findAllWithIdAuth);
+    this.router.get('/course/slugAuth/:slug/lectures', AuthMiddleware, this.lectureController.findAllByCourseSlug);
+    this.router.get('/course/lectures/start/:lecture_id', AuthMiddleware, this.lectureController.checkLectureStart);
     this.router.post(
       '/course/:courseId/lectures',
       AuthMiddleware,
@@ -45,12 +61,3 @@ export class lectureRoute implements Routes {
     this.router.delete('/course/:courseId/lectures/:id', AuthMiddleware, this.lectureController.delete);
   }
 }
-
-// const router = Router();
-// const lectureController = new LectureController();
-
-// router.post("/lectures", lectureController.create);
-// router.get("/lectures", lectureController.findAll);
-// router.get("/lectures/:id", lectureController.findOne);
-// router.put("/lectures/:id", lectureController.update);
-// router.delete("/lectures/:id", lectureController.delete);

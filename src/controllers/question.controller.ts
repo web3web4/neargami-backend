@@ -30,7 +30,17 @@ export class QuestionController {
       next(error);
     }
   };
+  /////////
+  public findQuestionsByLectureSlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { slug } = req.params;
+      const questions = await this.questionService.findQuestionsByLectureSlug(slug);
 
+      res.status(200).send({ data: questions, message: 'find All Questions by lecture slug' });
+    } catch (error) {
+      next(error);
+    }
+  };
   public findOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id, courseId, lectureId } = req.params;

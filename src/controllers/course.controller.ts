@@ -3,11 +3,37 @@ import Container, { Service } from 'typedi';
 import { CourseService } from '../services/course.service';
 import { CreateCourseDto, Status, UpdateCourseDto } from '../dtos/course.dto';
 import { RequestWithUser } from '../interfaces/auth.interface';
-import { Course } from '@prisma/client';
+import { Course, Lecture, Question } from '@prisma/client';
+import { LectureService } from '@/services/lecture.service';
+import { CreateLectureDto } from '@/dtos/lecture.dto';
 
 @Service() // Add this decorator to register CourseController
 export class CourseController {
   public courseService = Container.get(CourseService);
+
+  // find all courses was started by student except mine
+  public findStudentStartedCoursesExceptMine = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.user;
+      const courses = await this.courseService.getAllStudentStartedCoursesExceptMine(id);
+      res.status(200).json({
+        data: courses,
+        message: 'All courses that students have started, excluding your own as teacher.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public makeAllCoursesHaveSlug = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const AllCourses = await this.courseService.updateForAllSlug();
+      res.status(200).json({ data: AllCourses, message: 'All Courses Have Slug' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public findAllCoursesPage = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = 1, limit = 10 } = req.query; // Extract page and limit from query parameters
@@ -39,15 +65,6 @@ export class CourseController {
     }
   };
 
-  public findAllCourses = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const courses: Course[] = await this.courseService.findAll();
-
-      res.status(200).json({ data: courses, message: 'findAll' });
-    } catch (error) {
-      next(error);
-    }
-  };
   public findTeacherCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -58,11 +75,32 @@ export class CourseController {
       next(error);
     }
   };
+  public findTeacherCoursesByUserName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { username } = req.params;
+      const courses: Course[] = await this.courseService.findAllTeacherCoursesByUserName(username);
+
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public findCoursesByStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
-      const courses: Course[] = await this.courseService.findAllCoursesByStatus(id as Status);
+      const courses: Course[] = await this.courseService.findAllCoursesByStatusLastestVersion(id as Status);
+      res.status(200).json({ data: courses, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  public findCourseBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { slug } = req.params;
+
+      const courses: Course = await this.courseService.findUniqueCourseBySlug(slug);
       res.status(200).json({ data: courses, message: 'findAll' });
     } catch (error) {
       next(error);
@@ -89,17 +127,7 @@ export class CourseController {
       next(error);
     }
   };
-  public findCoursesByTextSearch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { phras } = req.params;
 
-      const courses: Course[] = await this.courseService.findAllByTextSearch(phras);
-
-      res.status(200).json({ data: courses, message: `findAll courses about : ${phras} ` });
-    } catch (error) {
-      next(error);
-    }
-  };
   public findCoursesBySubTextSearch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { phras } = req.params;
@@ -111,34 +139,80 @@ export class CourseController {
       next(error);
     }
   };
+
+  private getLastId = async () => {
+    const id = await this.courseService.getLastUserId();
+    return id;
+  };
+  private getId = async (uid: number) => {
+    const id = await this.courseService.getUserId(uid);
+    return id;
+  };
+  private stringToSlugById = async (title: string, id: number) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+
+    const uniqueSuffix = await this.getId(id); // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
+  private stringToSlugByIdforLectureVersion = async (title: string, id: number) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+
+    const uniqueSuffix = id; // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
+  private stringToSlug = async (title: string) => {
+    const baseSlug = title
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim whitespace from both ends
+      .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+
+    const uniqueSuffix = await this.getLastId(); // Use timestamp for uniqueness
+    return `${baseSlug}-${uniqueSuffix}`;
+  };
   public createCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const data: CreateCourseDto = req.body;
+    const sluge = await this.stringToSlug(data.title);
+    const teacher_user_id = req.user.id;
     try {
-      const { id } = req.user;
-      const createdCourse: Course = await this.courseService.createNewCourse(id, data);
+      const createdCourse: Course = await this.courseService.createNewCourse(teacher_user_id, data, sluge);
+      if (createdCourse.parent_version_id == null) {
+        const correctCourse = await this.courseService.related_createNewCourse(createdCourse.id);
 
-      res.status(201).send({ data: createdCourse, message: 'created' });
+        res.status(201).send({ data: correctCourse, message: 'created' });
+      } else {
+        res.status(201).send({ data: createdCourse, message: 'created' });
+      }
     } catch (error) {
       res.status(400).json({ error: error.message });
       next(error);
     }
   };
-  public findCourseById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const findOneCourseData: Course = await this.courseService.findOne(+id);
 
-      res.status(200).send({ data: findOneCourseData, message: 'findOne' });
-    } catch (error) {
-      next(error);
-    }
-  };
   public updateCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const userId = req.user.id;
+
     const data: UpdateCourseDto = req.body;
+    const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+    const sluge = await this.stringToSlugById(courseinfo.title, +id);
+
     try {
-      const course: Course = await this.courseService.update(+id, userId, data);
+      const course: Course = await this.courseService.update(+id, userId, data, sluge);
       res.status(200).send({ data: course, message: 'updated' });
     } catch (error) {
       next(error);
@@ -146,18 +220,22 @@ export class CourseController {
   };
   public updateCourseStatus = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const isAdmin = req.user.isAdmin;
+    const user = req.user;
+    // req.user.isAdmin;
 
     const publish_status: Status = req.body.publish_status;
     const publish_status_reson: string = req.body.publish_status_reson;
+    const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+    const sluge = await this.stringToSlugById(courseinfo.title, +id);
     try {
-      const course: Course = await this.courseService.updateStatus(+id, isAdmin, publish_status, publish_status_reson);
+      const course: Course = await this.courseService.updateStatus(+id, user.isAdmin, publish_status, publish_status_reson, sluge);
 
       res.status(200).send({ data: course, message: 'status updated' });
     } catch (error) {
       next(error);
     }
   };
+
   public deleteCourse = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -169,5 +247,167 @@ export class CourseController {
       next(error);
     }
   };
-  // ... Other methods as defined
+
+  public search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { query } = req.query;
+      const searchResult = await this.courseService.search(query as string);
+      res.status(200).send({ data: searchResult, message: 'search' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getKeywords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const keywords = await this.courseService.getKeywords();
+      res.status(200).send({ data: keywords, message: 'keywords' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  //////////////////////////////////////////////////////////////////////////////////////////
+  // create new version of the course and add the whats_new field
+  public createNewCourseVersionWithWhatsNew = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { whats_new } = req.body;
+
+    try {
+      const prevCourse = await this.courseService.findOneCourse(+id);
+      const lectures = prevCourse['lecture'] || []; // Ensure it's an array
+      const questions = lectures.flatMap(l => l.question || []); // Extract questions
+      const userLectures = lectures.flatMap(l => l.userLecture || []); // Extract userlectures
+      const answers = questions.flatMap(l => l.answer || []); // Extract answers
+      const userCourses = prevCourse['userCourses'];
+      const userQuestionAnswers = prevCourse['UserQuestionAnswer'];
+
+      // Clone the previous course data and add `whats_new`
+      const newcourse = { ...prevCourse, whats_new };
+
+      const courseSluge = await this.stringToSlug(newcourse.title);
+
+      // Create a new course version
+      const newVersionCourse = await this.courseService.createNewVersionWithWhatsNew(+id, newcourse, userId, courseSluge, whats_new);
+
+      // Create new lecture versions
+      const newLectureswithNewIds = await this.courseService.createLectureVersion(userId, +newVersionCourse.id, lectures);
+
+      const { createdQuestions, createdAnswers } = await this.courseService.creatnewLectureQuestion(
+        questions,
+        lectures,
+        newLectureswithNewIds,
+        answers,
+      );
+
+      const userLecture = await this.courseService.creatnewUserLecture(+newVersionCourse.id, userLectures, lectures, newLectureswithNewIds);
+
+      // Update lecture slugs for the new version
+      newLectureswithNewIds.map(async newLectureswithNewId => {
+        const slug = await this.stringToSlugByIdforLectureVersion(newLectureswithNewId.title, newLectureswithNewId.id);
+        await this.courseService.updateLecture(+newLectureswithNewId.id, slug);
+      });
+
+      const newUserQuestionAnswers = await this.courseService.creatnewUserAnswersQuestion(
+        +newcourse.id,
+        userQuestionAnswers,
+        lectures,
+        newLectureswithNewIds,
+        questions,
+        createdQuestions,
+      );
+
+      const newUserCourses = await this.courseService.creatnewUserCourse(+newVersionCourse.id, userCourses);
+
+      res.status(200).send({
+        data: newVersionCourse,
+        newUserCourses,
+        userLecture,
+        createdQuestions,
+        createdAnswers,
+        newUserQuestionAnswers,
+        message: 'A new version created',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // update course status if was draft
+  public updateCourseIfWasDraft = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<Response> => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const data: UpdateCourseDto = req.body;
+
+    try {
+      const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
+
+      if (courseinfo.publish_status !== 'DRAFT') {
+        return res.status(400).send({
+          message: 'Course can only be updated if its status is DRAFT',
+        });
+      }
+      const sluge = await this.stringToSlugById(courseinfo.title, +id);
+      const course: Course = await this.courseService.update(+id, userId, data, sluge);
+      res.status(200).send({ data: course, message: 'Course updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  /////////////////////////////////////////////////
+  // functions versioning for student
+  ////////////////////////////////////////////////
+  public findAllCoursesPageForStudent = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page = 1, limit = 10 } = req.query;
+      const pageNumber = Math.max(1, parseInt(page as string, 10));
+      const limitNumber = Math.max(1, parseInt(limit as string, 10));
+      const offset = (pageNumber - 1) * limitNumber;
+
+      // Fetch courses with pagination for the latest version only
+      const courses: Course[] = await this.courseService.findAllPageWithLatestVersion({
+        offset,
+        limit: limitNumber,
+      });
+
+      // Fetch total count of latest version courses
+      const totalCourses: number = await this.courseService.countLatestVersionCourses();
+      const totalPages = Math.ceil(totalCourses / limitNumber);
+      res.status(200).json({
+        data: courses,
+        meta: {
+          totalItems: totalCourses,
+          totalPages,
+          currentPage: pageNumber,
+          itemsPerPage: limitNumber,
+        },
+        message: 'findAll latest courses with pagination',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // get all verion of course specific
+  public getAllCourseVersions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params; // The ID of the original course
+      const courseVersions = await this.courseService.getAllVersions(+id);
+      res.status(200).send({ data: courseVersions, message: 'All course versions retrieved successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  // find all courses was finished by student (name)
+  public findCompletedCoursesByStudentName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name } = req.params; // Retrieve the student's name from the request parameters
+      const courses: any = await this.courseService.findAllCompletedCoursesByStudentName(name);
+
+      res.status(200).json({ data: courses, message: 'Completed courses retrieved successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
