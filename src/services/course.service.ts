@@ -514,15 +514,61 @@ export class CourseService {
     return AllCourses;
   }
   public async findAllTeacherCoursesByUserName(username: string): Promise<Course[]> {
-    const AllCourses: Course[] = await this.course.findMany({
+    // 1️ Fetch all courses taught by this user
+    const allCourses = await this.prisma.course.findMany({
       where: {
-        teacher: {
-          username: username,
-        },
+        teacher: { username },
       },
-      include: { lecture: true, teacher: true },
+      include: {
+        lecture: {
+          include: { question: true },  // for total_score
+        },
+        teacher: true,
+      },
     });
-    return AllCourses;
+  
+    // 2️ Count students per course
+    const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      where: {
+        course_id: { in: allCourses.map(c => c.id) },
+      },
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
+    });
+  
+    // 3️ Merge counts + total_score + is_version into each course
+    return allCourses.map(course => {
+      const countsEntry =
+        countsByCourse.find(c => c.course_id === course.id) || {
+          course_id: course.id,
+          _count: { start_time: 0, end_time: 0 },
+        };
+  
+      // compute total_score (10 points per question)
+      const total_score = course.lecture.reduce(
+        (sum, lec) => sum + lec.question.length * 10,
+        0,
+      );
+  
+      // version flag
+      const is_version = course.parent_version_id !== course.id;
+  
+      return {
+        ...course,
+        counts: {
+          course_id: countsEntry.course_id,
+          _count: {
+            start_time: countsEntry._count.start_time,
+            end_time: countsEntry._count.end_time,
+          },
+        },
+        total_score,
+        is_version,
+      };
+    });
   }
 
   public async findAllByTag(tag: string): Promise<Course[]> {
