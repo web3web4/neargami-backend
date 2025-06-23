@@ -250,11 +250,11 @@ export class UserService {
     const user = await this.prismaUser.findFirst({
       where: { username, blocked: false },
     });
-  
+
     if (!user) {
       throw new Error(`User with name "${username}" not found`);
     }
-  
+
     // Query completed courses for the student and include all related data
     const completedCourses = await this.prisma.course.findMany({
       where: {
@@ -290,7 +290,7 @@ export class UserService {
         CourseStatusLog: true,
       },
     });
-  
+
     // 2️ Count students per completed course
     const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
@@ -302,25 +302,21 @@ export class UserService {
         end_time: true,
       },
     });
-  
+
     // 3️ Merge counts + total_score + is_version into each course
     const completedWithCounts = completedCourses.map(course => {
       // lookup or default counts entry
-      const countsEntry =
-        countsByCourse.find(c => c.course_id === course.id) || {
-          course_id: course.id,
-          _count: { start_time: 0, end_time: 0 },
-        };
-  
+      const countsEntry = countsByCourse.find(c => c.course_id === course.id) || {
+        course_id: course.id,
+        _count: { start_time: 0, end_time: 0 },
+      };
+
       // compute total_score: 10 points per question in all lectures
-      const total_score = course.lecture.reduce(
-        (sum, lec) => sum + lec.question.length * 10,
-        0,
-      );
-  
+      const total_score = course.lecture.reduce((sum, lec) => sum + lec.question.length * 10, 0);
+
       // determine if this record is a version of another course
       const is_version = course.parent_version_id !== course.id;
-  
+
       return {
         ...course,
         counts: {
@@ -334,7 +330,7 @@ export class UserService {
         is_version,
       };
     });
-  
+
     return {
       ...user,
       completedCourses: completedWithCounts,

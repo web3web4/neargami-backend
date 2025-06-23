@@ -521,12 +521,12 @@ export class CourseService {
       },
       include: {
         lecture: {
-          include: { question: true },  // for total_score
+          include: { question: true }, // for total_score
         },
         teacher: true,
       },
     });
-  
+
     // 2️ Count students per course
     const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
@@ -538,24 +538,20 @@ export class CourseService {
         end_time: true,
       },
     });
-  
+
     // 3️ Merge counts + total_score + is_version into each course
     return allCourses.map(course => {
-      const countsEntry =
-        countsByCourse.find(c => c.course_id === course.id) || {
-          course_id: course.id,
-          _count: { start_time: 0, end_time: 0 },
-        };
-  
+      const countsEntry = countsByCourse.find(c => c.course_id === course.id) || {
+        course_id: course.id,
+        _count: { start_time: 0, end_time: 0 },
+      };
+
       // compute total_score (10 points per question)
-      const total_score = course.lecture.reduce(
-        (sum, lec) => sum + lec.question.length * 10,
-        0,
-      );
-  
+      const total_score = course.lecture.reduce((sum, lec) => sum + lec.question.length * 10, 0);
+
       // version flag
       const is_version = course.parent_version_id !== course.id;
-  
+
       return {
         ...course,
         counts: {

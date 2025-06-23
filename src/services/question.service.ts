@@ -51,45 +51,68 @@ export class QuestionService {
       orderBy: { sequence: 'asc' },
     });
 
-    // If the course has a parent version and there are questions with null sequence
-    if (lecture.course_id && questions.some(q => q.sequence === null)) {
-      // Get the course to check if it has a parent version
+    // Check if there are questions with null sequence and fix them
+    const questionsWithNullSequence = questions.filter(q => q.sequence === null);
+
+    if (questionsWithNullSequence.length > 0) {
+      // First, try to get sequence from parent course if exists
       const course = await this.prisma.course.findUnique({
         where: { id: lecture.course_id },
         select: { parent_version_id: true },
       });
 
-      // If this course has a parent version
+      let sequenceFixed = false;
+
+      // If this course has a parent version, try to get sequence from parent
       if (course && course.parent_version_id && course.parent_version_id !== lecture.course_id) {
-        // Find the corresponding lecture in the parent course
         const parentLecture = await this.prisma.lecture.findFirst({
           where: {
             course_id: course.parent_version_id,
-            title: lecture.title, // Assuming lectures with same title correspond between versions
+            title: lecture.title,
           },
         });
 
         if (parentLecture) {
-          // Get questions from the parent lecture
           const parentQuestions = await this.prisma.question.findMany({
             where: { lecture_id: parentLecture.id },
             orderBy: { sequence: 'asc' },
           });
 
-          // Map parent questions to current questions based on description similarity
-          for (const question of questions) {
-            if (question.sequence === null) {
-              // Find matching question in parent by description
-              const matchingParentQuestion = parentQuestions.find(pq => pq.description === question.description);
-
-              if (matchingParentQuestion && matchingParentQuestion.sequence) {
-                // Update the sequence in memory (not in database)
-                question.sequence = matchingParentQuestion.sequence;
-              }
+          // Update questions with matching descriptions from parent
+          for (const question of questionsWithNullSequence) {
+            const matchingParentQuestion = parentQuestions.find(pq => pq.description === question.description);
+            if (matchingParentQuestion && matchingParentQuestion.sequence !== null) {
+              // Update the sequence in database
+              await this.prisma.question.update({
+                where: { id: question.id },
+                data: { sequence: matchingParentQuestion.sequence },
+              });
+              question.sequence = matchingParentQuestion.sequence;
+              sequenceFixed = true;
             }
           }
         }
       }
+
+      // For any remaining questions with null sequence, assign sequential numbers
+      const remainingNullQuestions = questions.filter(q => q.sequence === null);
+      if (remainingNullQuestions.length > 0) {
+        // Get the highest existing sequence number
+        const maxSequence = Math.max(...questions.filter(q => q.sequence !== null).map(q => q.sequence), 0);
+
+        // Assign sequential numbers starting from maxSequence + 1
+        for (let i = 0; i < remainingNullQuestions.length; i++) {
+          const newSequence = maxSequence + i + 1;
+          await this.prisma.question.update({
+            where: { id: remainingNullQuestions[i].id },
+            data: { sequence: newSequence },
+          });
+          remainingNullQuestions[i].sequence = newSequence;
+        }
+      }
+
+      // Re-sort questions by sequence after updates
+      questions.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
     }
 
     return questions;
