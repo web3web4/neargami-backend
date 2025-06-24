@@ -2,28 +2,20 @@ import { Service } from 'typedi';
 import { AuthStrategy } from '../interfaces/auth.interface';
 import { createHash } from 'crypto';
 import { HttpException } from '../exceptions/HttpException';
+import { validate } from '@telegram-apps/init-data-node';
 
 @Service()
 export class TelegramStrategy implements AuthStrategy {
-  private readonly BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  private readonly TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-  async validate(data: any): Promise<boolean> {
+  async validate(initDataRaw: string): Promise<any> {
     try {
-      const { hash, ...userData } = data;
+      validate(initDataRaw, this.TELEGRAM_BOT_TOKEN);
 
-      // Create data check string
-      const dataCheckString = Object.keys(userData)
-        .sort()
-        .map(key => `${key}=${userData[key]}`)
-        .join('\n');
+      const data = new URLSearchParams(initDataRaw);
+      const user = JSON.parse(decodeURIComponent(data.get('user')));
 
-      // Create secret key
-      const secretKey = createHash('sha256').update(this.BOT_TOKEN).digest();
-
-      // Calculate hash
-      const calculatedHash = createHash('sha256').update(secretKey).update(dataCheckString).digest('hex');
-
-      return calculatedHash === hash;
+      return user;
     } catch (error) {
       throw new HttpException(401, 'Invalid Telegram authentication data');
     }
