@@ -63,8 +63,12 @@ export class AuthService {
     const telegramUser = await this.telegramStrategy.createUser(user);
 
     // Check if user exists
+    const telegramId = String(telegramUser.telegramId);
+    if (!telegramId || telegramId === 'undefined' || telegramId === 'null') {
+      throw new Error('Invalid telegramId');
+    }
     const existingUser = await this.users.findFirst({
-      where: { telegramId: telegramUser.telegramId as string },
+      where: { telegramId },
     });
 
     if (existingUser) {
@@ -76,7 +80,7 @@ export class AuthService {
     const newUser = await this.users.create({
       data: {
         username,
-        telegramId: telegramUser.telegramId as string,
+        telegramId: telegramId,
         firstname: telegramUser.firstName,
         lastname: telegramUser.lastName,
         photoUrl: telegramUser.photoUrl,
