@@ -64,7 +64,7 @@ export class AuthService {
 
     // Check if user exists
     const existingUser = await this.users.findFirst({
-      where: { telegramId: telegramUser.telegramId },
+      where: { telegramId: telegramUser.telegramId as string },
     });
 
     if (existingUser) {
@@ -76,7 +76,7 @@ export class AuthService {
     const newUser = await this.users.create({
       data: {
         username,
-        telegramId: telegramUser.telegramId,
+        telegramId: telegramUser.telegramId as string,
         firstname: telegramUser.firstName,
         lastname: telegramUser.lastName,
         photoUrl: telegramUser.photoUrl,
