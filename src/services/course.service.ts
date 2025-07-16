@@ -27,6 +27,7 @@ export class CourseService {
   private prismaService = Container.get(PrismaService);
   private mailService = Container.get(MailService);
   private course = this.prismaService.course;
+  private userr = this.prismaService.user;
   private coursestatuslog = this.prismaService.courseStatusLog;
   private prisma = this.prismaService.prisma;
   private searchQuery = this.prismaService.searchQuery;
@@ -830,6 +831,14 @@ export class CourseService {
         },
       },
     });
+    //find all users where email is not null and in flags the email notification is true
+    const users = await this.prisma.user.findMany({
+      where: {
+        email: {
+          not: null,
+        },
+      },
+    });
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
@@ -863,6 +872,19 @@ export class CourseService {
         title: course.name,
         actionUrl: 'https://neargami.com',
       });
+
+      //send emails for all the users that that has an email and in flags the email notification is true that a new coures is available
+      for (let i = 0; i < users.length; i++) {
+        if ((users[i].flags as any).email_notification == true) {
+          this.mailService.sendEmail(users[i].email, 'New Course Notification', 'new-course', {
+            name: users[i].firstname || users[i].username,
+            title: course.name,
+            description: course.description,
+            link: 'https://www.neargami.com/course-details/' + course.slug,
+            unsubscribeLink: 'https://neargami.com',
+          });
+        }
+      }
     }
 
     return data;
