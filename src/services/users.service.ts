@@ -188,21 +188,99 @@ export class UserService {
     });
   }
 
-  async leaderBoard(): Promise<any> {
-    const users = await this.prismaUser.findMany({
-      where: { blocked: false },
-      orderBy: { top_points: 'desc' },
-      select: {
-        firstname: true,
-        lastname: true,
-        image: true,
-        ngc: true,
-        top_points: true,
-      },
-      take: 100,
-    });
-    return users;
-  }
+  // services/user.service.ts
+
+public async leaderBoard(): Promise<any[]> {
+  // Step 1: Get the top users
+  const basicUsers = await this.prismaUser.findMany({
+    where:    { blocked: false },
+    orderBy:  { top_points: 'desc' },
+    take:     100,
+    select:   {
+      id:         true,
+      firstname:  true,
+      lastname:   true,
+      username:   true,
+      image:      true,
+      ngc:        true,
+      top_points: true,
+    },
+  });
+
+  // Step 2: Enrich each user with completedCourses
+  const usersWithCourses = await Promise.all(
+    basicUsers.map(async user => {
+      const completedCourses = await this.prisma.course.findMany({
+        where: {
+          userCourses: {
+            some: {
+              user_id:  user.id,
+              end_time: { not: null },
+            },
+          },
+          lecture: {
+            every: {
+              userLecture: {
+                some: {
+                  user_id: user.id,
+                  end_at:  { not: null },
+                },
+              },
+            },
+          },
+        },
+        include: {
+          lecture: {
+            include: { question: true },
+          },
+          teacher:          true,
+          userCourses:      true,
+          UserQuestionAnswer: {
+            include: { question: true, answer: true },
+          },
+          CourseStatusLog:  true,
+        },
+      });
+
+      const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
+        by:    ['course_id'],
+        where: { course_id: { in: completedCourses.map(c => c.id) } },
+        _count: { start_time: true, end_time: true },
+      });
+
+      const completedWithCounts = completedCourses.map(course => {
+        const countsEntry = countsByCourse.find(c => c.course_id === course.id)
+          ?? { course_id: course.id, _count: { start_time: 0, end_time: 0 } };
+
+        const total_score = course.lecture
+          .reduce((sum, lec) => sum + lec.question.length * 10, 0);
+
+        const is_version = course.parent_version_id !== course.id;
+
+        return {
+          ...course,
+          counts: {
+            course_id: course.id,
+            _count: {
+              start_time: countsEntry._count.start_time,
+              end_time:   countsEntry._count.end_time,
+            },
+          },
+          total_score,
+          is_version,
+        };
+      });
+
+      return {
+        ...user,
+        completedCourses: completedWithCounts,
+      };
+    })
+  );
+
+  return usersWithCourses;
+}
+
   ///////////////////////////////////////////////////////////////
   public async assignUsernamesToOldUsers(): Promise<any[]> {
     // Fetch users without a username
