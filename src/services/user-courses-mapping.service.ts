@@ -49,7 +49,6 @@ export class UserCoursesMappingService {
     });
 
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
-      where: baseWhere,
       by: ['course_id'],
       _count: {
         start_time: true,
