@@ -29,6 +29,15 @@ export class UserCoursesMappingController {
       next(error);
     }
   };
+  public findAllWithoutComplation = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.user;
+      const userCoursesMapping = await this.userCoursesMappingService.findAllWithoutCompletion(id);
+      res.status(200).send({ data: userCoursesMapping, message: 'find All Courses' });
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public finsih = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
