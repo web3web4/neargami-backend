@@ -133,14 +133,25 @@ export class UserLectureMappingService {
       throw new HttpException(409, 'Lecture not registered');
     }
     const lectures = await this.lecturePrisma.findMany({ where: { course_id }, orderBy: { order: 'desc' } });
-    if (lecture.order === lectures[0].order) {
-    }
-    this.userCourseService.finish(user_id, course_id);
-    return this.prisma.userLectureMapping.update({
+
+    // Mark this lecture as finished
+    const updatedLecture = await this.prisma.userLectureMapping.update({
       where: { id: userLecture.id },
       data: { end_at: new Date() },
       include: { lecture: true },
     });
+
+    // Check if all lectures in the course are finished by the user
+    const allLectures = await this.lecturePrisma.findMany({ where: { course_id } });
+    const finishedLectures = await this.prisma.userLectureMapping.findMany({
+      where: { user_id, course_id, end_at: { not: null } }
+    });
+
+    if (allLectures.length > 0 && finishedLectures.length === allLectures.length) {
+      await this.userCourseService.finish(user_id, course_id);
+    }
+
+    return updatedLecture;
   }
 
   async findAll(user_id: string, course_id: number): Promise<UserLectureMapping[]> {
