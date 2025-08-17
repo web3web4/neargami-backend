@@ -99,7 +99,8 @@ export class AuthController {
 
   public authenticateWithTelegram = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = await this.auth.validateAndCreateUserWithTelegram(req.body);
+      const { initData } = req.body;
+      const user = await this.auth.validateAndCreateUserWithTelegram(initData);
       const token = this.auth.createToken(user.id);
 
       res.status(200).json({

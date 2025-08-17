@@ -57,17 +57,18 @@ export class AuthService {
 
   public async validateAndCreateUserWithTelegram(telegramData: any): Promise<User> {
     // Validate Telegram data
-    const isValid = await this.telegramStrategy.validate(telegramData);
-    if (!isValid) {
-      throw new HttpException(401, 'Invalid Telegram authentication data');
-    }
+    const user = await this.telegramStrategy.validate(telegramData);
 
     // Get user data from Telegram
-    const telegramUser = await this.telegramStrategy.createUser(telegramData);
+    const telegramUser = await this.telegramStrategy.createUser(user);
 
     // Check if user exists
+    const telegramId = String(telegramUser.telegramId);
+    if (!telegramId || telegramId === 'undefined' || telegramId === 'null') {
+      throw new Error('Invalid telegramId');
+    }
     const existingUser = await this.users.findFirst({
-      where: { telegramId: telegramUser.telegramId },
+      where: { telegramId },
     });
 
     if (existingUser) {
@@ -76,10 +77,10 @@ export class AuthService {
 
     // Create new user
     const username = await this.generateUniqueUsername();
-    const user = await this.users.create({
+    const newUser = await this.users.create({
       data: {
         username,
-        telegramId: telegramUser.telegramId,
+        telegramId: telegramId,
         firstname: telegramUser.firstName,
         lastname: telegramUser.lastName,
         photoUrl: telegramUser.photoUrl,
@@ -87,7 +88,7 @@ export class AuthService {
       },
     });
 
-    return user;
+    return newUser;
   }
 
   async manageFlagsForUser(userId: string, flagsToUpdate: Partial<Flags> = {}): Promise<Flags> {

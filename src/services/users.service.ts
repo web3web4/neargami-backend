@@ -93,18 +93,89 @@ export class UserService {
   }
 
   public async findOneById(uid: string): Promise<any> {
-    if (!this.isValidUUID(uid)) throw new HttpException(400, 'Invalid UUID');
-
-    const user = await this.prismaUser.findUnique({ where: { id: uid, blocked: false }, include: { userCourses: true } });
-    if (!user) throw new HttpException(404, "User doesn't exist");
+    if (!this.isValidUUID(uid)) {
+      throw new HttpException(400, 'Invalid UUID');
+    }
+  
+    const user = await this.prismaUser.findUnique({
+      where:   { id: uid, blocked: false },
+      include: { userCourses: true },
+    });
+    if (!user) {
+      throw new HttpException(404, "User doesn't exist");
+    }
+  
+    const completedCourses = await this.prisma.course.findMany({
+      where: {
+        userCourses: {
+          some: {
+            user_id:  user.id,
+            end_time: { not: null },
+          },
+        },
+        lecture: {
+          every: {
+            userLecture: {
+              some: {
+                user_id: user.id,
+                end_at:  { not: null },
+              },
+            },
+          },
+        },
+      },
+      include: {
+        lecture: {
+          include: { question: true },
+        },
+        teacher:            true,
+        userCourses:        true,
+        UserQuestionAnswer: { include: { question: true, answer: true } },
+        CourseStatusLog:    true,
+      },
+    });
+  
+    const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
+      by:    ['course_id'],
+      where: { course_id: { in: completedCourses.map(c => c.id) } },
+      _count: { start_time: true, end_time: true },
+    });
+  
+    const completedWithCounts = completedCourses.map(course => {
+      const entry = countsByCourse.find(c => c.course_id === course.id)
+                 ?? { course_id: course.id, _count: { start_time: 0, end_time: 0 } };
+  
+      const total_score = course.lecture
+        .reduce((sum, lec) => sum + lec.question.length * 10, 0);
+  
+      const is_version = course.parent_version_id !== course.id;
+  
+      return {
+        ...course,
+        counts: {
+          course_id: course.id,
+          _count: {
+            start_time: entry._count.start_time,
+            end_time:   entry._count.end_time,
+          },
+        },
+        total_score,
+        is_version,
+      };
+    });
+  
     const claimsSum = await this.prisma.claims.aggregate({
-      _sum: { ngc_claimed: true },
+      _sum:   { ngc_claimed: true },
       where: { user_id: user.id, executed: false },
     });
-
-    return { ...user, ngc_claimed: claimsSum._sum.ngc_claimed || 0 };
+  
+    return {
+      ...user,
+      ngc_claimed:      claimsSum._sum.ngc_claimed || 0,
+      completedCourses: completedWithCounts,
+    };
   }
-
+  
   public async getUserGame(username: string): Promise<any> {
     const game = this.prismaUser.findFirst({ where: { username, blocked: false }, select: { id: true, ngc: true, game: true } });
     if (!game) throw new HttpException(404, "User doesn't exist");
@@ -188,6 +259,8 @@ export class UserService {
     });
   }
 
+  // services/user.service.ts
+
   async leaderBoard(): Promise<any> {
     const users = await this.prismaUser.findMany({
       where: { blocked: false },
@@ -196,6 +269,7 @@ export class UserService {
         firstname: true,
         lastname: true,
         image: true,
+        username:true,
         ngc: true,
         top_points: true,
       },
@@ -203,6 +277,7 @@ export class UserService {
     });
     return users;
   }
+
   ///////////////////////////////////////////////////////////////
   public async assignUsernamesToOldUsers(): Promise<any[]> {
     // Fetch users without a username
@@ -250,11 +325,11 @@ export class UserService {
     const user = await this.prismaUser.findFirst({
       where: { username, blocked: false },
     });
-  
+
     if (!user) {
       throw new Error(`User with name "${username}" not found`);
     }
-  
+
     // Query completed courses for the student and include all related data
     const completedCourses = await this.prisma.course.findMany({
       where: {
@@ -290,7 +365,7 @@ export class UserService {
         CourseStatusLog: true,
       },
     });
-  
+
     // 2️ Count students per completed course
     const countsByCourse = await this.prisma.userCoursesMapping.groupBy({
       by: ['course_id'],
@@ -302,25 +377,21 @@ export class UserService {
         end_time: true,
       },
     });
-  
+
     // 3️ Merge counts + total_score + is_version into each course
     const completedWithCounts = completedCourses.map(course => {
       // lookup or default counts entry
-      const countsEntry =
-        countsByCourse.find(c => c.course_id === course.id) || {
-          course_id: course.id,
-          _count: { start_time: 0, end_time: 0 },
-        };
-  
+      const countsEntry = countsByCourse.find(c => c.course_id === course.id) || {
+        course_id: course.id,
+        _count: { start_time: 0, end_time: 0 },
+      };
+
       // compute total_score: 10 points per question in all lectures
-      const total_score = course.lecture.reduce(
-        (sum, lec) => sum + lec.question.length * 10,
-        0,
-      );
-  
+      const total_score = course.lecture.reduce((sum, lec) => sum + lec.question.length * 10, 0);
+
       // determine if this record is a version of another course
       const is_version = course.parent_version_id !== course.id;
-  
+
       return {
         ...course,
         counts: {
@@ -334,7 +405,7 @@ export class UserService {
         is_version,
       };
     });
-  
+
     return {
       ...user,
       completedCourses: completedWithCounts,
