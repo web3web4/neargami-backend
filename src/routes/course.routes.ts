@@ -39,6 +39,12 @@ export class CourseRoute implements Routes {
       ValidationMiddleware(UpdateCourseDto, false, true, true),
       this.courseController.updateCourseIfWasDraft,
     );
+    this.router.put(
+      '/courses/draft/:id',
+      AuthMiddleware,
+      this.courseController.setCourseToDraft
+    );
+    
     /////////////////////////////////////////////////////////////////
     // the versioning api for student
     ////////////////////////////////////////////////////////////////

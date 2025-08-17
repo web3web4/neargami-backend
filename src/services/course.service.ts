@@ -810,6 +810,45 @@ export class CourseService {
       },
     });
   }
+  // update status of course to draft 
+  async setToDraft(id: number, isAdmin: boolean): Promise<Course> {
+    const course = await this.prisma.course.findUnique({
+      where: { id }
+    });
+  
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
+    }
+  
+    if (!isAdmin) {
+      throw new HttpException(403, 'This user is not admin to update status');
+    }
+  
+    if (course.publish_status === Status.DRAFT) {
+      throw new HttpException(400, 'Course is already in DRAFT status');
+    }
+  
+    const updatedCourse = await this.prisma.course.update({
+      where: { id },
+      data: {
+        publish_status: Status.DRAFT
+      }
+    });
+  
+    // Optionally log this status change
+    await this.prisma.courseStatusLog.create({
+      data: {
+        changeStatusReson: 'Set to draft manually',
+        last_publish_status: course.publish_status,
+        current_publish_status: Status.DRAFT,
+        changeStatusDate: new Date(),
+        course_id: course.id
+      }
+    });
+  
+    return updatedCourse;
+  }
+  
 
   async findUniqueByTitle(id: number): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
