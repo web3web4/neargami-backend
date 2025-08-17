@@ -355,6 +355,23 @@ export class CourseController {
       next(error);
     }
   };
+  // update status of course to draft 
+  public setCourseToDraft = async (
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const { id } = req.params;
+    const user = req.user;
+  
+    try {
+      const course = await this.courseService.setToDraft(+id, user.isAdmin);
+      res.status(200).send({ data: course, message: 'Course set to draft' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
   /////////////////////////////////////////////////
   // functions versioning for student
   ////////////////////////////////////////////////
