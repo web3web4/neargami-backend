@@ -692,6 +692,51 @@ export class CourseService {
     return result;
   }
 
+  public async findAllCoursesByStatusDashboard(id: string): Promise<any[]> {
+    // 1. Aggregate user progress counts by course
+    const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
+      by: ['course_id'],
+      _count: {
+        start_time: true,
+        end_time: true,
+      },
+    });
+  
+    const includeOpts = {
+      CourseStatusLog: true,
+      lecture: { include: { question: true } },
+      teacher: true,
+    } as const;
+  
+    // 3. Fetch courses depending on the passed status
+    let allVersions: Course[];
+    if (id === 'ALL') {
+      allVersions = await this.course.findMany({ include: includeOpts });
+    } else {
+      allVersions = await this.course.findMany({
+        where: { publish_status: id as Status },
+        include: includeOpts,
+      });
+    }
+  
+    // 4. Directly map every course version (no latest version filtering)
+    return allVersions.map(course => {
+      const counts = userCoursesCounts.find(u => u.course_id === course.id)
+        || { _count: { start_time: 0, end_time: 0 } };
+      const total_score = (course as any).lecture.reduce(
+        (sum: number, lec: any) => sum + lec.question.length * 10,
+        0
+      );
+      return {
+        ...course,
+        counts,
+        total_score,
+        is_version: course.parent_version_id !== course.id,
+      };
+    });
+  }
+  
+
   public async findAllCoursesByStatus(id: string): Promise<any> {
     let AllCourses: Course[];
     const userCoursesCounts = await this.prisma.userCoursesMapping.groupBy({
@@ -810,7 +855,6 @@ export class CourseService {
       },
     });
   }
-  // update status of course to draft 
  // Update status of course to draft (including all versions)
 async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
   const course = await this.prisma.course.findUnique({
@@ -825,17 +869,22 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
     throw new HttpException(403, 'This user is not admin to update status');
   }
 
-  if (course.publish_status === Status.DRAFT) {
+  // Fetch all versions of the course
+  const versions = await this.prisma.course.findMany({
+    where: { parent_version_id: id }
+  });
+
+  // Check if course + all versions are already in DRAFT
+  const allDraft = [course, ...versions].every(c => c.publish_status === Status.DRAFT);
+  if (allDraft) {
     throw new HttpException(400, 'Course is already in DRAFT status');
   }
 
-  // Update the course itself
   const updatedMainCourse = await this.prisma.course.update({
     where: { id },
     data: { publish_status: Status.DRAFT }
   });
 
-  // Update all versions where parent_version_id = id
   const updatedVersions = await this.prisma.course.updateMany({
     where: { parent_version_id: id },
     data: { publish_status: Status.DRAFT }
@@ -852,15 +901,11 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
     }
   });
 
-  if (updatedVersions.count > 0) {
-    const versions = await this.prisma.course.findMany({
-      where: { parent_version_id: id },
-      select: { id: true, publish_status: true }
-    });
-
+  // If there are any versions, log their changes too
+  if (versions.length > 0) {
     const logs = versions.map(v => ({
       changeStatusReson: 'Set to draft manually (parent changed)',
-      last_publish_status: v.publish_status, // previous status
+      last_publish_status: v.publish_status,
       current_publish_status: Status.DRAFT,
       changeStatusDate: new Date(),
       course_id: v.id
@@ -1002,6 +1047,136 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
   
     return data;
   }
+  
+  async changeStatusAllVersionsAndParents(
+    id: number,
+    isAdmin: boolean,
+    publish_status: Status,
+    publish_status_reason: string,
+    slug: string
+  ): Promise<Course> {
+    const course = await this.course.findUnique({
+      where: { id },
+      include: {
+        teacher: { select: { email: true } },
+      },
+    });
+  
+    if (!course) throw new HttpException(404, 'Course not found');
+    // if (!isAdmin) throw new HttpException(403, 'This user is not admin to update status');
+  
+    const changestatusdate = new Date();
+  
+    // Fetch parent if exists
+    const parentCourse = course.parent_version_id
+      ? await this.course.findUnique({ where: { id: course.parent_version_id } })
+      : null;
+  
+    // Fetch children before updating
+    const childCourses = await this.prisma.course.findMany({
+      where: { parent_version_id: id },
+      select: { id: true, publish_status: true },
+    });
+  
+    // --- 1. Log and update the current course ---
+    await this.coursestatuslog.create({
+      data: {
+        changeStatusReson: publish_status_reason,
+        last_publish_status: course.publish_status,
+        current_publish_status: publish_status,
+        changeStatusDate: changestatusdate,
+        course_id: course.id,
+      },
+    });
+  
+    const updatedCourse = await this.course.update({
+      where: { id },
+      data: { publish_status, slug },
+    });
+  
+    // --- 2. Log and update parent course if exists ---
+    if (parentCourse) {
+      await this.coursestatuslog.create({
+        data: {
+          changeStatusReson: publish_status_reason + ' (child triggered parent update)',
+          last_publish_status: parentCourse.publish_status,
+          current_publish_status: publish_status,
+          changeStatusDate: changestatusdate,
+          course_id: parentCourse.id,
+        },
+      });
+  
+      await this.course.update({
+        where: { id: parentCourse.id },
+        data: { publish_status },
+      });
+    }
+  
+    // --- 3. Log and update children ---
+    if (childCourses.length > 0) {
+      await this.prisma.course.updateMany({
+        where: { parent_version_id: id },
+        data: { publish_status },
+      });
+  
+      const logs = childCourses.map(v => ({
+        changeStatusReson: publish_status_reason + ' (parent updated)',
+        last_publish_status: v.publish_status,
+        current_publish_status: publish_status,
+        changeStatusDate: changestatusdate,
+        course_id: v.id,
+      }));
+      await this.coursestatuslog.createMany({ data: logs });
+    }
+  
+    // --- 4. Notifications ---
+    const users = await this.prisma.user.findMany({
+      where: {
+        email: { not: null },
+        flags: { path: ['email_notification'], equals: true },
+      },
+    });
+  
+    if (publish_status === Status.REJECTED) {
+      this.mailService.sendEmail(
+        course.teacher.email,
+        'Course Reject Notification',
+        'reject-course',
+        {
+          title: course.name,
+          actionUrl: 'https://neargami.com',
+        }
+      );
+    } else {
+      this.mailService.sendEmail(
+        course.teacher.email,
+        'Course Accept Notification',
+        'approve-course',
+        {
+          title: course.name,
+          actionUrl: 'https://neargami.com',
+        }
+      );
+  
+      for (const user of users) {
+        this.mailService.sendEmail(
+          user.email,
+          'New Course Notification',
+          'new-course',
+          {
+            name: user.firstname || user.username,
+            title: course.name,
+            description: course.description,
+            link: 'https://www.neargami.com/course-details/' + course.slug,
+            unsubscribeLink: 'https://neargami.com',
+          }
+        );
+      }
+    }
+  
+    return updatedCourse;
+  }
+  
   
 
   async stringToSlugById(title: string, id: number) {
