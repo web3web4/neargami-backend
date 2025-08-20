@@ -1072,6 +1072,17 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
       ? await this.course.findUnique({ where: { id: course.parent_version_id } })
       : null;
   
+    // Fetch siblings if parent exists
+    const siblingCourses = parentCourse
+      ? await this.prisma.course.findMany({
+          where: {
+            parent_version_id: parentCourse.parent_version_id ?? undefined,
+            NOT: { id: parentCourse.id }, // exclude parent itself
+          },
+          select: { id: true, publish_status: true },
+        })
+      : [];
+  
     // Fetch children before updating
     const childCourses = await this.prisma.course.findMany({
       where: { parent_version_id: id },
@@ -1129,7 +1140,24 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
       await this.coursestatuslog.createMany({ data: logs });
     }
   
-    // --- 4. Notifications ---
+    // --- 4. Log and update siblings ---
+    if (siblingCourses.length > 0) {
+      await this.prisma.course.updateMany({
+        where: { id: { in: siblingCourses.map(c => c.id) } },
+        data: { publish_status },
+      });
+  
+      const siblingLogs = siblingCourses.map(v => ({
+        changeStatusReson: publish_status_reason + ' (parent group updated)',
+        last_publish_status: v.publish_status,
+        current_publish_status: publish_status,
+        changeStatusDate: changestatusdate,
+        course_id: v.id,
+      }));
+      await this.coursestatuslog.createMany({ data: siblingLogs });
+    }
+  
+    // --- 5. Notifications ---
     const users = await this.prisma.user.findMany({
       where: {
         email: { not: null },
@@ -1176,6 +1204,7 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
   
     return updatedCourse;
   }
+  
   
   
 
