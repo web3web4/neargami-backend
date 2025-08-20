@@ -1063,7 +1063,7 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
     });
   
     if (!course) throw new HttpException(404, 'Course not found');
-    // if (!isAdmin) throw new HttpException(403, 'This user is not admin to update status');
+    if (!isAdmin) throw new HttpException(403, 'This user is not admin to update status');
   
     const changestatusdate = new Date();
   
