@@ -44,6 +44,14 @@ export class CourseRoute implements Routes {
       AuthMiddleware,
       this.courseController.setCourseToDraft
     );
+    this.router.put(
+      '/courses/changeStatus/all/:id',
+      AuthMiddleware,
+      this.courseController.changeStatusAll
+    );
+    this.router.get('/courses/status/:id/dashboard', this.courseController.findCoursesStatusDashboard);
+
+    
     
     /////////////////////////////////////////////////////////////////
     // the versioning api for student
