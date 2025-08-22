@@ -382,7 +382,7 @@ export class CourseController {
       next(error);
     }
   };
-  //
+  // change status all versions and all parents
   public changeStatusAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const user = req.user;
