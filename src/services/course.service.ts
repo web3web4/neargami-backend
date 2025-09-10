@@ -701,13 +701,13 @@ export class CourseService {
         end_time: true,
       },
     });
-  
+
     const includeOpts = {
       CourseStatusLog: true,
       lecture: { include: { question: true } },
       teacher: true,
     } as const;
-  
+
     // 3. Fetch courses depending on the passed status
     let allVersions: Course[];
     if (id === 'ALL') {
@@ -718,15 +718,11 @@ export class CourseService {
         include: includeOpts,
       });
     }
-  
+
     // 4. Directly map every course version (no latest version filtering)
     return allVersions.map(course => {
-      const counts = userCoursesCounts.find(u => u.course_id === course.id)
-        || { _count: { start_time: 0, end_time: 0 } };
-      const total_score = (course as any).lecture.reduce(
-        (sum: number, lec: any) => sum + lec.question.length * 10,
-        0
-      );
+      const counts = userCoursesCounts.find(u => u.course_id === course.id) || { _count: { start_time: 0, end_time: 0 } };
+      const total_score = (course as any).lecture.reduce((sum: number, lec: any) => sum + lec.question.length * 10, 0);
       return {
         ...course,
         counts,
@@ -735,7 +731,6 @@ export class CourseService {
       };
     });
   }
-  
 
   public async findAllCoursesByStatus(id: string): Promise<any> {
     let AllCourses: Course[];
@@ -855,79 +850,74 @@ export class CourseService {
       },
     });
   }
- // Update status of course to draft (including all versions)
-async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
-  const course = await this.prisma.course.findUnique({
-    where: { id }
-  });
+  // Update status of course to draft (including all versions)
+  async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
+    const course = await this.prisma.course.findUnique({
+      where: { id },
+    });
 
-  if (!course) {
-    throw new HttpException(404, 'Course not found');
-  }
-
-  if (!isAdmin) {
-    throw new HttpException(403, 'This user is not admin to update status');
-  }
-
-  // Fetch all versions of the course
-  const versions = await this.prisma.course.findMany({
-    where: { parent_version_id: id }
-  });
-
-  // Check if course + all versions are already in DRAFT
-  const allDraft = [course, ...versions].every(c => c.publish_status === Status.DRAFT);
-  if (allDraft) {
-    throw new HttpException(400, 'Course is already in DRAFT status');
-  }
-
-  const updatedMainCourse = await this.prisma.course.update({
-    where: { id },
-    data: { publish_status: Status.DRAFT }
-  });
-
-  const updatedVersions = await this.prisma.course.updateMany({
-    where: { parent_version_id: id },
-    data: { publish_status: Status.DRAFT }
-  });
-
-  // Log status change for main course
-  await this.prisma.courseStatusLog.create({
-    data: {
-      changeStatusReson: 'Set to draft manually',
-      last_publish_status: course.publish_status,
-      current_publish_status: Status.DRAFT,
-      changeStatusDate: new Date(),
-      course_id: course.id
+    if (!course) {
+      throw new HttpException(404, 'Course not found');
     }
-  });
 
-  // If there are any versions, log their changes too
-  if (versions.length > 0) {
-    const logs = versions.map(v => ({
-      changeStatusReson: 'Set to draft manually (parent changed)',
-      last_publish_status: v.publish_status,
-      current_publish_status: Status.DRAFT,
-      changeStatusDate: new Date(),
-      course_id: v.id
-    }));
-
-    await this.prisma.courseStatusLog.createMany({ data: logs });
-  }
-
-  // Return updated courses (main + versions)
-  const allUpdatedCourses = await this.prisma.course.findMany({
-    where: {
-      OR: [
-        { id },
-        { parent_version_id: id }
-      ]
+    if (!isAdmin) {
+      throw new HttpException(403, 'This user is not admin to update status');
     }
-  });
 
-  return allUpdatedCourses;
-}
+    // Fetch all versions of the course
+    const versions = await this.prisma.course.findMany({
+      where: { parent_version_id: id },
+    });
 
-  
+    // Check if course + all versions are already in DRAFT
+    const allDraft = [course, ...versions].every(c => c.publish_status === Status.DRAFT);
+    if (allDraft) {
+      throw new HttpException(400, 'Course is already in DRAFT status');
+    }
+
+    const updatedMainCourse = await this.prisma.course.update({
+      where: { id },
+      data: { publish_status: Status.DRAFT },
+    });
+
+    const updatedVersions = await this.prisma.course.updateMany({
+      where: { parent_version_id: id },
+      data: { publish_status: Status.DRAFT },
+    });
+
+    // Log status change for main course
+    await this.prisma.courseStatusLog.create({
+      data: {
+        changeStatusReson: 'Set to draft manually',
+        last_publish_status: course.publish_status,
+        current_publish_status: Status.DRAFT,
+        changeStatusDate: new Date(),
+        course_id: course.id,
+      },
+    });
+
+    // If there are any versions, log their changes too
+    if (versions.length > 0) {
+      const logs = versions.map(v => ({
+        changeStatusReson: 'Set to draft manually (parent changed)',
+        last_publish_status: v.publish_status,
+        current_publish_status: Status.DRAFT,
+        changeStatusDate: new Date(),
+        course_id: v.id,
+      }));
+
+      await this.prisma.courseStatusLog.createMany({ data: logs });
+    }
+
+    // Return updated courses (main + versions)
+    const allUpdatedCourses = await this.prisma.course.findMany({
+      where: {
+        OR: [{ id }, { parent_version_id: id }],
+      },
+    });
+
+    return allUpdatedCourses;
+  }
 
   async findUniqueByTitle(id: number): Promise<Course> {
     const course = await this.course.findUnique({ where: { id } });
@@ -938,13 +928,7 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
   // update log status for admin user
 
   //////////////////////////////
-  async updateStatus(
-    id: number,
-    isAdmin: boolean,
-    publish_status: Status,
-    publish_status_reson: string,
-    sluge: string
-  ): Promise<Course> {
+  async updateStatus(id: number, isAdmin: boolean, publish_status: Status, publish_status_reson: string, sluge: string): Promise<Course> {
     const course = await this.course.findUnique({
       where: { id },
       include: {
@@ -955,7 +939,7 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         },
       },
     });
-  
+
     // find all users where email is not null and in flags the email notification is true
     const users = await this.prisma.user.findMany({
       where: {
@@ -964,17 +948,17 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         },
       },
     });
-  
+
     if (!course) {
       throw new HttpException(404, 'Course not found');
     }
-  
+
     if (isAdmin == false) {
       throw new HttpException(403, 'this user is not admin to update status');
     }
-  
+
     const changstatusdate = new Date();
-  
+
     await this.coursestatuslog.create({
       data: {
         changeStatusReson: publish_status_reson,
@@ -984,23 +968,23 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         course_id: course.id,
       },
     });
-  
+
     const data = await this.course.update({
       where: { id },
       data: { publish_status: publish_status, slug: sluge },
     });
-  
+
     const updatedVersions = await this.prisma.course.updateMany({
       where: { parent_version_id: id },
       data: { publish_status: publish_status },
     });
-  
+
     if (updatedVersions.count > 0) {
       const versions = await this.prisma.course.findMany({
         where: { parent_version_id: id },
         select: { id: true, publish_status: true },
       });
-  
+
       const logs = versions.map(v => ({
         changeStatusReson: publish_status_reson + ' (parent updated)',
         last_publish_status: v.publish_status,
@@ -1008,52 +992,42 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         changeStatusDate: changstatusdate,
         course_id: v.id,
       }));
-  
+
       await this.coursestatuslog.createMany({ data: logs });
     }
     if (publish_status === Status.REJECTED) {
-      this.mailService.sendEmail(
-        course.teacher.email,
-        'Course In Reject Notification',
-        'reject-course',
-        {
-          title: course.name,
-          actionUrl: 'https://neargami.com',
-        }
-      );
-    } else {
-      this.mailService.sendEmail(
-        course.teacher.email,
-        'Course In Accepte Notification',
-        'approve-course',
-        {
-          title: course.name,
-          actionUrl: 'https://neargami.com',
-        }
-      );
-  
+      this.mailService.sendEmail(course.teacher.email, 'Course Rejected Notification', 'reject-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
+    } else if (publish_status === Status.APPROVED) {
+      this.mailService.sendEmail(course.teacher.email, 'Course Approved Notification', 'approve-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
+
       for (let i = 0; i < users.length; i++) {
         if ((users[i].flags as any).email_notification == true) {
-          this.mailService.sendEmail(users[i].email, 'New Course Notification', 'new-course', {
+          this.mailService.sendEmail(users[i].email, 'New Course Notification', 'new_course', {
             name: users[i].firstname || users[i].username,
             title: course.name,
-            description: course.description,
-            link: 'https://www.neargami.com/course-details/' + course.slug,
+            course_goal: course.description,
+            actionUrl: 'https://www.neargami.com/course-details/' + course.slug,
             unsubscribeLink: 'https://neargami.com',
           });
         }
       }
     }
-  
+
     return data;
   }
-  
+
   async changeStatusAllVersionsAndParents(
     id: number,
     isAdmin: boolean,
     publish_status: Status,
     publish_status_reason: string,
-    slug: string
+    slug: string,
   ): Promise<Course> {
     const course = await this.course.findUnique({
       where: { id },
@@ -1061,17 +1035,15 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         teacher: { select: { email: true } },
       },
     });
-  
+
     if (!course) throw new HttpException(404, 'Course not found');
     if (!isAdmin) throw new HttpException(403, 'This user is not admin to update status');
-  
+
     const changestatusdate = new Date();
-  
+
     // Fetch parent if exists
-    const parentCourse = course.parent_version_id
-      ? await this.course.findUnique({ where: { id: course.parent_version_id } })
-      : null;
-  
+    const parentCourse = course.parent_version_id ? await this.course.findUnique({ where: { id: course.parent_version_id } }) : null;
+
     // Fetch siblings if parent exists
     const siblingCourses = parentCourse
       ? await this.prisma.course.findMany({
@@ -1082,13 +1054,13 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
           select: { id: true, publish_status: true },
         })
       : [];
-  
+
     // Fetch children before updating
     const childCourses = await this.prisma.course.findMany({
       where: { parent_version_id: id },
       select: { id: true, publish_status: true },
     });
-  
+
     // --- 1. Log and update the current course ---
     await this.coursestatuslog.create({
       data: {
@@ -1099,12 +1071,12 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         course_id: course.id,
       },
     });
-  
+
     const updatedCourse = await this.course.update({
       where: { id },
       data: { publish_status, slug },
     });
-  
+
     // --- 2. Log and update parent course if exists ---
     if (parentCourse) {
       await this.coursestatuslog.create({
@@ -1116,20 +1088,20 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
           course_id: parentCourse.id,
         },
       });
-  
+
       await this.course.update({
         where: { id: parentCourse.id },
         data: { publish_status },
       });
     }
-  
+
     // --- 3. Log and update children ---
     if (childCourses.length > 0) {
       await this.prisma.course.updateMany({
         where: { parent_version_id: id },
         data: { publish_status },
       });
-  
+
       const logs = childCourses.map(v => ({
         changeStatusReson: publish_status_reason + ' (parent updated)',
         last_publish_status: v.publish_status,
@@ -1139,14 +1111,14 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
       }));
       await this.coursestatuslog.createMany({ data: logs });
     }
-  
+
     // --- 4. Log and update siblings ---
     if (siblingCourses.length > 0) {
       await this.prisma.course.updateMany({
         where: { id: { in: siblingCourses.map(c => c.id) } },
         data: { publish_status },
       });
-  
+
       const siblingLogs = siblingCourses.map(v => ({
         changeStatusReson: publish_status_reason + ' (parent group updated)',
         last_publish_status: v.publish_status,
@@ -1156,7 +1128,7 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
       }));
       await this.coursestatuslog.createMany({ data: siblingLogs });
     }
-  
+
     // --- 5. Notifications ---
     const users = await this.prisma.user.findMany({
       where: {
@@ -1164,49 +1136,31 @@ async setToDraft(id: number, isAdmin: boolean): Promise<Course[]> {
         flags: { path: ['email_notification'], equals: true },
       },
     });
-  
+
     if (publish_status === Status.REJECTED) {
-      this.mailService.sendEmail(
-        course.teacher.email,
-        'Course Reject Notification',
-        'reject-course',
-        {
-          title: course.name,
-          actionUrl: 'https://neargami.com',
-        }
-      );
+      this.mailService.sendEmail(course.teacher.email, 'Course Reject Notification', 'reject-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
     } else {
-      this.mailService.sendEmail(
-        course.teacher.email,
-        'Course Accept Notification',
-        'approve-course',
-        {
-          title: course.name,
-          actionUrl: 'https://neargami.com',
-        }
-      );
-  
+      this.mailService.sendEmail(course.teacher.email, 'Course Accept Notification', 'approve-course', {
+        title: course.name,
+        actionUrl: 'https://neargami.com',
+      });
+
       for (const user of users) {
-        this.mailService.sendEmail(
-          user.email,
-          'New Course Notification',
-          'new-course',
-          {
-            name: user.firstname || user.username,
-            title: course.name,
-            description: course.description,
-            link: 'https://www.neargami.com/course-details/' + course.slug,
-            unsubscribeLink: 'https://neargami.com',
-          }
-        );
+        this.mailService.sendEmail(user.email, 'New Course Notification', 'new-course', {
+          name: user.firstname || user.username,
+          title: course.name,
+          description: course.description,
+          link: 'https://www.neargami.com/course-details/' + course.slug,
+          unsubscribeLink: 'https://neargami.com',
+        });
       }
     }
-  
+
     return updatedCourse;
   }
-  
-  
-  
 
   async stringToSlugById(title: string, id: number) {
     const baseSlug = title

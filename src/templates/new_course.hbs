@@ -2,20 +2,52 @@
   <head>
     <meta charset='UTF-8' />
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-    <title>New Course Notification</title>
+    <title>New Course Available</title>
+    <style>
+      body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; color: #333; background: #f4f4f4; } .container { width: 100%; max-width: 600px;
+      margin: 0 auto; padding: 20px; box-sizing: border-box; background: #ffffff; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 1s ease-in; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } .header { background: linear-gradient(90deg,
+      #0072ff 0%, #00c6ff 100%); color: #fff; text-align: center; padding: 40px 0; border-top-left-radius: 6px; border-top-right-radius: 6px; } .logo
+      { max-width: 100px; margin-bottom: 10px; animation: logoScale 0.5s ease-in-out; } @keyframes logoScale { 0% { transform: scale(0.8); opacity:
+      0.8; } 100% { transform: scale(1); opacity: 1; } } .header h1 { margin: 0; font-size: 28px; font-weight: 700; } .content { padding: 30px 20px; }
+      .content p { font-size: 16px; line-height: 1.6; margin-bottom: 20px; } .new-badge { display: inline-block; padding: 4px 8px; background-color:
+      rgb(255, 243, 205); color: #856404; border: 1px solid #ffeeba; border-radius: 4px; font-weight: 700; } .cta-button { display: inline-block;
+      padding: 15px 25px; background-color: #0072ff; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;
+      margin-bottom: 20px; } .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; padding-bottom: 20px; }
+    </style>
   </head>
   <body>
-    <!-- Template in Handlebars (HBS) -->
-    <script id='email-template' type='text/x-handlebars-template'>
-      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px; margin: 0 auto; background-color:#ffffff;
-      font-family: Arial, sans-serif; color:#333333;"> <tr> <td align="center" style="padding: 20px 0; background-color: #007bff;"> <h1 style="color:
-      #ffffff; font-size: 24px;">New Course Alert!</h1> </td> </tr> <tr> <td style="padding: 20px;"> <p style="font-size: 16px;">Hi
-      {{name}},</p> <p style="font-size: 16px;">We’re excited to announce the launch of a brand-new course that you won’t want to miss:</p> <h2
-      style="font-size: 20px; color: #007bff;">{{title}}</h2> <p style="font-size: 16px;">{{description}}</p> <p style="font-size: 16px;">Ready to get
-      started? <a href="{{link}}" style="color: #007bff; text-decoration: none;">Enroll now</a> and take your skills to the next level!</p> </td>
-      </tr> <tr> <td align="center" style="padding: 20px; background-color: #f4f4f4;"> <p style="font-size: 14px; color: #777777;">You received this
-      email because you are subscribed to our updates. <br /> If you no longer wish to receive these emails, please <a href="{{unsubscribeLink}}"
-      style="color: #007bff; text-decoration: none;">unsubscribe here</a>.</p> </td> </tr> </table>
-    </script>
+    <div class='container'>
+      <div class='header'>
+        <img
+          src='https://www.neargami.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FLogo-6.90c82bb6.png&w=384&q=75&dpl=dpl_9VuqMnkv8ZsX3toqWxVBdWtQkYbT'
+          alt='Gimfid Learning Platform Logo'
+          class='logo'
+        />
+        <h1>New Course Available!</h1>
+      </div>
+
+      <div class='content'>
+        <p>
+          We're excited to announce a brand-new course on the Neargami platform!
+        </p>
+        <p>
+          <span class='new-badge'>NEW</span>
+        </p>
+        <p>
+          Discover "{{{title}}}", a course designed to help you
+          {{{course_goal}}}. This engaging content, crafted by our expert instructors, is now available for you to explore and enhance your skills.
+        </p>
+        <a href='{{{actionUrl}}}' class='cta-button'>Enroll Now</a>
+        <p>
+          Don’t miss out on this opportunity to learn something new! If you have any questions, our support team is here to assist you. Start your
+          learning journey today!
+        </p>
+      </div>
+
+      <div class='footer'>
+        <p>© 2025 Neargami. All rights reserved.</p>
+      </div>
+    </div>
   </body>
 </html>
