@@ -11,15 +11,6 @@ import { CreateLectureDto } from '@/dtos/lecture.dto';
 export class CourseController {
   public courseService = Container.get(CourseService);
 
-  public testEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await this.courseService.testEmail();
-      res.status(200).json({ message: 'Email sent' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   // find all courses was started by student except mine
   public findStudentStartedCoursesExceptMine = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {

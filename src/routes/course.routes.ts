@@ -18,7 +18,6 @@ export class CourseRoute implements Routes {
   //
   //
   private initializeRoutes() {
-    this.router.get('/courses/testEmail', this.courseController.testEmail);
     this.router.post('/courses', AuthMiddleware, ValidationMiddleware(CreateCourseDto, false, false, true), this.courseController.createCourse);
     this.router.get('/courses/students-started', AuthMiddleware, this.courseController.findStudentStartedCoursesExceptMine);
     this.router.get('/courses/slug', this.courseController.makeAllCoursesHaveSlug);
