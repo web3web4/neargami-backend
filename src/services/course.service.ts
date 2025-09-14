@@ -34,6 +34,14 @@ export class CourseService {
   public findLatestVersion = this.prismaService.course;
   static findLatestVersion: any;
 
+  public async testEmail() {
+    await this.mailService.sendEmail('narotoaozomake99@gmail.com', 'Course Rejected Notification', 'reject-course', {
+      title: 'course.name',
+      actionUrl: 'https://neargami.com',
+    });
+    return { message: 'Email sent' };
+  }
+
   // find all courses was started by student except mine
   public async getAllStudentStartedCoursesExceptMine(teacherId: string) {
     const startedCourses = await this.prisma.userCoursesMapping.findMany({
