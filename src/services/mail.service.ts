@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import { EMAIL_NAME, EMAIL_PASSWORD } from '../config';
+import path from 'path';
 
 @Service()
 export class MailService {
@@ -41,8 +42,8 @@ export class MailService {
       if (!to) {
         throw new Error('Missing recipient email address');
       }
-
-      const templateSource = fs.readFileSync(`./src/templates/${templateName}.hbs`, 'utf8');
+      const templateDir = path.join(__dirname, `../templates/${templateName}.hbs`);
+      const templateSource = fs.readFileSync(templateDir, 'utf8');
 
       if (!templateSource) {
         throw new Error(`Missing template file: ${templateName}.hbs`);

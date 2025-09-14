@@ -96,7 +96,7 @@ export class CourseController {
       next(error);
     }
   };
-  // find all courses by status 
+  // find all courses by status
   public findCoursesStatusDashboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -106,7 +106,7 @@ export class CourseController {
       next(error);
     }
   };
-  
+
   public findCourseBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { slug } = req.params;
@@ -366,15 +366,11 @@ export class CourseController {
       next(error);
     }
   };
-  // update status of course to draft 
-  public setCourseToDraft = async (
-    req: RequestWithUser,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  // update status of course to draft
+  public setCourseToDraft = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const user = req.user;
-  
+
     try {
       const course = await this.courseService.setToDraft(+id, user.isAdmin);
       res.status(200).send({ data: course, message: 'Course set to draft' });
@@ -386,29 +382,22 @@ export class CourseController {
   public changeStatusAll = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const user = req.user;
-  
+
     const publish_status: Status = req.body.publish_status;
     const publish_status_reason: string = req.body.publish_status_reson;
-  
+
     try {
       const courseinfo: Course = await this.courseService.findUniqueByTitle(+id);
       const slug = await this.stringToSlugById(courseinfo.title, +id);
-  
-      const course = await this.courseService.changeStatusAllVersionsAndParents(
-        +id,
-        user.isAdmin,
-        publish_status,
-        publish_status_reason,
-        slug
-      );
-  
+
+      const course = await this.courseService.changeStatusAllVersionsAndParents(+id, user.isAdmin, publish_status, publish_status_reason, slug);
+
       res.status(200).send({ data: course, message: 'status updated for course, parent, and children' });
     } catch (error) {
       next(error);
     }
   };
-  
-  
+
   /////////////////////////////////////////////////
   // functions versioning for student
   ////////////////////////////////////////////////

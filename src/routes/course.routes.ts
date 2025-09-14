@@ -39,20 +39,10 @@ export class CourseRoute implements Routes {
       ValidationMiddleware(UpdateCourseDto, false, true, true),
       this.courseController.updateCourseIfWasDraft,
     );
-    this.router.put(
-      '/courses/draft/:id',
-      AuthMiddleware,
-      this.courseController.setCourseToDraft
-    );
-    this.router.put(
-      '/courses/changeStatus/all/:id',
-      AuthMiddleware,
-      this.courseController.changeStatusAll
-    );
+    this.router.put('/courses/draft/:id', AuthMiddleware, this.courseController.setCourseToDraft);
+    this.router.put('/courses/changeStatus/all/:id', AuthMiddleware, this.courseController.changeStatusAll);
     this.router.get('/courses/status/:id/dashboard', this.courseController.findCoursesStatusDashboard);
 
-    
-    
     /////////////////////////////////////////////////////////////////
     // the versioning api for student
     ////////////////////////////////////////////////////////////////
