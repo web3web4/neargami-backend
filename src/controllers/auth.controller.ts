@@ -87,6 +87,27 @@ export class AuthController {
     }
   };
 
+  
+  public etherSignUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Manage user flags based on accountId (same as normal signup)
+    const flags = await this.auth.manageFlagsForUser(req.body.accountId);
+
+    // Generate a username only for first signup
+    const username = flags === null ? await this.auth.generateUniqueUsername() : undefined;
+
+    // Create user without signature verification
+    const signUpUserData: User = await this.auth.validateAndCreateUserWithoutAuth(req.body, undefined, username);
+
+    // Generate authentication token
+    const authenticate = await this.auth.createToken(signUpUserData.id);
+
+    res.status(201).json({ data: { signUpUserData, authenticate }, message: 'ethersignup' });
+  } catch (error) {
+    next(error);
+  }
+};
+
   public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.body;
