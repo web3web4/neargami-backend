@@ -238,6 +238,47 @@ export class AuthService {
 
     return user;
   }
+  
+  // Add a new version of validateAndCreateUser (without ensureAuthentication)
+public async validateAndCreateUserWithoutAuth(
+  { accountId, publicKey, signature, challenge, message },
+  networkId = NETWORK_ID,
+  username?: string
+) {
+  // Check if user exists and blocked
+  const existingUser = await this.users.findUnique({
+    where: { address: accountId },
+    select: { blocked: true },
+  });
+
+  if (existingUser && existingUser.blocked) {
+    throw new HttpException(403, 'User is blocked');
+  }
+
+  // ⚠️ No actual authentication check here (no ensureAuthentication call)
+
+  // Update challenge log (optional)
+  await this.challangelog.updateMany({ where: { accountId }, data: { signature } });
+
+  // Upsert user (create if not exists, otherwise update)
+  const user = await this.users.upsert({
+    where: { address: accountId },
+    create: {
+      address: accountId,
+      message,
+      signature,
+      phone: challenge,
+      username: username || `user_${Date.now()}`,
+    },
+    update: {
+      message,
+      signature,
+      ...(username && { username }),
+    },
+  });
+
+  return user;
+}
 
   // Aux method
   private async fetch_all_user_keys({ accountId }, networkId) {
@@ -321,6 +362,7 @@ export class AuthService {
 
       // Use the public Key to verify that the private-counterpart signed the message
       const myPK = nearApiJsUtils.PublicKey.from(publicKey);
+      //@ts-ignore
       return myPK.verify(to_sign, real_signature);
     } catch (error) {
       throw error;
